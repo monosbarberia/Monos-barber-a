@@ -63,13 +63,6 @@
             letter-spacing: 1px;
         }
 
-        .since {
-            font-size: 0.9em;
-            letter-spacing: 2px;
-            margin-top: 10px;
-            opacity: 0.9;
-        }
-
         .section-title {
             font-size: 1.5em;
             margin-top: 30px;
@@ -105,6 +98,7 @@
             font-family: 'Cormorant Garamond', serif;
             font-size: 1.1em;
             border-radius: 4px;
+            outline: none;
         }
 
         .btn-submit {
@@ -204,6 +198,8 @@
         dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
 
         function updateAvailableTimes() {
+            if (!dateInput.value) return;
+
             const selectedDate = new Date(dateInput.value + 'T00:00:00');
             timeSelect.innerHTML = '';
 
@@ -213,17 +209,30 @@
                 return;
             }
 
+            let selectedCount = 0;
+            checkboxes.forEach(cb => { if (cb.checked) selectedCount++; });
+
             timeSelect.disabled = false;
-            const slots = ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM","04:30 PM","05:00 PM"];
+            
+            // Lista original de horarios
+            const allSlots = ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM","04:30 PM","05:00 PM"];
+            
             timeSelect.innerHTML = '<option value="">Elegir hora...</option>';
-            slots.forEach(slot => {
+            
+            allSlots.forEach(slot => {
+                // Si elige más de 1 servicio, bloqueamos el último horario de la mañana (12:00 PM)
+                if (selectedCount > 1 && slot === "12:00 PM") {
+                    return; 
+                }
                 const opt = document.createElement('option');
                 opt.value = slot; opt.textContent = slot;
                 timeSelect.appendChild(opt);
             });
         }
 
+        // Escuchar cambios tanto en fecha como en los servicios seleccionados
         dateInput.addEventListener('change', updateAvailableTimes);
+        checkboxes.forEach(cb => cb.addEventListener('change', updateAvailableTimes));
 
         function sendToWhatsApp() {
             const date = dateInput.value;
@@ -243,9 +252,11 @@
                 return;
             }
 
-            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A📍Maceo 254 e/Cables y%0A Angel Guerra%0A📅 Fecha: ${date}%0A⏰ Hora: ${time}%0A✂️ Servicios: ${selected.join(', ')}%0A💰 Total: $${total}`;
+            const duracionEstimada = selected.length > 1 ? "1 hora aproximadamente" : "30 minutos";
+
+            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A📍Maceo 254 e/Cables y%0A Angel Guerra%0A📅 Fecha: ${date}%0A⏰ Hora: ${time}%0A⏳ Duración: ${duracionEstimada}%0A✂️ Servicios: ${selected.join(', ')}%0A💰 Total a pagar: $${total}`;
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
     </script>
 </body>
-</html>
+    </html>
