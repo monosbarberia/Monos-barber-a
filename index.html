@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mono's Barbería - Reservas Holguín</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&display=swap" rel="stylesheet">
+    <title>Mono's Barbería Holguín - Reservas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <style>
-        /* Paleta de colores de lujo: Verde Bosque y Dorado de la Tarjeta */
         :root {
-            --dark-forest-green: #1a3625;
-            --elegant-gold: #cbb26a; 
-            --elegant-gold-hover: #e0cca0;
+            --bg-green: #1a3625; /* Verde bosque */
+            --gold: #cbb26a; /* Dorado */
+            --gold-hover: #e0cca0;
         }
 
         body {
-            background-color: var(--dark-forest-green);
-            color: var(--elegant-gold);
-            font-family: 'Cormorant Garamond', serif; /* Texto principal elegante */
+            background-color: var(--bg-green);
+            color: var(--gold);
+            font-family: 'Playfair Display', serif;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -27,40 +26,40 @@
         .container {
             max-width: 500px;
             width: 100%;
-            border: 2px solid var(--elegant-gold); /* Borde dorado como la tarjeta */
+            border: 2px solid var(--gold);
             padding: 30px;
             border-radius: 8px;
             box-sizing: border-box;
-            background-image: linear-gradient(rgba(26, 54, 37, 0.95), rgba(26, 54, 37, 0.95)); /* Un toque sutil de textura */
+            background-image: linear-gradient(rgba(26, 54, 37, 0.95), rgba(26, 54, 37, 0.95));
         }
 
-        /* --- Estilos para el Logo SVG --- */
-        .logo-container {
+        .logo-title {
             text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .logo-svg {
-            max-width: 180px; /* Ajusta el tamaño del logo aquí */
-            height: auto;
-            fill: var(--elegant-gold); /* El color del logo lo toma de la paleta */
+            font-size: 3em;
+            margin: 0;
+            font-weight: normal;
         }
 
         .subtitle {
             text-align: center;
             font-style: italic;
             font-size: 1.2em;
-            margin-bottom: 30px;
-            border-bottom: 1px solid var(--elegant-gold); /* Línea divisoria de la tarjeta */
-            padding-bottom: 10px;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
         }
 
-        .section-title {
-            font-size: 1.5em;
-            margin-top: 30px;
-            border-bottom: 1px dashed var(--elegant-gold);
+        .address {
+            text-align: center;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--gold);
+            padding-bottom: 15px;
+        }
+
+        h3 {
+            font-weight: normal;
+            border-bottom: 1px dashed var(--gold);
             padding-bottom: 5px;
-            margin-bottom: 15px;
         }
 
         .service-list {
@@ -79,7 +78,7 @@
         }
 
         .service-item input[type="checkbox"] {
-            accent-color: var(--elegant-gold);
+            accent-color: var(--gold);
             width: 20px;
             height: 20px;
             margin-right: 15px;
@@ -98,10 +97,10 @@
 
         input[type="date"], select {
             background-color: transparent;
-            color: var(--elegant-gold);
-            border: 1px solid var(--elegant-gold);
+            color: var(--gold);
+            border: 1px solid var(--gold);
             padding: 10px;
-            font-family: 'Cormorant Garamond', serif;
+            font-family: 'Playfair Display', serif;
             font-size: 1em;
             border-radius: 4px;
             outline: none;
@@ -114,14 +113,14 @@
         }
 
         .btn-submit {
-            background-color: var(--elegant-gold);
-            color: var(--dark-forest-green);
+            background-color: var(--gold);
+            color: var(--bg-green);
             border: none;
             padding: 15px;
             width: 100%;
             font-size: 1.2em;
             font-weight: bold;
-            font-family: 'Cormorant Garamond', serif;
+            font-family: 'Playfair Display', serif;
             cursor: pointer;
             border-radius: 4px;
             margin-top: 20px;
@@ -129,9 +128,10 @@
         }
 
         .btn-submit:hover {
-            background-color: var(--elegant-gold-hover);
+            background-color: var(--gold-hover);
         }
 
+        /* Botón flotante de WhatsApp */
         .whatsapp-float {
             position: fixed;
             bottom: 20px;
@@ -155,17 +155,15 @@
 <body>
 
     <div class="container">
-        <div class="logo-container">
-            <svg class="logo-svg" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
-                <path d="M40 30 C 50 10, 70 10, 80 30 L 80 70 M 60 70 C 60 85, 40 85, 40 70 M 60 70 L 60 40 L 40 40 L 40 70" stroke-width="2" stroke="currentColor" fill="none"/>
-                <path d="M 90 40 C 95 35, 105 35, 110 40 C 115 45, 110 50, 105 50 C 100 50, 95 55, 100 60 C 105 65, 115 65, 120 60" stroke-width="2" stroke="currentColor" fill="none"/>
-                <text x="75" y="70" font-family="Verdana" font-size="25" font-weight="bold" fill="currentColor">ONO'S</text>
-            </svg>
+        <h1 class="logo-title">Mono's</h1>
+        <div class="subtitle">Barberia</div>
+        <div class="address">
+            Maceo 254 e/ Cables y Ángel Guerra<br>
+            Holguín,Cuba
         </div>
-        <div class="subtitle">Classic luxury</div>
 
         <form id="bookingForm">
-            <h3 class="section-title">1. Elige tus servicios</h3>
+            <h3>1. Elige tus servicios</h3>
             <div class="service-list" id="services">
                 <label class="service-item">
                     <div><input type="checkbox" name="service" value="Corte sencillo" data-price="200"> Corte sencillo</div>
@@ -189,7 +187,7 @@
                 </label>
             </div>
 
-            <h3 class="section-title">2. Elige fecha y hora</h3>
+            <h3>2. Elige fecha y hora</h3>
             <div class="form-group">
                 <label for="date">Fecha:</label>
                 <input type="date" id="date" required>
@@ -211,26 +209,29 @@
     </a>
 
     <script>
-        // ... (Este script es el mismo del mensaje anterior, no ha cambiado) ...
         const dateInput = document.getElementById('date');
         const timeSelect = document.getElementById('time');
         const checkboxes = document.querySelectorAll('input[name="service"]');
 
+        // Configurar la fecha mínima como hoy
         const today = new Date().toISOString().split('T')[0];
         dateInput.setAttribute('min', today);
 
+        // Actualizar horarios disponibles cuando cambia la fecha o los servicios
         function updateAvailableTimes() {
             const selectedDate = new Date(dateInput.value + 'T00:00:00');
-            const dayOfWeek = selectedDate.getDay(); 
+            const dayOfWeek = selectedDate.getDay(); // 0=Dom, 1=Lun... 6=Sab
 
             timeSelect.innerHTML = '';
 
+            // Verificar si es domingo (0)
             if (dayOfWeek === 0) {
                 timeSelect.innerHTML = '<option value="">Cerrado los domingos</option>';
                 timeSelect.disabled = true;
                 return;
             }
 
+            // Calcular duración requerida
             let selectedCount = 0;
             checkboxes.forEach(cb => { if (cb.checked) selectedCount++; });
             
@@ -243,6 +244,7 @@
             timeSelect.disabled = false;
             const requiresOneHour = selectedCount >= 2;
 
+            // Horarios base
             const slots = [
                 "09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
                 "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM", "04:30 PM"
@@ -251,8 +253,9 @@
             timeSelect.innerHTML = '<option value="">Elige una hora...</option>';
 
             slots.forEach(slot => {
+                // Si requiere 1 hora, no puede reservar en los últimos turnos antes de cerrar o almorzar
                 if (requiresOneHour && (slot === "11:30 AM" || slot === "04:30 PM")) {
-                    return; 
+                    return; // Saltar este horario
                 }
                 const option = document.createElement('option');
                 option.value = slot;
@@ -287,6 +290,7 @@
                 return;
             }
 
+            // Formatear la fecha para que se lea mejor (DD/MM/YYYY)
             const dateObj = new Date(date + 'T00:00:00');
             const formattedDate = dateObj.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
