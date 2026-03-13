@@ -214,7 +214,7 @@
             }
 
             timeSelect.disabled = false;
-            const slots = ["09:00 AM", "10:00 AM", "11:00 AM", "02:00 PM", "03:00 PM", "04:00 PM"];
+            const slots = ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 AM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM","04:30 PM","05:00 PM"];
             timeSelect.innerHTML = '<option value="">Elegir hora...</option>';
             slots.forEach(slot => {
                 const opt = document.createElement('option');
@@ -243,7 +243,7 @@
                 return;
             }
 
-            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A📍 Maceo 254%0A📅 Fecha: ${date}%0A⏰ Hora: ${time}%0A✂️ Servicios: ${selected.join(', ')}%0A💰 Total: $${total}`;
+            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A📍 Maceo 254 e/Cables & Angel Guerra%0A📅 Fecha: ${date}%0A⏰ Hora: ${time}%0A✂️ Servicios: ${selected.join(', ')}%0A💰 Total: $${total}`;
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
     </script>
