@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mono's Barbería Holguin - Reservas</title>
+    <title>Mono's Barbería Holguín - Reservas</title>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -56,6 +56,7 @@
             font-style: italic;
             font-size: 1.3em;
             margin: 5px 0;
+            opacity: 0.9;
         }
 
         .address {
@@ -79,6 +80,7 @@
             gap: 12px;
         }
 
+        /* Estilo de Tarjetas Interactivas */
         .service-item {
             display: flex;
             justify-content: space-between;
@@ -88,8 +90,13 @@
             border: 1px solid rgba(203, 178, 106, 0.4);
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             position: relative;
+        }
+
+        .service-item:hover {
+            border-color: var(--elegant-gold);
+            background-color: rgba(203, 178, 106, 0.05);
         }
 
         .service-item input[type="checkbox"] {
@@ -104,6 +111,7 @@
             color: var(--dark-forest-green);
             font-weight: bold;
             transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(203, 178, 106, 0.2);
         }
 
         .form-group {
@@ -122,8 +130,10 @@
             font-size: 1.1em;
             border-radius: 6px;
             outline: none;
+            appearance: none;
         }
 
+        /* Resumen en vivo del Ticket */
         .live-summary {
             background-color: rgba(0,0,0,0.2);
             padding: 15px 20px;
@@ -161,6 +171,7 @@
             margin-top: 25px;
             transition: all 0.3s ease;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .btn-submit:disabled {
@@ -263,10 +274,11 @@
         const liveTotal = document.getElementById('live-total');
         const liveDuration = document.getElementById('live-duration');
 
+        // Configurar fecha mínima
         dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
 
         function updateFormState(e) {
-            // Exclusión mutua: o sencillo o degradado
+            // Exclusión mutua para los cortes principales
             if (e && e.target.classList.contains('main-cut') && e.target.checked) {
                 checkboxes.forEach(cb => {
                     if (cb.classList.contains('main-cut') && cb !== e.target) cb.checked = false;
@@ -275,9 +287,8 @@
 
             let total = 0;
             let selectedCount = 0;
-            let hasMainCut = false;
-            let addonsCount = 0;
             let isDegradado = false;
+            let addonsCount = 0;
 
             checkboxes.forEach(cb => {
                 const parentLabel = cb.closest('.service-item');
@@ -285,17 +296,14 @@
                     selectedCount++;
                     total += parseInt(cb.getAttribute('data-price'));
                     parentLabel.classList.add('selected');
-                    if (cb.classList.contains('main-cut')) {
-                        hasMainCut = true;
-                        if(cb.value === "Degradado") isDegradado = true;
-                    }
+                    if (cb.value === "Degradado") isDegradado = true;
                     if (cb.classList.contains('addon')) addonsCount++;
                 } else {
                     parentLabel.classList.remove('selected');
                 }
             });
 
-            // Lógica de tiempo refinada
+            // Lógica de tiempo inteligente
             let durationText = "--";
             if (selectedCount === 1) {
                 durationText = "30 minutos";
@@ -308,7 +316,7 @@
             liveTotal.textContent = `$${total}`;
             liveDuration.textContent = durationText;
 
-            // Horarios
+            // Gestión de horarios disponibles
             if (dateInput.value) {
                 const selectedDate = new Date(dateInput.value + 'T00:00:00');
                 if (selectedDate.getDay() === 0) {
@@ -318,9 +326,12 @@
                     timeSelect.disabled = false;
                     const currentValue = timeSelect.value;
                     const allSlots = ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM","04:30 PM","05:00 PM"];
+                    
                     timeSelect.innerHTML = '<option value="">Elegir hora...</option>';
                     allSlots.forEach(slot => {
-                        if (durationText !== "30 minutos" && slot === "12:00 PM") return; 
+                        // Si el turno requiere más de 30 min, bloqueamos el último de la mañana
+                        if (selectedCount > 1 && slot === "12:00 PM") return; 
+                        
                         const opt = document.createElement('option');
                         opt.value = slot; opt.textContent = slot;
                         if (slot === currentValue) opt.selected = true;
@@ -328,15 +339,18 @@
                     });
                 }
             }
+
+            // Habilitar botón solo si el formulario está completo
             submitBtn.disabled = !(selectedCount > 0 && dateInput.value && timeSelect.value);
         }
 
+        // Listeners
         checkboxes.forEach(cb => cb.addEventListener('change', updateFormState));
         dateInput.addEventListener('change', updateFormState);
         timeSelect.addEventListener('change', updateFormState);
 
         function sendToWhatsApp() {
-            const rawDate = dateInput.value; // Formato AAAA-MM-DD
+            const rawDate = dateInput.value; 
             const time = timeSelect.value;
             let selected = [];
             let total = 0;
@@ -348,7 +362,9 @@
                 }
             });
 
-            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍Maceo 254 e/Cables y Angel Guerra%0A📅Fecha y Hora: ${Date} ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${liveDuration.textContent}%0A💰 Total a pagar: $${total}`;
+            // Formato de fecha AAAA-MM-DD para que iOS lo detecte como calendario
+            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍 Maceo 254 e/Cables y Angel Guerra%0A📅 Fecha/Hora: ${rawDate} ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${liveDuration.textContent}%0A💰 Total a pagar: $${total}`;
+            
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
     </script>
