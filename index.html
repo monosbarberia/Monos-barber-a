@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -28,10 +27,11 @@
             max-width: 500px;
             width: 100%;
             border: 2px solid var(--elegant-gold);
-            padding: 30px;
-            border-radius: 8px;
+            padding: 40px 30px;
+            border-radius: 12px;
             box-sizing: border-box;
             background-color: var(--dark-forest-green);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Sombra elegante para dar profundidad */
         }
 
         .logo-container {
@@ -49,57 +49,125 @@
             text-align: center;
             margin-bottom: 30px;
             border-bottom: 1px solid var(--elegant-gold);
-            padding-bottom: 15px;
+            padding-bottom: 20px;
         }
 
         .subtitle {
             font-style: italic;
             font-size: 1.3em;
             margin: 5px 0;
+            opacity: 0.9;
         }
 
         .address {
             font-size: 1.1em;
             margin: 10px 0;
             letter-spacing: 1px;
+            line-height: 1.4;
         }
 
         .section-title {
             font-size: 1.5em;
             margin-top: 30px;
-            border-bottom: 1px dashed var(--elegant-gold);
+            border-bottom: 1px dashed rgba(203, 178, 106, 0.5);
             padding-bottom: 5px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .service-list {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
 
+        /* Estilos Pro para los servicios */
         .service-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 1.2em;
+            padding: 15px 20px;
+            border: 1px solid rgba(203, 178, 106, 0.4);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transición suave Apple-style */
+            position: relative;
+        }
+
+        .service-item:hover {
+            border-color: var(--elegant-gold);
+            background-color: rgba(203, 178, 106, 0.05);
+        }
+
+        /* Ocultamos el checkbox nativo pero lo mantenemos funcional */
+        .service-item input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        /* Clase dinámica que se añade con JS al seleccionar */
+        .service-item.selected {
+            background-color: var(--elegant-gold);
+            color: var(--dark-forest-green);
+            font-weight: bold;
+            transform: scale(1.02); /* Pequeño salto 3D */
+            box-shadow: 0 4px 15px rgba(203, 178, 106, 0.2);
         }
 
         .form-group {
-            margin: 20px 0;
+            margin: 25px 0;
             display: flex;
             flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 1.2em;
         }
 
         input[type="date"], select {
             background-color: transparent;
             color: var(--elegant-gold);
             border: 1px solid var(--elegant-gold);
-            padding: 12px;
+            padding: 15px;
             font-family: 'Cormorant Garamond', serif;
             font-size: 1.1em;
-            border-radius: 4px;
+            border-radius: 6px;
             outline: none;
+            transition: border-color 0.3s;
+            appearance: none; /* Limpia estilos nativos del navegador */
+        }
+
+        input[type="date"]:focus, select:focus {
+            border-width: 2px;
+            padding: 14px; /* Ajuste para que el borde no mueva el diseño */
+        }
+
+        /* Panel de resumen en vivo */
+        .live-summary {
+            background-color: rgba(0,0,0,0.2);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2em;
+            border-left: 3px solid var(--elegant-gold);
+        }
+
+        .summary-label {
+            font-style: italic;
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+
+        .summary-value {
+            font-weight: bold;
+            font-size: 1.3em;
         }
 
         .btn-submit {
@@ -112,25 +180,47 @@
             font-weight: bold;
             font-family: 'Cormorant Garamond', serif;
             cursor: pointer;
-            border-radius: 4px;
-            margin-top: 20px;
+            border-radius: 6px;
+            margin-top: 25px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Estado deshabilitado del botón */
+        .btn-submit:disabled {
+            background-color: rgba(203, 178, 106, 0.2);
+            color: rgba(203, 178, 106, 0.5);
+            cursor: not-allowed;
+        }
+
+        .btn-submit:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(203, 178, 106, 0.3);
+            background-color: var(--elegant-gold-hover);
         }
 
         .whatsapp-float {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 25px;
+            right: 25px;
             background-color: #25D366;
             color: white;
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
+            width: 65px;
+            height: 65px;
             display: flex;
             justify-content: center;
             align-items: center;
             text-decoration: none;
-            font-size: 30px;
+            font-size: 35px;
             z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1);
         }
     </style>
 </head>
@@ -143,31 +233,30 @@
 
         <div class="info-header">
             <div class="subtitle">Luce limpio, fino, mono...</div>
-            <div class="address">Maceo 254 e/ Cables y Ángel Guerra
-            Holguin, Cuba</div>
+            <div class="address">Maceo 254 e/ Cables y Ángel Guerra<br>Holguín, Cuba</div>
         </div>
 
         <form id="bookingForm">
             <h3 class="section-title">Servicios</h3>
             <div class="service-list">
                 <label class="service-item">
-                    <div><input type="checkbox" name="service" value="Corte sencillo" data-price="200"> Corte sencillo</div>
+                    <span><input type="checkbox" name="service" value="Corte sencillo" data-price="200"> Corte sencillo</span>
                     <span>$200</span>
                 </label>
                 <label class="service-item">
-                    <div><input type="checkbox" name="service" value="Degradado" data-price="400"> Degradado</div>
+                    <span><input type="checkbox" name="service" value="Degradado" data-price="400"> Degradado</span>
                     <span>$400</span>
                 </label>
                 <label class="service-item">
-                    <div><input type="checkbox" name="service" value="Barba" data-price="100"> Barba</div>
+                    <span><input type="checkbox" name="service" value="Barba" data-price="100"> Barba</span>
                     <span>$100</span>
                 </label>
                 <label class="service-item">
-                    <div><input type="checkbox" name="service" value="Diseño" data-price="100"> Diseño</div>
+                    <span><input type="checkbox" name="service" value="Diseño" data-price="100"> Diseño</span>
                     <span>$100</span>
                 </label>
                 <label class="service-item">
-                    <div><input type="checkbox" name="service" value="Peinado" data-price="200"> Peinado</div>
+                    <span><input type="checkbox" name="service" value="Peinado" data-price="200"> Peinado</span>
                     <span>$200</span>
                 </label>
             </div>
@@ -181,11 +270,22 @@
             <div class="form-group">
                 <label>Hora:</label>
                 <select id="time" required disabled>
-                    <option value="">Selecciona fecha...</option>
+                    <option value="">Selecciona fecha primero...</option>
                 </select>
             </div>
 
-            <button type="button" class="btn-submit" onclick="sendToWhatsApp()">Enviar reserva por WhatsApp</button>
+            <div class="live-summary">
+                <div>
+                    <div class="summary-label">Tiempo est.</div>
+                    <div id="live-duration" style="font-size: 1.1em;">--</div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="summary-label">Total</div>
+                    <div class="summary-value" id="live-total">$0</div>
+                </div>
+            </div>
+
+            <button type="button" class="btn-submit" id="submitBtn" onclick="sendToWhatsApp()" disabled>Confirmar Reserva</button>
         </form>
     </div>
 
@@ -195,45 +295,80 @@
         const dateInput = document.getElementById('date');
         const timeSelect = document.getElementById('time');
         const checkboxes = document.querySelectorAll('input[name="service"]');
+        const submitBtn = document.getElementById('submitBtn');
+        const liveTotal = document.getElementById('live-total');
+        const liveDuration = document.getElementById('live-duration');
 
+        // Configurar fecha mínima a hoy
         dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
 
-        function updateAvailableTimes() {
-            if (!dateInput.value) return;
+        // Función central que evalúa todo el estado del formulario
+        function updateFormState() {
+            let selectedCount = 0;
+            let total = 0;
 
-            const selectedDate = new Date(dateInput.value + 'T00:00:00');
-            timeSelect.innerHTML = '';
+            // Actualizar el estilo de los servicios y calcular totales
+            checkboxes.forEach(cb => {
+                const parentLabel = cb.closest('.service-item');
+                if (cb.checked) {
+                    selectedCount++;
+                    total += parseInt(cb.getAttribute('data-price'));
+                    parentLabel.classList.add('selected');
+                } else {
+                    parentLabel.classList.remove('selected');
+                }
+            });
 
-            if (selectedDate.getDay() === 0) {
-                timeSelect.innerHTML = '<option value="">Cerrado Domingos</option>';
-                timeSelect.disabled = true;
-                return;
+            // Actualizar resumen visual
+            liveTotal.textContent = `$${total}`;
+            if (selectedCount > 1) {
+                liveDuration.textContent = "~ 1 hora";
+            } else if (selectedCount === 1) {
+                liveDuration.textContent = "~ 30 min";
+            } else {
+                liveDuration.textContent = "--";
             }
 
-            let selectedCount = 0;
-            checkboxes.forEach(cb => { if (cb.checked) selectedCount++; });
-
-            timeSelect.disabled = false;
-            
-            // Lista original de horarios
-            const allSlots = ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM","04:30 PM","05:00 PM"];
-            
-            timeSelect.innerHTML = '<option value="">Elegir hora...</option>';
-            
-            allSlots.forEach(slot => {
-                // Si elige más de 1 servicio, bloqueamos el último horario de la mañana (12:00 PM)
-                if (selectedCount > 1 && slot === "12:00 PM") {
-                    return; 
+            // Gestionar la fecha y horas disponibles
+            if (dateInput.value) {
+                const selectedDate = new Date(dateInput.value + 'T00:00:00');
+                
+                if (selectedDate.getDay() === 0) {
+                    timeSelect.innerHTML = '<option value="">Cerrado Domingos</option>';
+                    timeSelect.disabled = true;
+                } else {
+                    // Solo reconstruimos las opciones si el select estaba deshabilitado o si cambió la lógica de horarios
+                    timeSelect.disabled = false;
+                    const currentValue = timeSelect.value;
+                    
+                    const allSlots = ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM","04:30 PM","05:00 PM"];
+                    
+                    timeSelect.innerHTML = '<option value="">Elegir hora...</option>';
+                    
+                    allSlots.forEach(slot => {
+                        if (selectedCount > 1 && slot === "12:00 PM") return; 
+                        
+                        const opt = document.createElement('option');
+                        opt.value = slot; 
+                        opt.textContent = slot;
+                        if (slot === currentValue) opt.selected = true; // Mantener la selección si es válida
+                        timeSelect.appendChild(opt);
+                    });
                 }
-                const opt = document.createElement('option');
-                opt.value = slot; opt.textContent = slot;
-                timeSelect.appendChild(opt);
-            });
+            } else {
+                timeSelect.innerHTML = '<option value="">Selecciona fecha primero...</option>';
+                timeSelect.disabled = true;
+            }
+
+            // Habilitar el botón final solo si todo está listo
+            const isFormComplete = selectedCount > 0 && dateInput.value && timeSelect.value;
+            submitBtn.disabled = !isFormComplete;
         }
 
-        // Escuchar cambios tanto en fecha como en los servicios seleccionados
-        dateInput.addEventListener('change', updateAvailableTimes);
-        checkboxes.forEach(cb => cb.addEventListener('change', updateAvailableTimes));
+        // Escuchar eventos
+        dateInput.addEventListener('change', updateFormState);
+        timeSelect.addEventListener('change', updateFormState);
+        checkboxes.forEach(cb => cb.addEventListener('change', updateFormState));
 
         function sendToWhatsApp() {
             const rawDate = dateInput.value;
@@ -248,18 +383,11 @@
                 }
             });
 
-            if (selected.length === 0 || !rawDate || !time) {
-                alert("Completa todos los datos");
-                return;
-            }
-
-            // Convertir la fecha de AAAA-MM-DD a DD/MM/AAAA
             const [year, month, day] = rawDate.split('-');
             const formattedDate = `${day}/${month}/${year}`;
+            const duracionEstimada = selected.length > 1 ? "1 hora aprox." : "30 minutos";
 
-            const duracionEstimada = selected.length > 1 ? "1 hora aproximadamente" : "30 minutos";
-
-            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍Maceo 254 e/Cables y Angel%0A Guerra%0A📅Fecha/Hora: ${formattedDate} ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${duracionEstimada}%0A💰 Total a pagar: $${total}`;
+            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍Maceo 254 e/Cables y Angel Guerra%0A📅Fecha/Hora: ${formattedDate} a las ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${duracionEstimada}%0A💰 Total a pagar: $${total}`;
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
     </script>
