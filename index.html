@@ -31,7 +31,7 @@
             border-radius: 12px;
             box-sizing: border-box;
             background-color: var(--dark-forest-green);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Sombra elegante para dar profundidad */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .logo-container {
@@ -80,7 +80,6 @@
             gap: 12px;
         }
 
-        /* Estilos Pro para los servicios */
         .service-item {
             display: flex;
             justify-content: space-between;
@@ -90,7 +89,7 @@
             border: 1px solid rgba(203, 178, 106, 0.4);
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transición suave Apple-style */
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             position: relative;
         }
 
@@ -99,7 +98,6 @@
             background-color: rgba(203, 178, 106, 0.05);
         }
 
-        /* Ocultamos el checkbox nativo pero lo mantenemos funcional */
         .service-item input[type="checkbox"] {
             position: absolute;
             opacity: 0;
@@ -108,12 +106,11 @@
             width: 0;
         }
 
-        /* Clase dinámica que se añade con JS al seleccionar */
         .service-item.selected {
             background-color: var(--elegant-gold);
             color: var(--dark-forest-green);
             font-weight: bold;
-            transform: scale(1.02); /* Pequeño salto 3D */
+            transform: scale(1.02);
             box-shadow: 0 4px 15px rgba(203, 178, 106, 0.2);
         }
 
@@ -122,10 +119,6 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-        }
-
-        .form-group label {
-            font-size: 1.2em;
         }
 
         input[type="date"], select {
@@ -137,16 +130,9 @@
             font-size: 1.1em;
             border-radius: 6px;
             outline: none;
-            transition: border-color 0.3s;
-            appearance: none; /* Limpia estilos nativos del navegador */
+            appearance: none;
         }
 
-        input[type="date"]:focus, select:focus {
-            border-width: 2px;
-            padding: 14px; /* Ajuste para que el borde no mueva el diseño */
-        }
-
-        /* Panel de resumen en vivo */
         .live-summary {
             background-color: rgba(0,0,0,0.2);
             padding: 15px 20px;
@@ -187,17 +173,10 @@
             letter-spacing: 1px;
         }
 
-        /* Estado deshabilitado del botón */
         .btn-submit:disabled {
             background-color: rgba(203, 178, 106, 0.2);
             color: rgba(203, 178, 106, 0.5);
             cursor: not-allowed;
-        }
-
-        .btn-submit:not(:disabled):hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(203, 178, 106, 0.3);
-            background-color: var(--elegant-gold-hover);
         }
 
         .whatsapp-float {
@@ -216,11 +195,6 @@
             font-size: 35px;
             z-index: 100;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: transform 0.3s ease;
-        }
-
-        .whatsapp-float:hover {
-            transform: scale(1.1);
         }
     </style>
 </head>
@@ -239,24 +213,24 @@
         <form id="bookingForm">
             <h3 class="section-title">Servicios</h3>
             <div class="service-list">
-                <label class="service-item">
-                    <span><input type="checkbox" name="service" value="Corte sencillo" data-price="200"> Corte sencillo</span>
+                <label class="service-item" id="label-sencillo">
+                    <span><input type="checkbox" name="service" value="Corte sencillo" data-price="200" class="main-cut"> Corte sencillo</span>
                     <span>$200</span>
                 </label>
-                <label class="service-item">
-                    <span><input type="checkbox" name="service" value="Degradado" data-price="400"> Degradado</span>
+                <label class="service-item" id="label-degradado">
+                    <span><input type="checkbox" name="service" value="Degradado" data-price="400" class="main-cut"> Degradado</span>
                     <span>$400</span>
                 </label>
                 <label class="service-item">
-                    <span><input type="checkbox" name="service" value="Barba" data-price="100"> Barba</span>
+                    <span><input type="checkbox" name="service" value="Barba" data-price="100" class="addon"> Barba</span>
                     <span>$100</span>
                 </label>
                 <label class="service-item">
-                    <span><input type="checkbox" name="service" value="Diseño" data-price="100"> Diseño</span>
+                    <span><input type="checkbox" name="service" value="Diseño" data-price="100" class="addon"> Diseño</span>
                     <span>$100</span>
                 </label>
                 <label class="service-item">
-                    <span><input type="checkbox" name="service" value="Peinado" data-price="200"> Peinado</span>
+                    <span><input type="checkbox" name="service" value="Peinado" data-price="200" class="addon"> Peinado</span>
                     <span>$200</span>
                 </label>
             </div>
@@ -277,7 +251,7 @@
             <div class="live-summary">
                 <div>
                     <div class="summary-label">Tiempo est.</div>
-                    <div id="live-duration" style="font-size: 1.1em;">--</div>
+                    <div id="live-duration">--</div>
                 </div>
                 <div style="text-align: right;">
                     <div class="summary-label">Total</div>
@@ -299,76 +273,86 @@
         const liveTotal = document.getElementById('live-total');
         const liveDuration = document.getElementById('live-duration');
 
-        // Configurar fecha mínima a hoy
         dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
 
-        // Función central que evalúa todo el estado del formulario
-        function updateFormState() {
-            let selectedCount = 0;
-            let total = 0;
+        function updateFormState(e) {
+            // Lógica de exclusión mutua para los cortes principales
+            if (e && e.target.classList.contains('main-cut') && e.target.checked) {
+                checkboxes.forEach(cb => {
+                    if (cb.classList.contains('main-cut') && cb !== e.target) {
+                        cb.checked = false;
+                    }
+                });
+            }
 
-            // Actualizar el estilo de los servicios y calcular totales
+            let total = 0;
+            let hasMainCut = false;
+            let addonsCount = 0;
+            let isDegradadoFullCombo = false;
+
             checkboxes.forEach(cb => {
                 const parentLabel = cb.closest('.service-item');
                 if (cb.checked) {
-                    selectedCount++;
                     total += parseInt(cb.getAttribute('data-price'));
                     parentLabel.classList.add('selected');
+                    if (cb.classList.contains('main-cut')) hasMainCut = true;
+                    if (cb.classList.contains('addon')) addonsCount++;
                 } else {
                     parentLabel.classList.remove('selected');
                 }
             });
 
-            // Actualizar resumen visual
-            liveTotal.textContent = `$${total}`;
-            if (selectedCount > 1) {
-                liveDuration.textContent = "~ 1 hora";
-            } else if (selectedCount === 1) {
-                liveDuration.textContent = "~ 30 min";
-            } else {
-                liveDuration.textContent = "--";
+            // Verificar si es el combo máximo (Degradado + los 3 addons)
+            const degradadoCheck = document.querySelector('input[value="Degradado"]');
+            if (degradadoCheck.checked && addonsCount === 3) {
+                isDegradadoFullCombo = true;
             }
 
-            // Gestionar la fecha y horas disponibles
+            // Cálculo de tiempo "Pro"
+            let durationText = "--";
+            if (hasMainCut) {
+                if (isDegradadoFullCombo) {
+                    durationText = "1 hora y 30 min";
+                } else if (addonsCount >= 1) {
+                    durationText = "1 hora aprox.";
+                } else {
+                    durationText = "30 minutos";
+                }
+            } else if (addonsCount > 0) {
+                durationText = "30-60 min"; // Si solo elige barba/diseño sin corte
+            }
+
+            liveTotal.textContent = `$${total}`;
+            liveDuration.textContent = durationText;
+
+            // Gestión de horarios
             if (dateInput.value) {
                 const selectedDate = new Date(dateInput.value + 'T00:00:00');
-                
                 if (selectedDate.getDay() === 0) {
                     timeSelect.innerHTML = '<option value="">Cerrado Domingos</option>';
                     timeSelect.disabled = true;
                 } else {
-                    // Solo reconstruimos las opciones si el select estaba deshabilitado o si cambió la lógica de horarios
                     timeSelect.disabled = false;
                     const currentValue = timeSelect.value;
-                    
                     const allSlots = ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM","04:30 PM","05:00 PM"];
-                    
                     timeSelect.innerHTML = '<option value="">Elegir hora...</option>';
-                    
                     allSlots.forEach(slot => {
-                        if (selectedCount > 1 && slot === "12:00 PM") return; 
-                        
+                        // Si el servicio dura más de 30 min, bloqueamos el último turno de la mañana
+                        if ((addonsCount >= 1) && slot === "12:00 PM") return; 
                         const opt = document.createElement('option');
-                        opt.value = slot; 
-                        opt.textContent = slot;
-                        if (slot === currentValue) opt.selected = true; // Mantener la selección si es válida
+                        opt.value = slot; opt.textContent = slot;
+                        if (slot === currentValue) opt.selected = true;
                         timeSelect.appendChild(opt);
                     });
                 }
-            } else {
-                timeSelect.innerHTML = '<option value="">Selecciona fecha primero...</option>';
-                timeSelect.disabled = true;
             }
 
-            // Habilitar el botón final solo si todo está listo
-            const isFormComplete = selectedCount > 0 && dateInput.value && timeSelect.value;
-            submitBtn.disabled = !isFormComplete;
+            submitBtn.disabled = !(total > 0 && dateInput.value && timeSelect.value);
         }
 
-        // Escuchar eventos
+        checkboxes.forEach(cb => cb.addEventListener('change', updateFormState));
         dateInput.addEventListener('change', updateFormState);
         timeSelect.addEventListener('change', updateFormState);
-        checkboxes.forEach(cb => cb.addEventListener('change', updateFormState));
 
         function sendToWhatsApp() {
             const rawDate = dateInput.value;
@@ -383,11 +367,11 @@
                 }
             });
 
+            // Formato de fecha con guion: DD-MM-AAAA
             const [year, month, day] = rawDate.split('-');
-            const formattedDate = `${day}/${month}/${year}`;
-            const duracionEstimada = selected.length > 1 ? "1 hora aprox." : "30 minutos";
+            const formattedDate = `${day}-${month}-${year}`;
 
-            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍Maceo 254 e/Cables y Angel Guerra%0A📅Fecha/Hora: ${formattedDate} a las ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${duracionEstimada}%0A💰 Total a pagar: $${total}`;
+            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍Maceo 254 e/Cables y Angel Guerra%0A📅Fecha y Hora: ${formattedDate} ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${liveDuration.textContent}%0A💰 Total a pagar: $${total}`;
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
     </script>
