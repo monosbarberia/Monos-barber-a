@@ -56,7 +56,6 @@
             font-style: italic;
             font-size: 1.3em;
             margin: 5px 0;
-            opacity: 0.9;
         }
 
         .address {
@@ -89,19 +88,13 @@
             border: 1px solid rgba(203, 178, 106, 0.4);
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: all 0.3s ease;
             position: relative;
-        }
-
-        .service-item:hover {
-            border-color: var(--elegant-gold);
-            background-color: rgba(203, 178, 106, 0.05);
         }
 
         .service-item input[type="checkbox"] {
             position: absolute;
             opacity: 0;
-            cursor: pointer;
             height: 0;
             width: 0;
         }
@@ -111,7 +104,6 @@
             color: var(--dark-forest-green);
             font-weight: bold;
             transform: scale(1.02);
-            box-shadow: 0 4px 15px rgba(203, 178, 106, 0.2);
         }
 
         .form-group {
@@ -130,7 +122,6 @@
             font-size: 1.1em;
             border-radius: 6px;
             outline: none;
-            appearance: none;
         }
 
         .live-summary {
@@ -170,7 +161,6 @@
             margin-top: 25px;
             transition: all 0.3s ease;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .btn-submit:disabled {
@@ -213,11 +203,11 @@
         <form id="bookingForm">
             <h3 class="section-title">Servicios</h3>
             <div class="service-list">
-                <label class="service-item" id="label-sencillo">
+                <label class="service-item">
                     <span><input type="checkbox" name="service" value="Corte sencillo" data-price="200" class="main-cut"> Corte sencillo</span>
                     <span>$200</span>
                 </label>
-                <label class="service-item" id="label-degradado">
+                <label class="service-item">
                     <span><input type="checkbox" name="service" value="Degradado" data-price="400" class="main-cut"> Degradado</span>
                     <span>$400</span>
                 </label>
@@ -276,56 +266,49 @@
         dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
 
         function updateFormState(e) {
-            // Lógica de exclusión mutua para los cortes principales
+            // Exclusión mutua: o sencillo o degradado
             if (e && e.target.classList.contains('main-cut') && e.target.checked) {
                 checkboxes.forEach(cb => {
-                    if (cb.classList.contains('main-cut') && cb !== e.target) {
-                        cb.checked = false;
-                    }
+                    if (cb.classList.contains('main-cut') && cb !== e.target) cb.checked = false;
                 });
             }
 
             let total = 0;
+            let selectedCount = 0;
             let hasMainCut = false;
             let addonsCount = 0;
-            let isDegradadoFullCombo = false;
+            let isDegradado = false;
 
             checkboxes.forEach(cb => {
                 const parentLabel = cb.closest('.service-item');
                 if (cb.checked) {
+                    selectedCount++;
                     total += parseInt(cb.getAttribute('data-price'));
                     parentLabel.classList.add('selected');
-                    if (cb.classList.contains('main-cut')) hasMainCut = true;
+                    if (cb.classList.contains('main-cut')) {
+                        hasMainCut = true;
+                        if(cb.value === "Degradado") isDegradado = true;
+                    }
                     if (cb.classList.contains('addon')) addonsCount++;
                 } else {
                     parentLabel.classList.remove('selected');
                 }
             });
 
-            // Verificar si es el combo máximo (Degradado + los 3 addons)
-            const degradadoCheck = document.querySelector('input[value="Degradado"]');
-            if (degradadoCheck.checked && addonsCount === 3) {
-                isDegradadoFullCombo = true;
-            }
-
-            // Cálculo de tiempo "Pro"
+            // Lógica de tiempo refinada
             let durationText = "--";
-            if (hasMainCut) {
-                if (isDegradadoFullCombo) {
-                    durationText = "1 hora y 30 min";
-                } else if (addonsCount >= 1) {
-                    durationText = "1 hora aprox.";
-                } else {
-                    durationText = "30 minutos";
-                }
-            } else if (addonsCount > 0) {
-                durationText = "30-60 min"; // Si solo elige barba/diseño sin corte
+            if (selectedCount === 1) {
+                durationText = "30 minutos";
+            } else if (isDegradado && addonsCount === 3) {
+                durationText = "1 hora y 30 min";
+            } else if (selectedCount > 1) {
+                durationText = "1 hora aprox.";
             }
 
             liveTotal.textContent = `$${total}`;
             liveDuration.textContent = durationText;
 
-            // Gestión de horarios
+            // Horarios
             if (dateInput.value) {
                 const selectedDate = new Date(dateInput.value + 'T00:00:00');
                 if (selectedDate.getDay() === 0) {
@@ -337,8 +320,7 @@
                     const allSlots = ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM","04:30 PM","05:00 PM"];
                     timeSelect.innerHTML = '<option value="">Elegir hora...</option>';
                     allSlots.forEach(slot => {
-                        // Si el servicio dura más de 30 min, bloqueamos el último turno de la mañana
-                        if ((addonsCount >= 1) && slot === "12:00 PM") return; 
+                        if (durationText !== "30 minutos" && slot === "12:00 PM") return; 
                         const opt = document.createElement('option');
                         opt.value = slot; opt.textContent = slot;
                         if (slot === currentValue) opt.selected = true;
@@ -346,8 +328,7 @@
                     });
                 }
             }
-
-            submitBtn.disabled = !(total > 0 && dateInput.value && timeSelect.value);
+            submitBtn.disabled = !(selectedCount > 0 && dateInput.value && timeSelect.value);
         }
 
         checkboxes.forEach(cb => cb.addEventListener('change', updateFormState));
@@ -355,7 +336,7 @@
         timeSelect.addEventListener('change', updateFormState);
 
         function sendToWhatsApp() {
-            const rawDate = dateInput.value;
+            const rawDate = dateInput.value; // Formato AAAA-MM-DD
             const time = timeSelect.value;
             let selected = [];
             let total = 0;
@@ -367,11 +348,7 @@
                 }
             });
 
-            // Formato de fecha con guion: DD-MM-AAAA
-            const [year, month, day] = rawDate.split('-');
-            const formattedDate = `${day}-${month}-${year}`;
-
-            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍Maceo 254 e/Cables y Angel Guerra%0A📅Fecha y Hora: ${formattedDate} ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${liveDuration.textContent}%0A💰 Total a pagar: $${total}`;
+            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍Maceo 254 e/Cables y Angel Guerra%0A📅Fecha y Hora: ${rawDate} ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${liveDuration.textContent}%0A💰 Total a pagar: $${total}`;
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
     </script>
