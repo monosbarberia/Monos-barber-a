@@ -318,4 +318,37 @@
                     allSlots.forEach(slot => {
                         if (selectedCount > 1 && slot === "12:00 PM") return; 
                         const opt = document.createElement('option');
-                        opt.value =
+                        opt.value = slot; opt.textContent = slot;
+                        if (slot === currentValue) opt.selected = true;
+                        timeSelect.appendChild(opt);
+                    });
+                }
+            }
+            submitBtn.disabled = !(selectedCount > 0 && dateInput.value && timeSelect.value);
+        }
+
+        checkboxes.forEach(cb => cb.addEventListener('change', updateFormState));
+        dateInput.addEventListener('change', updateFormState);
+        timeSelect.addEventListener('change', updateFormState);
+
+        function sendToWhatsApp() {
+            const rawDate = dateInput.value; 
+            const time = timeSelect.value;
+            let selected = [];
+            let total = 0;
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    selected.push(cb.value);
+                    total += parseInt(cb.getAttribute('data-price'));
+                }
+            });
+
+            // Formato original sin transformaciones adicionales para detección de iOS
+            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍 Maceo 254 e/Cables y Angel Guerra%0A📅 Fecha/Hora: ${rawDate} ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${liveDuration.textContent}%0A💰 Total a pagar: $${total}`;
+            
+            window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
+        }
+    </script>
+</body>
+    </html>
