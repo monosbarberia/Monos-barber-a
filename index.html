@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -235,7 +236,7 @@
         checkboxes.forEach(cb => cb.addEventListener('change', updateAvailableTimes));
 
         function sendToWhatsApp() {
-            const date = dateInput.value;
+            const rawDate = dateInput.value;
             const time = timeSelect.value;
             let selected = [];
             let total = 0;
@@ -247,16 +248,20 @@
                 }
             });
 
-            if (selected.length === 0 || !date || !time) {
+            if (selected.length === 0 || !rawDate || !time) {
                 alert("Completa todos los datos");
                 return;
             }
 
+            // Convertir la fecha de AAAA-MM-DD a DD/MM/AAAA
+            const [year, month, day] = rawDate.split('-');
+            const formattedDate = `${day}/${month}/${year}`;
+
             const duracionEstimada = selected.length > 1 ? "1 hora aproximadamente" : "30 minutos";
 
-            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍Maceo 254 e/Cables y Angel%0A Guerra%0A📅Fecha/Hora: ${date} ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${duracionEstimada}%0A💰 Total a pagar: $${total}`;
+            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍Maceo 254 e/Cables y Angel%0A Guerra%0A📅Fecha/Hora: ${formattedDate}${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${duracionEstimada}%0A💰 Total a pagar: $${total}`;
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
     </script>
 </body>
-    </html>
+</html>
