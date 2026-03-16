@@ -80,7 +80,6 @@
             gap: 12px;
         }
 
-        /* Estilo de Tarjetas Interactivas */
         .service-item {
             display: flex;
             justify-content: space-between;
@@ -92,11 +91,6 @@
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             position: relative;
-        }
-
-        .service-item:hover {
-            border-color: var(--elegant-gold);
-            background-color: rgba(203, 178, 106, 0.05);
         }
 
         .service-item input[type="checkbox"] {
@@ -111,7 +105,6 @@
             color: var(--dark-forest-green);
             font-weight: bold;
             transform: scale(1.02);
-            box-shadow: 0 4px 15px rgba(203, 178, 106, 0.2);
         }
 
         .form-group {
@@ -133,7 +126,6 @@
             appearance: none;
         }
 
-        /* Resumen en vivo del Ticket */
         .live-summary {
             background-color: rgba(0,0,0,0.2);
             padding: 15px 20px;
@@ -171,7 +163,6 @@
             margin-top: 25px;
             transition: all 0.3s ease;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .btn-submit:disabled {
@@ -274,11 +265,9 @@
         const liveTotal = document.getElementById('live-total');
         const liveDuration = document.getElementById('live-duration');
 
-        // Configurar fecha mínima
         dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
 
         function updateFormState(e) {
-            // Exclusión mutua para los cortes principales
             if (e && e.target.classList.contains('main-cut') && e.target.checked) {
                 checkboxes.forEach(cb => {
                     if (cb.classList.contains('main-cut') && cb !== e.target) cb.checked = false;
@@ -303,7 +292,6 @@
                 }
             });
 
-            // Lógica de tiempo inteligente
             let durationText = "--";
             if (selectedCount === 1) {
                 durationText = "30 minutos";
@@ -316,7 +304,6 @@
             liveTotal.textContent = `$${total}`;
             liveDuration.textContent = durationText;
 
-            // Gestión de horarios disponibles
             if (dateInput.value) {
                 const selectedDate = new Date(dateInput.value + 'T00:00:00');
                 if (selectedDate.getDay() === 0) {
@@ -329,44 +316,6 @@
                     
                     timeSelect.innerHTML = '<option value="">Elegir hora...</option>';
                     allSlots.forEach(slot => {
-                        // Si el turno requiere más de 30 min, bloqueamos el último de la mañana
                         if (selectedCount > 1 && slot === "12:00 PM") return; 
-                        
                         const opt = document.createElement('option');
-                        opt.value = slot; opt.textContent = slot;
-                        if (slot === currentValue) opt.selected = true;
-                        timeSelect.appendChild(opt);
-                    });
-                }
-            }
-
-            // Habilitar botón solo si el formulario está completo
-            submitBtn.disabled = !(selectedCount > 0 && dateInput.value && timeSelect.value);
-        }
-
-        // Listeners
-        checkboxes.forEach(cb => cb.addEventListener('change', updateFormState));
-        dateInput.addEventListener('change', updateFormState);
-        timeSelect.addEventListener('change', updateFormState);
-
-        function sendToWhatsApp() {
-            const rawDate = dateInput.value; 
-            const time = timeSelect.value;
-            let selected = [];
-            let total = 0;
-
-            checkboxes.forEach(cb => {
-                if (cb.checked) {
-                    selected.push(cb.value);
-                    total += parseInt(cb.getAttribute('data-price'));
-                }
-            });
-
-            // Formato de fecha AAAA-MM-DD para que iOS lo detecte como calendario
-            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍 Maceo 254 e/Cables y Angel Guerra%0A📅 Fecha/Hora: ${rawDate} ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${liveDuration.textContent}%0A💰 Total a pagar: $${total}`;
-            
-            window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
-        }
-    </script>
-</body>
-</html>
+                        opt.value =
