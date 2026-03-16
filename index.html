@@ -259,7 +259,7 @@
 
             const duracionEstimada = selected.length > 1 ? "1 hora aproximadamente" : "30 minutos";
 
-            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍Maceo 254 e/Cables y Angel%0A Guerra%0A📅Fecha/Hora: ${formattedDate}${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${duracionEstimada}%0A💰 Total a pagar: $${total}`;
+            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍Maceo 254 e/Cables y Angel%0A Guerra%0A📅Fecha/Hora: ${formattedDate} ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${duracionEstimada}%0A💰 Total a pagar: $${total}`;
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
     </script>
