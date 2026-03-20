@@ -189,6 +189,12 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
     </style>
+
+    <script type="text/javascript">
+      (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
+      Cal("init", "degradado", {origin:"https://app.cal.com"});
+      Cal.ns.degradado("ui", {"theme":"dark","cssVarsPerTheme":{"light":{"cal-brand":"#1c3823"}},"hideEventTypeDetails":false,"layout":"month_view"});
+    </script>
 </head>
 <body>
 
@@ -268,10 +274,19 @@
         dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
 
         function updateFormState(e) {
+            // Manejo de selección única para cortes principales
             if (e && e.target.classList.contains('main-cut') && e.target.checked) {
                 checkboxes.forEach(cb => {
                     if (cb.classList.contains('main-cut') && cb !== e.target) cb.checked = false;
                 });
+
+                // INTEGRACIÓN CAL.COM: Si elige Degradado, abrir el calendario
+                if (e.target.value === "Degradado") {
+                    Cal.ns.degradado("ui", {"theme":"dark"});
+                    Cal.ns.degradado("show", {
+                        "layout": "month_view"
+                    });
+                }
             }
 
             let total = 0;
@@ -292,6 +307,7 @@
                 }
             });
 
+            // Ajuste de duración
             let durationText = "--";
             if (selectedCount === 1) {
                 durationText = "30 minutos";
@@ -304,6 +320,7 @@
             liveTotal.textContent = `$${total}`;
             liveDuration.textContent = durationText;
 
+            // Lógica de horarios manuales (se mantiene por si no eligen Degradado)
             if (dateInput.value) {
                 const selectedDate = new Date(dateInput.value + 'T00:00:00');
                 if (selectedDate.getDay() === 0) {
@@ -344,12 +361,10 @@
                 }
             });
 
-            // Formato original sin transformaciones adicionales para detección de iOS
             const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍 Maceo 254 e/Cables y Angel Guerra%0A📅 Fecha/Hora: ${rawDate} ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${liveDuration.textContent}%0A💰 Total a pagar: $${total}`;
             
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
     </script>
 </body>
-    </html>
-
+</html>
