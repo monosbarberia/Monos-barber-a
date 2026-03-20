@@ -189,12 +189,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
     </style>
-
-    <script type="text/javascript">
-      (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
-      Cal("init", "degradado", {origin:"https://app.cal.com"});
-      Cal.ns.degradado("ui", {"theme":"dark","cssVarsPerTheme":{"light":{"cal-brand":"#1c3823"}},"hideEventTypeDetails":false,"layout":"month_view"});
-    </script>
 </head>
 <body>
 
@@ -273,52 +267,11 @@
 
         dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
 
-        // --- CONEXIÓN CAL.COM -> FORMULARIO ---
-        Cal.ns.degradado("on", {
-            action: "bookingSuccessful",
-            callback: (e) => {
-                const data = e.detail.data;
-                const dateObj = new Date(data.startTime);
-                
-                // 1. Llenar la fecha (Formato YYYY-MM-DD)
-                dateInput.value = dateObj.toISOString().split('T')[0];
-                
-                // 2. Llenar la hora (Formato HH:MM AM/PM para coincidir con tu select)
-                let hours = dateObj.getHours();
-                const minutes = dateObj.getMinutes().toString().padStart(2, '0');
-                const ampm = hours >= 12 ? 'PM' : 'AM';
-                hours = hours % 12;
-                hours = hours ? hours : 12; // el '0' debe ser '12'
-                const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
-
-                // Habilitar el select de tiempo y forzar el valor
-                timeSelect.disabled = false;
-                
-                // Asegurarnos que la opción existe en el select, si no, la creamos
-                let optionExists = Array.from(timeSelect.options).some(opt => opt.value === formattedTime);
-                if (!optionExists) {
-                    const newOpt = document.createElement('option');
-                    newOpt.value = formattedTime;
-                    newOpt.textContent = formattedTime;
-                    timeSelect.appendChild(newOpt);
-                }
-                
-                timeSelect.value = formattedTime;
-                
-                // 3. Actualizar el estado del formulario (totales, botón, etc)
-                updateFormState();
-            }
-        });
-
         function updateFormState(e) {
             if (e && e.target.classList.contains('main-cut') && e.target.checked) {
                 checkboxes.forEach(cb => {
                     if (cb.classList.contains('main-cut') && cb !== e.target) cb.checked = false;
                 });
-
-                if (e.target.value === "Degradado") {
-                    Cal.ns.degradado("show");
-                }
             }
 
             let total = 0;
@@ -361,16 +314,14 @@
                     const currentValue = timeSelect.value;
                     const allSlots = ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM","04:30 PM","05:00 PM"];
                     
-                    if (!currentValue || !allSlots.includes(currentValue)) {
-                        timeSelect.innerHTML = '<option value="">Elegir hora...</option>';
-                        allSlots.forEach(slot => {
-                            if (selectedCount > 1 && slot === "12:00 PM") return; 
-                            const opt = document.createElement('option');
-                            opt.value = slot; opt.textContent = slot;
-                            timeSelect.appendChild(opt);
-                        });
-                        if (currentValue) timeSelect.value = currentValue; 
-                    }
+                    timeSelect.innerHTML = '<option value="">Elegir hora...</option>';
+                    allSlots.forEach(slot => {
+                        if (selectedCount > 1 && slot === "12:00 PM") return; 
+                        const opt = document.createElement('option');
+                        opt.value = slot; opt.textContent = slot;
+                        if (slot === currentValue) opt.selected = true;
+                        timeSelect.appendChild(opt);
+                    });
                 }
             }
             submitBtn.disabled = !(selectedCount > 0 && dateInput.value && timeSelect.value);
@@ -393,10 +344,11 @@
                 }
             });
 
+            // Formato original sin transformaciones adicionales para detección de iOS
             const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍 Maceo 254 e/Cables y Angel Guerra%0A📅 Fecha/Hora: ${rawDate} ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${liveDuration.textContent}%0A💰 Total a pagar: $${total}`;
             
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
     </script>
 </body>
-</html>
+    </html>
