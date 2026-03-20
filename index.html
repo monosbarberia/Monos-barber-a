@@ -273,98 +273,42 @@
 
         dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
 
+        // --- CONEXIÓN CAL.COM -> FORMULARIO ---
+        Cal.ns.degradado("on", {
+            action: "bookingSuccessful",
+            callback: (e) => {
+                const data = e.detail.data;
+                const dateObj = new Date(data.startTime);
+                
+                // 1. Llenar la fecha (Formato YYYY-MM-DD)
+                dateInput.value = dateObj.toISOString().split('T')[0];
+                
+                // 2. Llenar la hora (Formato HH:MM AM/PM para coincidir con tu select)
+                let hours = dateObj.getHours();
+                const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // el '0' debe ser '12'
+                const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+
+                // Habilitar el select de tiempo y forzar el valor
+                timeSelect.disabled = false;
+                
+                // Asegurarnos que la opción existe en el select, si no, la creamos
+                let optionExists = Array.from(timeSelect.options).some(opt => opt.value === formattedTime);
+                if (!optionExists) {
+                    const newOpt = document.createElement('option');
+                    newOpt.value = formattedTime;
+                    newOpt.textContent = formattedTime;
+                    timeSelect.appendChild(newOpt);
+                }
+                
+                timeSelect.value = formattedTime;
+                
+                // 3. Actualizar el estado del formulario (totales, botón, etc)
+                updateFormState();
+            }
+        });
+
         function updateFormState(e) {
-            // Manejo de selección única para cortes principales
-            if (e && e.target.classList.contains('main-cut') && e.target.checked) {
-                checkboxes.forEach(cb => {
-                    if (cb.classList.contains('main-cut') && cb !== e.target) cb.checked = false;
-                });
-
-                // INTEGRACIÓN CAL.COM: Si elige Degradado, abrir el calendario
-                if (e.target.value === "Degradado") {
-                    Cal.ns.degradado("ui", {"theme":"dark"});
-                    Cal.ns.degradado("show", {
-                        "layout": "month_view"
-                    });
-                }
-            }
-
-            let total = 0;
-            let selectedCount = 0;
-            let isDegradado = false;
-            let addonsCount = 0;
-
-            checkboxes.forEach(cb => {
-                const parentLabel = cb.closest('.service-item');
-                if (cb.checked) {
-                    selectedCount++;
-                    total += parseInt(cb.getAttribute('data-price'));
-                    parentLabel.classList.add('selected');
-                    if (cb.value === "Degradado") isDegradado = true;
-                    if (cb.classList.contains('addon')) addonsCount++;
-                } else {
-                    parentLabel.classList.remove('selected');
-                }
-            });
-
-            // Ajuste de duración
-            let durationText = "--";
-            if (selectedCount === 1) {
-                durationText = "30 minutos";
-            } else if (isDegradado && addonsCount === 3) {
-                durationText = "1 hora y 30 min";
-            } else if (selectedCount > 1) {
-                durationText = "1 hora aprox.";
-            }
-
-            liveTotal.textContent = `$${total}`;
-            liveDuration.textContent = durationText;
-
-            // Lógica de horarios manuales (se mantiene por si no eligen Degradado)
-            if (dateInput.value) {
-                const selectedDate = new Date(dateInput.value + 'T00:00:00');
-                if (selectedDate.getDay() === 0) {
-                    timeSelect.innerHTML = '<option value="">Cerrado Domingos</option>';
-                    timeSelect.disabled = true;
-                } else {
-                    timeSelect.disabled = false;
-                    const currentValue = timeSelect.value;
-                    const allSlots = ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM","04:30 PM","05:00 PM"];
-                    
-                    timeSelect.innerHTML = '<option value="">Elegir hora...</option>';
-                    allSlots.forEach(slot => {
-                        if (selectedCount > 1 && slot === "12:00 PM") return; 
-                        const opt = document.createElement('option');
-                        opt.value = slot; opt.textContent = slot;
-                        if (slot === currentValue) opt.selected = true;
-                        timeSelect.appendChild(opt);
-                    });
-                }
-            }
-            submitBtn.disabled = !(selectedCount > 0 && dateInput.value && timeSelect.value);
-        }
-
-        checkboxes.forEach(cb => cb.addEventListener('change', updateFormState));
-        dateInput.addEventListener('change', updateFormState);
-        timeSelect.addEventListener('change', updateFormState);
-
-        function sendToWhatsApp() {
-            const rawDate = dateInput.value; 
-            const time = timeSelect.value;
-            let selected = [];
-            let total = 0;
-
-            checkboxes.forEach(cb => {
-                if (cb.checked) {
-                    selected.push(cb.value);
-                    total += parseInt(cb.getAttribute('data-price'));
-                }
-            });
-
-            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍 Maceo 254 e/Cables y Angel Guerra%0A📅 Fecha/Hora: ${rawDate} ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${liveDuration.textContent}%0A💰 Total a pagar: $${total}`;
-            
-            window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
-        }
-    </script>
-</body>
-</html>
+            if (e && e.target.
