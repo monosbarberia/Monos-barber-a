@@ -1,354 +1,169 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mono's Barbería Holguín - Reservas</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --dark-forest-green: #1c3823;
-            --elegant-gold: #cbb26a; 
-            --elegant-gold-hover: #e0cca0;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mono's Barbería Holguín - Reservas</title>
 
-        body {
-            background-color: var(--dark-forest-green);
-            color: var(--elegant-gold);
-            font-family: 'Cormorant Garamond', serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+<style>
+:root {
+    --dark-forest-green: #1c3823;
+    --elegant-gold: #cbb26a;
+}
 
-        .container {
-            max-width: 500px;
-            width: 100%;
-            border: 2px solid var(--elegant-gold);
-            padding: 40px 30px;
-            border-radius: 12px;
-            box-sizing: border-box;
-            background-color: var(--dark-forest-green);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+body {
+    background-color: var(--dark-forest-green);
+    color: var(--elegant-gold);
+    font-family: 'Cormorant Garamond', serif;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
 
-        .logo-container {
-            text-align: center;
-            margin-bottom: 10px;
-        }
+.container {
+    max-width: 500px;
+    width: 100%;
+    border: 2px solid var(--elegant-gold);
+    padding: 30px;
+    border-radius: 12px;
+}
 
-        .logo-img {
-            max-width: 250px;
-            width: 100%;
-            height: auto;
-        }
+.time-slots {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+}
 
-        .info-header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 1px solid var(--elegant-gold);
-            padding-bottom: 20px;
-        }
+.slot {
+    padding: 12px;
+    text-align: center;
+    border: 1px solid var(--elegant-gold);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+}
 
-        .subtitle {
-            font-style: italic;
-            font-size: 1.3em;
-            margin: 5px 0;
-            opacity: 0.9;
-        }
+.slot:hover {
+    background: var(--elegant-gold);
+    color: var(--dark-forest-green);
+}
 
-        .address {
-            font-size: 1.1em;
-            margin: 10px 0;
-            letter-spacing: 1px;
-            line-height: 1.4;
-        }
+.slot.selected {
+    background: var(--elegant-gold);
+    color: var(--dark-forest-green);
+    font-weight: bold;
+}
 
-        .section-title {
-            font-size: 1.5em;
-            margin-top: 30px;
-            border-bottom: 1px dashed rgba(203, 178, 106, 0.5);
-            padding-bottom: 5px;
-            margin-bottom: 20px;
-        }
+.slot.occupied {
+    background: rgba(255,0,0,0.2);
+    color: red;
+    border: 1px solid red;
+    cursor: not-allowed;
+}
 
-        .service-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    background: transparent;
+    border: 1px solid var(--elegant-gold);
+    color: var(--elegant-gold);
+}
 
-        .service-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.2em;
-            padding: 15px 20px;
-            border: 1px solid rgba(203, 178, 106, 0.4);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            position: relative;
-        }
-
-        .service-item input[type="checkbox"] {
-            position: absolute;
-            opacity: 0;
-            height: 0;
-            width: 0;
-        }
-
-        .service-item.selected {
-            background-color: var(--elegant-gold);
-            color: var(--dark-forest-green);
-            font-weight: bold;
-            transform: scale(1.02);
-        }
-
-        .form-group {
-            margin: 25px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        input[type="date"], select {
-            background-color: transparent;
-            color: var(--elegant-gold);
-            border: 1px solid var(--elegant-gold);
-            padding: 15px;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1em;
-            border-radius: 6px;
-            outline: none;
-            appearance: none;
-        }
-
-        .live-summary {
-            background-color: rgba(0,0,0,0.2);
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.2em;
-            border-left: 3px solid var(--elegant-gold);
-        }
-
-        .summary-label {
-            font-style: italic;
-            opacity: 0.8;
-            font-size: 0.9em;
-        }
-
-        .summary-value {
-            font-weight: bold;
-            font-size: 1.3em;
-        }
-
-        .btn-submit {
-            background-color: var(--elegant-gold);
-            color: var(--dark-forest-green);
-            border: none;
-            padding: 18px;
-            width: 100%;
-            font-size: 1.3em;
-            font-weight: bold;
-            font-family: 'Cormorant Garamond', serif;
-            cursor: pointer;
-            border-radius: 6px;
-            margin-top: 25px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-        }
-
-        .btn-submit:disabled {
-            background-color: rgba(203, 178, 106, 0.2);
-            color: rgba(203, 178, 106, 0.5);
-            cursor: not-allowed;
-        }
-
-        .whatsapp-float {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background-color: #25D366;
-            color: white;
-            border-radius: 50%;
-            width: 65px;
-            height: 65px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-decoration: none;
-            font-size: 35px;
-            z-index: 100;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-    </style>
+button {
+    width: 100%;
+    padding: 15px;
+    margin-top: 25px;
+    background: var(--elegant-gold);
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+</style>
 </head>
+
 <body>
 
-    <div class="container">
-        <div class="logo-container">
-            <img src="logo.jpg" alt="Logo Mono's" class="logo-img">
-        </div>
+<div class="container">
 
-        <div class="info-header">
-            <div class="subtitle">Luce limpio, fino, mono...</div>
-            <div class="address">Maceo 254 e/ Cables y Ángel Guerra<br>Holguín, Cuba</div>
-        </div>
+<h2>Reserva tu turno</h2>
 
-        <form id="bookingForm">
-            <h3 class="section-title">Servicios</h3>
-            <div class="service-list">
-                <label class="service-item">
-                    <span><input type="checkbox" name="service" value="Corte sencillo" data-price="200" class="main-cut"> Corte sencillo</span>
-                    <span>$200</span>
-                </label>
-                <label class="service-item">
-                    <span><input type="checkbox" name="service" value="Degradado" data-price="400" class="main-cut"> Degradado</span>
-                    <span>$400</span>
-                </label>
-                <label class="service-item">
-                    <span><input type="checkbox" name="service" value="Barba" data-price="100" class="addon"> Barba</span>
-                    <span>$100</span>
-                </label>
-                <label class="service-item">
-                    <span><input type="checkbox" name="service" value="Diseño" data-price="100" class="addon"> Diseño</span>
-                    <span>$100</span>
-                </label>
-                <label class="service-item">
-                    <span><input type="checkbox" name="service" value="Peinado" data-price="200" class="addon"> Peinado</span>
-                    <span>$200</span>
-                </label>
-            </div>
+<input type="date" id="date">
 
-            <h3 class="section-title">Cita</h3>
-            <div class="form-group">
-                <label>Fecha:</label>
-                <input type="date" id="date" required>
-            </div>
+<div id="slots" class="time-slots"></div>
 
-            <div class="form-group">
-                <label>Hora:</label>
-                <select id="time" required disabled>
-                    <option value="">Selecciona fecha primero...</option>
-                </select>
-            </div>
+<button onclick="enviarReserva()">Confirmar Reserva</button>
 
-            <div class="live-summary">
-                <div>
-                    <div class="summary-label">Tiempo est.</div>
-                    <div id="live-duration">--</div>
-                </div>
-                <div style="text-align: right;">
-                    <div class="summary-label">Total</div>
-                    <div class="summary-value" id="live-total">$0</div>
-                </div>
-            </div>
+</div>
 
-            <button type="button" class="btn-submit" id="submitBtn" onclick="sendToWhatsApp()" disabled>Confirmar Reserva</button>
-        </form>
-    </div>
+<script>
 
-    <a href="https://wa.me/5358592776" class="whatsapp-float" target="_blank">💬</a>
+const allSlots = [
+"09:00 AM","09:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM",
+"02:00 PM","02:30 PM","03:00 PM","03:30 PM","04:00 PM","04:30 PM","05:00 PM"
+];
 
-    <script>
-        const dateInput = document.getElementById('date');
-        const timeSelect = document.getElementById('time');
-        const checkboxes = document.querySelectorAll('input[name="service"]');
-        const submitBtn = document.getElementById('submitBtn');
-        const liveTotal = document.getElementById('live-total');
-        const liveDuration = document.getElementById('live-duration');
+let reservas = {};
+let selectedTime = "";
 
-        dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
+async function cargarReservas() {
+    const res = await fetch('reservas.json');
+    reservas = await res.json();
+}
 
-        function updateFormState(e) {
-            if (e && e.target.classList.contains('main-cut') && e.target.checked) {
-                checkboxes.forEach(cb => {
-                    if (cb.classList.contains('main-cut') && cb !== e.target) cb.checked = false;
-                });
-            }
+async function renderSlots() {
 
-            let total = 0;
-            let selectedCount = 0;
-            let isDegradado = false;
-            let addonsCount = 0;
+    await cargarReservas();
 
-            checkboxes.forEach(cb => {
-                const parentLabel = cb.closest('.service-item');
-                if (cb.checked) {
-                    selectedCount++;
-                    total += parseInt(cb.getAttribute('data-price'));
-                    parentLabel.classList.add('selected');
-                    if (cb.value === "Degradado") isDegradado = true;
-                    if (cb.classList.contains('addon')) addonsCount++;
-                } else {
-                    parentLabel.classList.remove('selected');
-                }
-            });
+    const date = document.getElementById("date").value;
+    const container = document.getElementById("slots");
 
-            let durationText = "--";
-            if (selectedCount === 1) {
-                durationText = "30 minutos";
-            } else if (isDegradado && addonsCount === 3) {
-                durationText = "1 hora y 30 min";
-            } else if (selectedCount > 1) {
-                durationText = "1 hora aprox.";
-            }
+    container.innerHTML = "";
+    selectedTime = "";
 
-            liveTotal.textContent = `$${total}`;
-            liveDuration.textContent = durationText;
+    if (!date) return;
 
-            if (dateInput.value) {
-                const selectedDate = new Date(dateInput.value + 'T00:00:00');
-                if (selectedDate.getDay() === 0) {
-                    timeSelect.innerHTML = '<option value="">Cerrado Domingos</option>';
-                    timeSelect.disabled = true;
-                } else {
-                    timeSelect.disabled = false;
-                    const currentValue = timeSelect.value;
-                    const allSlots = ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM","04:30 PM","05:00 PM"];
-                    
-                    timeSelect.innerHTML = '<option value="">Elegir hora...</option>';
-                    allSlots.forEach(slot => {
-                        if (selectedCount > 1 && slot === "12:00 PM") return; 
-                        const opt = document.createElement('option');
-                        opt.value = slot; opt.textContent = slot;
-                        if (slot === currentValue) opt.selected = true;
-                        timeSelect.appendChild(opt);
-                    });
-                }
-            }
-            submitBtn.disabled = !(selectedCount > 0 && dateInput.value && timeSelect.value);
+    const ocupados = reservas[date] || [];
+
+    allSlots.forEach(slot => {
+        const div = document.createElement("div");
+        div.textContent = slot;
+
+        if (ocupados.includes(slot)) {
+            div.classList.add("slot","occupied");
+        } else {
+            div.classList.add("slot");
+
+            div.onclick = () => {
+                document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
+                div.classList.add("selected");
+                selectedTime = slot;
+            };
         }
 
-        checkboxes.forEach(cb => cb.addEventListener('change', updateFormState));
-        dateInput.addEventListener('change', updateFormState);
-        timeSelect.addEventListener('change', updateFormState);
+        container.appendChild(div);
+    });
+}
 
-        function sendToWhatsApp() {
-            const rawDate = dateInput.value; 
-            const time = timeSelect.value;
-            let selected = [];
-            let total = 0;
+document.getElementById("date").addEventListener("change", renderSlots);
 
-            checkboxes.forEach(cb => {
-                if (cb.checked) {
-                    selected.push(cb.value);
-                    total += parseInt(cb.getAttribute('data-price'));
-                }
-            });
+function enviarReserva() {
 
-            // Formato original sin transformaciones adicionales para detección de iOS
-            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍 Maceo 254 e/Cables y Angel Guerra%0A📅 Fecha/Hora: ${rawDate} ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${liveDuration.textContent}%0A💰 Total a pagar: $${total}`;
-            
-            window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
-        }
-    </script>
+    const fecha = document.getElementById("date").value;
+
+    if (!fecha || !selectedTime) {
+        alert("Selecciona fecha y hora");
+        return;
+    }
+
+    const msg = `¡Hola Félix!%0A%0AQuiero una cita en Mono's Barbería%0A📅 ${fecha} ${selectedTime}`;
+
+    window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
+}
+
+</script>
+
 </body>
-    </html>
+</html>
