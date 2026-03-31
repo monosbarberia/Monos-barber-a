@@ -89,13 +89,15 @@
             border: 1px solid rgba(203, 178, 106, 0.4);
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             position: relative;
         }
 
         .service-item input[type="checkbox"] {
             position: absolute;
             opacity: 0;
+            height: 0;
+            width: 0;
         }
 
         .service-item.selected {
@@ -121,6 +123,7 @@
             font-size: 1.1em;
             border-radius: 6px;
             outline: none;
+            appearance: none;
         }
 
         .live-summary {
@@ -154,14 +157,18 @@
             width: 100%;
             font-size: 1.3em;
             font-weight: bold;
+            font-family: 'Cormorant Garamond', serif;
             cursor: pointer;
             border-radius: 6px;
             margin-top: 25px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
         }
 
         .btn-submit:disabled {
             background-color: rgba(203, 178, 106, 0.2);
             color: rgba(203, 178, 106, 0.5);
+            cursor: not-allowed;
         }
 
         .whatsapp-float {
@@ -178,160 +185,170 @@
             align-items: center;
             text-decoration: none;
             font-size: 35px;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+    <div class="container">
+        <div class="logo-container">
+            <img src="logo.jpg" alt="Logo Mono's" class="logo-img">
+        </div>
 
-    <div class="logo-container">
-        <img src="logo.jpg" class="logo-img">
+        <div class="info-header">
+            <div class="subtitle">Luce limpio, fino, mono...</div>
+            <div class="address">Maceo 254 e/ Cables y Ángel Guerra<br>Holguín, Cuba</div>
+        </div>
+
+        <form id="bookingForm">
+            <h3 class="section-title">Servicios</h3>
+            <div class="service-list">
+                <label class="service-item">
+                    <span><input type="checkbox" name="service" value="Corte sencillo" data-price="200" class="main-cut"> Corte sencillo</span>
+                    <span>$200</span>
+                </label>
+                <label class="service-item">
+                    <span><input type="checkbox" name="service" value="Degradado" data-price="400" class="main-cut"> Degradado</span>
+                    <span>$400</span>
+                </label>
+                <label class="service-item">
+                    <span><input type="checkbox" name="service" value="Barba" data-price="100" class="addon"> Barba</span>
+                    <span>$100</span>
+                </label>
+                <label class="service-item">
+                    <span><input type="checkbox" name="service" value="Diseño" data-price="100" class="addon"> Diseño</span>
+                    <span>$100</span>
+                </label>
+                <label class="service-item">
+                    <span><input type="checkbox" name="service" value="Peinado" data-price="200" class="addon"> Peinado</span>
+                    <span>$200</span>
+                </label>
+            </div>
+
+            <h3 class="section-title">Cita</h3>
+            <div class="form-group">
+                <label>Fecha:</label>
+                <input type="date" id="date" required>
+            </div>
+
+            <div class="form-group">
+                <label>Hora:</label>
+                <select id="time" required disabled>
+                    <option value="">Selecciona fecha primero...</option>
+                </select>
+            </div>
+
+            <div class="live-summary">
+                <div>
+                    <div class="summary-label">Tiempo est.</div>
+                    <div id="live-duration">--</div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="summary-label">Total</div>
+                    <div class="summary-value" id="live-total">$0</div>
+                </div>
+            </div>
+
+            <button type="button" class="btn-submit" id="submitBtn" onclick="sendToWhatsApp()" disabled>Confirmar Reserva</button>
+        </form>
     </div>
 
-    <div class="info-header">
-        <div class="subtitle">Luce limpio, fino, mono...</div>
-        <div class="address">Maceo 254 e/ Cables y Ángel Guerra<br>Holguín, Cuba</div>
-    </div>
+    <a href="https://wa.me/5358592776" class="whatsapp-float" target="_blank">💬</a>
 
-    <form id="bookingForm">
+    <script>
+        const dateInput = document.getElementById('date');
+        const timeSelect = document.getElementById('time');
+        const checkboxes = document.querySelectorAll('input[name="service"]');
+        const submitBtn = document.getElementById('submitBtn');
+        const liveTotal = document.getElementById('live-total');
+        const liveDuration = document.getElementById('live-duration');
 
-        <h3 class="section-title">Servicios</h3>
+        dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
 
-        <div class="service-list">
-            <label class="service-item">
-                <input type="checkbox" value="Corte sencillo" data-price="200" class="main-cut">
-                <span>Corte sencillo</span><span>$200</span>
-            </label>
+        function updateFormState(e) {
+            if (e && e.target.classList.contains('main-cut') && e.target.checked) {
+                checkboxes.forEach(cb => {
+                    if (cb.classList.contains('main-cut') && cb !== e.target) cb.checked = false;
+                });
+            }
 
-            <label class="service-item">
-                <input type="checkbox" value="Degradado" data-price="400" class="main-cut">
-                <span>Degradado</span><span>$400</span>
-            </label>
+            let total = 0;
+            let selectedCount = 0;
+            let isDegradado = false;
+            let addonsCount = 0;
 
-            <label class="service-item">
-                <input type="checkbox" value="Barba" data-price="100" class="addon">
-                <span>Barba</span><span>$100</span>
-            </label>
+            checkboxes.forEach(cb => {
+                const parentLabel = cb.closest('.service-item');
+                if (cb.checked) {
+                    selectedCount++;
+                    total += parseInt(cb.getAttribute('data-price'));
+                    parentLabel.classList.add('selected');
+                    if (cb.value === "Degradado") isDegradado = true;
+                    if (cb.classList.contains('addon')) addonsCount++;
+                } else {
+                    parentLabel.classList.remove('selected');
+                }
+            });
 
-            <label class="service-item">
-                <input type="checkbox" value="Diseño" data-price="100" class="addon">
-                <span>Diseño</span><span>$100</span>
-            </label>
+            let durationText = "--";
+            if (selectedCount === 1) {
+                durationText = "30 minutos";
+            } else if (isDegradado && addonsCount === 3) {
+                durationText = "1 hora y 30 min";
+            } else if (selectedCount > 1) {
+                durationText = "1 hora aprox.";
+            }
 
-            <label class="service-item">
-                <input type="checkbox" value="Peinado" data-price="200" class="addon">
-                <span>Peinado</span><span>$200</span>
-            </label>
-        </div>
+            liveTotal.textContent = `$${total}`;
+            liveDuration.textContent = durationText;
 
-        <h3 class="section-title">Cita</h3>
-
-        <div class="form-group">
-            <label>Fecha:</label>
-            <input type="date" id="date" required>
-        </div>
-
-        <div class="form-group">
-            <label>Turno:</label>
-            <select id="time" required disabled>
-                <option value="">Selecciona fecha primero...</option>
-                <option value="Mañana">Mañana</option>
-                <option value="Tarde">Tarde</option>
-            </select>
-        </div>
-
-        <div class="live-summary">
-            <div>
-                <div class="summary-label">Tiempo est.</div>
-                <div id="live-duration">--</div>
-            </div>
-            <div>
-                <div class="summary-label">Total</div>
-                <div class="summary-value" id="live-total">$0</div>
-            </div>
-        </div>
-
-        <button type="button" id="submitBtn" class="btn-submit" onclick="sendToWhatsApp()" disabled>
-            Confirmar Reserva
-        </button>
-
-    </form>
-
-</div>
-
-<a href="https://wa.me/5358592776" class="whatsapp-float">💬</a>
-
-<script>
-const dateInput = document.getElementById('date');
-const timeSelect = document.getElementById('time');
-const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-const submitBtn = document.getElementById('submitBtn');
-const liveTotal = document.getElementById('live-total');
-const liveDuration = document.getElementById('live-duration');
-
-dateInput.min = new Date().toISOString().split('T')[0];
-
-function updateFormState(e) {
-
-    if (e && e.target.classList.contains('main-cut') && e.target.checked) {
-        checkboxes.forEach(cb => {
-            if (cb.classList.contains('main-cut') && cb !== e.target) cb.checked = false;
-        });
-    }
-
-    let total = 0;
-    let count = 0;
-
-    checkboxes.forEach(cb => {
-        const label = cb.closest('.service-item');
-        if (cb.checked) {
-            total += parseInt(cb.dataset.price);
-            count++;
-            label.classList.add('selected');
-        } else {
-            label.classList.remove('selected');
+            if (dateInput.value) {
+                const selectedDate = new Date(dateInput.value + 'T00:00:00');
+                if (selectedDate.getDay() === 0) {
+                    timeSelect.innerHTML = '<option value="">Cerrado Domingos</option>';
+                    timeSelect.disabled = true;
+                } else {
+                    timeSelect.disabled = false;
+                    const currentValue = timeSelect.value;
+                    const allSlots = ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM","04:30 PM","05:00 PM"];
+                    
+                    timeSelect.innerHTML = '<option value="">Elegir hora...</option>';
+                    allSlots.forEach(slot => {
+                        if (selectedCount > 1 && slot === "12:00 PM") return; 
+                        const opt = document.createElement('option');
+                        opt.value = slot; opt.textContent = slot;
+                        if (slot === currentValue) opt.selected = true;
+                        timeSelect.appendChild(opt);
+                    });
+                }
+            }
+            submitBtn.disabled = !(selectedCount > 0 && dateInput.value && timeSelect.value);
         }
-    });
 
-    liveTotal.textContent = `$${total}`;
-    liveDuration.textContent = count > 1 ? "1 hora aprox." : "30 minutos";
+        checkboxes.forEach(cb => cb.addEventListener('change', updateFormState));
+        dateInput.addEventListener('change', updateFormState);
+        timeSelect.addEventListener('change', updateFormState);
 
-    if (dateInput.value) {
-        const d = new Date(dateInput.value + 'T00:00:00');
+        function sendToWhatsApp() {
+            const rawDate = dateInput.value; 
+            const time = timeSelect.value;
+            let selected = [];
+            let total = 0;
 
-        if (d.getDay() === 0) {
-            timeSelect.innerHTML = '<option>Cerrado Domingos</option>';
-            timeSelect.disabled = true;
-        } else {
-            timeSelect.disabled = false;
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    selected.push(cb.value);
+                    total += parseInt(cb.getAttribute('data-price'));
+                }
+            });
+
+            // Formato original sin transformaciones adicionales para detección de iOS
+            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍 Maceo 254 e/Cables y Angel Guerra%0A📅 Fecha/Hora: ${rawDate} ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${liveDuration.textContent}%0A💰 Total a pagar: $${total}`;
+            
+            window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
-    }
-
-    submitBtn.disabled = !(count > 0 && dateInput.value && timeSelect.value);
-}
-
-checkboxes.forEach(cb => cb.addEventListener('change', updateFormState));
-dateInput.addEventListener('change', updateFormState);
-timeSelect.addEventListener('change', updateFormState);
-
-function sendToWhatsApp() {
-
-    let servicios = [];
-    let total = 0;
-
-    checkboxes.forEach(cb => {
-        if (cb.checked) {
-            servicios.push(cb.value);
-            total += parseInt(cb.dataset.price);
-        }
-    });
-
-    const msg = `Hola Félix!%0A%0AQuiero una cita en Mono's Barbería%0A📅 ${dateInput.value} (${timeSelect.value})%0A✂️ ${servicios.join(', ')}%0A💰 Total: $${total}`;
-
-    window.open(`https://wa.me/5358592776?text=${msg}`);
-}
-</script>
-
+    </script>
 </body>
-</html>
+    </html>
