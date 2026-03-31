@@ -234,7 +234,7 @@
             </div>
 
             <div class="form-group">
-                <label>Hora:</label>
+                <label>Horario:</label>
                 <select id="time" required disabled>
                     <option value="">Selecciona fecha primero...</option>
                 </select>
@@ -251,7 +251,7 @@
                 </div>
             </div>
 
-            <button type="button" class="btn-submit" id="submitBtn" onclick="sendToWhatsApp()" disabled>Confirmar Reserva</button>
+            <button type="button" class="btn-submit" id="submitBtn" onclick="sendToWhatsApp()" disabled>Pedir Cita</button>
         </form>
     </div>
 
@@ -312,11 +312,10 @@
                 } else {
                     timeSelect.disabled = false;
                     const currentValue = timeSelect.value;
-                    const allSlots = ["09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "12:00 PM", "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", "04:00 PM","04:30 PM","05:00 PM"];
+                    const allSlots = ["Mañana", "Tarde"];
                     
-                    timeSelect.innerHTML = '<option value="">Elegir hora...</option>';
+                    timeSelect.innerHTML = '<option value="">Elegir turno...</option>';
                     allSlots.forEach(slot => {
-                        if (selectedCount > 1 && slot === "12:00 PM") return; 
                         const opt = document.createElement('option');
                         opt.value = slot; opt.textContent = slot;
                         if (slot === currentValue) opt.selected = true;
@@ -344,11 +343,11 @@
                 }
             });
 
-            // Formato original sin transformaciones adicionales para detección de iOS
-            const msg = `¡Hola Félix!%0A%0AQuiero una cita en *Mono's Barbería*%0A%0A📍 Maceo 254 e/Cables y Angel Guerra%0A📅 Fecha/Hora: ${rawDate} ${time}%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración: ${liveDuration.textContent}%0A💰 Total a pagar: $${total}`;
+            // Formato actualizado para solicitar turno y confirmar hora
+            const msg = `¡Hola Félix!%0A%0AQuiero pedir una cita en *Mono's Barbería*%0A%0A📍 Maceo 254 e/Cables y Angel Guerra%0A📅 Fecha: ${rawDate}%0A⏰ Turno: Por la ${time.toLowerCase()} (Quedo a la espera de que me confirmes la hora exacta)%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración est.: ${liveDuration.textContent}%0A💰 Total a pagar: $${total}`;
             
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
     </script>
 </body>
-    </html>
+</html>
