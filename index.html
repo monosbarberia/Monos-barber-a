@@ -49,7 +49,7 @@
             text-align: center;
             margin-bottom: 30px;
             border-bottom: 1px solid var(--elegant-gold);
-            padding-bottom: 20px;
+            padding-bottom: 25px;
         }
 
         .subtitle {
@@ -64,6 +64,33 @@
             margin: 10px 0;
             letter-spacing: 1px;
             line-height: 1.4;
+        }
+
+        /* Estilos para los botones sociales */
+        .social-links {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .social-btn {
+            text-decoration: none;
+            color: var(--elegant-gold);
+            border: 1px solid var(--elegant-gold);
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            font-family: 'Cormorant Garamond', serif;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .social-btn:hover {
+            background-color: var(--elegant-gold);
+            color: var(--dark-forest-green);
         }
 
         .section-title {
@@ -200,6 +227,11 @@
         <div class="info-header">
             <div class="subtitle">Luce limpio, fino, mono...</div>
             <div class="address">Maceo 254 e/ Cables y Ángel Guerra<br>Holguín, Cuba</div>
+            
+            <div class="social-links">
+                <a href="https://www.facebook.com/profile.php?id=61550881144010&mibextid=wwXIfr&mibextid=wwXIfr" class="social-btn" target="_blank">Facebook</a>
+                <a href="https://www.instagram.com/monos_barberia_holguin?igsh=enRpZmZ1ZmRtMWhq&utm_source=qr" class="social-btn" target="_blank">Instagram</a>
+            </div>
         </div>
 
         <form id="bookingForm">
@@ -312,7 +344,7 @@
                 } else {
                     timeSelect.disabled = false;
                     const currentValue = timeSelect.value;
-                    const allSlots = ["Mañana", "Tarde"];
+                    const allSlots = ["Mañana", "Tarde", "Cualquier horario"];
                     
                     timeSelect.innerHTML = '<option value="">Elegir turno...</option>';
                     allSlots.forEach(slot => {
@@ -343,8 +375,12 @@
                 }
             });
 
-            // Formato actualizado para solicitar turno y confirmar hora
-            const msg = `¡Hola Félix!%0A%0AQuiero pedir una cita en *Mono's Barbería*%0A%0A📍 Maceo 254 e/Cables y Angel Guerra%0A📅 Fecha: ${rawDate}%0A⏰ Turno: Por la ${time.toLowerCase()} (Quedo a la espera de que me confirmes la hora exacta)%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración est.: ${liveDuration.textContent}%0A💰 Total a pagar: $${total}`;
+            // Ajuste de texto para que suene natural en español
+            let turnoTexto = time === "Cualquier horario" 
+                ? "Cualquier horario" 
+                : `Por la ${time.toLowerCase()}`;
+
+            const msg = `¡Hola Félix!%0A%0AQuiero pedir una cita en *Mono's Barbería*%0A%0A📍 Maceo 254 e/Cables y Angel Guerra%0A📅 Fecha: ${rawDate}%0A⏰ Turno: ${turnoTexto} (Quedo a la espera de que me confirmes la hora exacta)%0A✂️ Servicio: ${selected.join(', ')}%0A⏳ Duración est.: ${liveDuration.textContent}%0A💰 Total a pagar: $${total}`;
             
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
