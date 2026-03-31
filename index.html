@@ -4,12 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mono's Barbería Holguín - Reservas</title>
+    
+    <meta property="og:title" content="Mono's Barbería - Reservas">
+    <meta property="og:description" content="Luce limpio, fino, mono... Reserva tu cita en Holguín.">
+    <meta property="og:image" content="logo.jpeg">
+    
+    <link rel="icon" type="image/jpeg" href="logo.jpeg">
+    
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --dark-forest-green: #1c3823;
             --elegant-gold: #cbb26a; 
             --elegant-gold-hover: #e0cca0;
+        }
+
+        /* Animación de entrada */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         body {
@@ -32,6 +45,7 @@
             box-sizing: border-box;
             background-color: var(--dark-forest-green);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            animation: fadeInUp 0.8s ease-out; /* Aplicando la animación */
         }
 
         .logo-container {
@@ -66,7 +80,6 @@
             line-height: 1.4;
         }
 
-        /* Estilos para los botones sociales */
         .social-links {
             margin-top: 15px;
             display: flex;
@@ -229,8 +242,8 @@
             <div class="address">Maceo 254 e/ Cables y Ángel Guerra<br>Holguín, Cuba</div>
             
             <div class="social-links">
-                <a href="https://www.facebook.com/profile.php?id=61550881144010&mibextid=wwXIfr&mibextid=wwXIfr" class="social-btn" target="_blank">Facebook</a>
-                <a href="https://www.instagram.com/monos_barberia_holguin?igsh=enRpZmZ1ZmRtMWhq&utm_source=qr" class="social-btn" target="_blank">Instagram</a>
+                <a href="https://www.facebook.com/profile.php?id=61550881144010" class="social-btn" target="_blank">Facebook</a>
+                <a href="https://www.instagram.com/monos_barberia_holguin" class="social-btn" target="_blank">Instagram</a>
             </div>
         </div>
 
@@ -375,7 +388,6 @@
                 }
             });
 
-            // Ajuste de texto para que suene natural en español
             let turnoTexto = time === "Cualquier horario" 
                 ? "Cualquier horario" 
                 : `Por la ${time.toLowerCase()}`;
