@@ -59,7 +59,6 @@
         .subtitle { font-style: italic; font-size: 1.3em; margin: 5px 0; opacity: 0.9; }
         .address { font-size: 1.1em; margin: 10px 0; letter-spacing: 1px; line-height: 1.4; }
 
-        /* Estilo mejorado para el botón del mapa */
         .map-link {
             display: inline-block;
             color: var(--elegant-gold);
@@ -99,6 +98,7 @@
         }
 
         .service-list { display: flex; flex-direction: column; gap: 12px; }
+        
         .service-item {
             display: flex;
             justify-content: space-between;
@@ -113,7 +113,13 @@
         }
 
         .service-item input[type="checkbox"] { position: absolute; opacity: 0; }
-        .service-item.selected { background-color: var(--elegant-gold); color: var(--dark-forest-green); font-weight: bold; }
+        
+        /* Estilo activo cuando se selecciona el servicio */
+        .service-item.selected { 
+            background-color: var(--elegant-gold); 
+            color: var(--dark-forest-green); 
+            font-weight: bold; 
+        }
 
         .form-group { margin: 25px 0; display: flex; flex-direction: column; gap: 8px; }
         input[type="date"], select {
@@ -190,7 +196,7 @@
             <div class="subtitle">Luce limpio, fino, mono...</div>
             <div class="address">Maceo 254 e/ Cables y Ángel Guerra<br>Holguín, Cuba</div>
             
-            <a href="https://www.google.com/maps/search/?api=1&query=Monos+Barberia+Holguin" target="_blank" class="map-link">📍 Ver ubicación exacta</a>
+            <a href="https://www.google.com/maps/search/?api=1&query=Monos+Barberia+Holguin" target="_blank" class="map-link">Ver ubicación</a>
             
             <div class="social-links">
                 <a href="https://www.facebook.com/profile.php?id=61550881144010" class="social-btn" target="_blank">Facebook</a>
@@ -248,7 +254,7 @@
             </div>
 
             <div class="terms-box">
-                <strong style="display: block; margin-bottom: 5px;">📌 Compromiso de puntualidad:</strong>
+                <strong style="display: block; margin-bottom: 5px;">Términos de reserva:</strong>
                 Para respetar el tiempo de todos, agradecemos llegar puntual. Si no puedes asistir, infórmanos con antelación para ceder el turno.
                 <label class="checkbox-container">
                     <input type="checkbox" id="acceptTerms"> He leído y acepto las condiciones
@@ -262,6 +268,7 @@
     <a href="https://wa.me/5358592776" class="whatsapp-float" target="_blank">💬</a>
 
     <script>
+        // Referencias a los elementos del formulario
         const dateInput = document.getElementById('date');
         const timeSelect = document.getElementById('time');
         const checkboxes = document.querySelectorAll('input[name="service"]');
@@ -270,9 +277,26 @@
         const liveTotal = document.getElementById('live-total');
         const liveDuration = document.getElementById('live-duration');
 
-        dateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
+        // Configurar la fecha mínima al día de hoy
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        dateInput.setAttribute('min', `${yyyy}-${mm}-${dd}`);
 
-        function updateFormState() {
+        // Función principal que actualiza toda la página en vivo
+        function updateFormState(e) {
+            
+            // 1. Evitar que se seleccionen "Corte sencillo" y "Degradado" a la vez
+            if (e && e.target && e.target.classList && e.target.classList.contains('main-cut') && e.target.checked) {
+                checkboxes.forEach(cb => {
+                    if (cb.classList.contains('main-cut') && cb !== e.target) {
+                        cb.checked = false; // Desmarcar el otro corte principal
+                    }
+                });
+            }
+
+            // 2. Calcular los totales y pintar los botones dorados
             let total = 0;
             let selectedCount = 0;
             let isDegradado = false;
@@ -283,31 +307,80 @@
                 if (cb.checked) {
                     selectedCount++;
                     total += parseInt(cb.getAttribute('data-price'));
-                    parentLabel.classList.add('selected');
+                    parentLabel.classList.add('selected'); // Pintar dorado
                     if (cb.value === "Degradado") isDegradado = true;
                     if (cb.classList.contains('addon')) addonsCount++;
                 } else {
-                    parentLabel.classList.remove('selected');
+                    parentLabel.classList.remove('selected'); // Quitar dorado
                 }
             });
 
+            // 3. Calcular duración estimada
             let durationText = "--";
             if (selectedCount === 1) durationText = "30 minutos";
             else if (isDegradado && addonsCount === 3) durationText = "1 hora y 30 min";
             else if (selectedCount > 1) durationText = "1 hora aprox.";
 
+            // 4. Mostrar valores en pantalla
             liveTotal.textContent = `$${total}`;
             liveDuration.textContent = durationText;
 
+            // 5. Configurar opciones del horario dependiendo de la fecha
             if (dateInput.value) {
-                timeSelect.disabled = false;
-                if (timeSelect.options.length <= 1) {
-                    ["Mañana", "Tarde", "Cualquier horario"].forEach(slot => {
+                const selectedDate = new Date(dateInput.value + 'T00:00:00');
+                if (selectedDate.getDay() === 0) { // El día 0 es el domingo
+                    timeSelect.innerHTML = '<option value="">Cerrado Domingos</option>';
+                    timeSelect.disabled = true;
+                } else {
+                    timeSelect.disabled = false;
+                    const currentValue = timeSelect.value;
+                    const allSlots = ["Mañana", "Tarde", "Cualquier horario"];
+                    
+                    // Llenar el select con las opciones frescas cada vez
+                    timeSelect.innerHTML = '<option value="">Elegir turno...</option>';
+                    allSlots.forEach(slot => {
                         const opt = document.createElement('option');
-                        opt.value = slot; opt.textContent = slot;
+                        opt.value = slot; 
+                        opt.textContent = slot;
+                        if (slot === currentValue) opt.selected = true; // Mantener seleccionado si el cliente ya eligió
                         timeSelect.appendChild(opt);
                     });
                 }
+            } else {
+                timeSelect.innerHTML = '<option value="">Selecciona fecha primero...</option>';
+                timeSelect.disabled = true;
             }
 
-            submitBtn.disabled = !(selectedCount >
+            // 6. Habilitar o Deshabilitar el botón de enviar WhatsApp final
+            submitBtn.disabled = !(selectedCount > 0 && dateInput.value && timeSelect.value && acceptTerms.checked);
+        }
+
+        // Agregar los "escuchadores" de eventos para que la función se active al hacer clic
+        checkboxes.forEach(cb => cb.addEventListener('change', updateFormState));
+        dateInput.addEventListener('change', updateFormState);
+        timeSelect.addEventListener('change', updateFormState);
+        acceptTerms.addEventListener('change', updateFormState);
+
+        // Preparar y enviar el mensaje final
+        function sendToWhatsApp() {
+            const rawDate = dateInput.value; 
+            const time = timeSelect.value;
+            let selected = [];
+            let total = 0;
+            
+            checkboxes.forEach(cb => { 
+                if (cb.checked) { 
+                    selected.push(cb.value); 
+                    total += parseInt(cb.getAttribute('data-price')); 
+                } 
+            });
+            
+            let turnoTexto = time === "Cualquier horario" ? "Cualquier horario" : `Por la ${time.toLowerCase()}`;
+            
+            const msg = `¡Hola Félix!%0A%0AQuiero pedir una cita en *Mono's Barbería*%0A%0A📅 Fecha: ${rawDate}%0A⏰ Turno: ${turnoTexto}%0A✂️ Servicio: ${selected.join(', ')}%0A💰 Total: $${total}`;
+            
+            window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
+        }
+    </script>
+</body>
+</html>
