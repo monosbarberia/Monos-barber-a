@@ -392,7 +392,7 @@
             let turnoTexto = time === "Cualquier horario" ? "Cualquier horario" : `Por la ${time.toLowerCase()}`;
             turnoTexto += " (Quedo a la espera de que me confirmes la hora exacta)";
             
-            const msg = `¡Hola Félix!%0AQuiero pedir una cita en%0A*Mono's Barbería Holguín*%0A%0A📍Dirección: Maceo 254 e/ Cables y Ángel Guerra%0A📅 Fecha: ${rawDate}%0A⏰ Turno: ${turnoTexto}%0A✂️ Servicio: ${selected.join(', ')}%0A⏱️ Duración apróx: ${duration}%0A💰 Total: $${total}`;
+            const msg = `¡Hola Félix!%0AQuiero pedir una cita en%0A*Mono's Barbería Holguín*%0A%0A📍Dirección: Maceo 254 e/ Cables y Ángel Guerra%0A📅 Fecha: ${rawDate}%0A⏰ Horario: ${turnoTexto}%0A✂️ Servicio: ${selected.join(', ')}%0A⏱️ Duración apróx: ${duration}%0A💰 Total a pagar: $${total}`;
             
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
