@@ -282,7 +282,6 @@
     <a href="https://wa.me/5358592776" class="whatsapp-float" target="_blank">💬</a>
 
     <script>
-        // Referencias a los elementos del formulario
         const dateInput = document.getElementById('date');
         const timeSelect = document.getElementById('time');
         const checkboxes = document.querySelectorAll('input[name="service"]');
@@ -291,17 +290,13 @@
         const liveTotal = document.getElementById('live-total');
         const liveDuration = document.getElementById('live-duration');
 
-        // Configurar la fecha mínima al día de hoy
         const today = new Date();
         const yyyy = today.getFullYear();
         const mm = String(today.getMonth() + 1).padStart(2, '0');
         const dd = String(today.getDate()).padStart(2, '0');
         dateInput.setAttribute('min', `${yyyy}-${mm}-${dd}`);
 
-        // Función principal que actualiza toda la página en vivo
         function updateFormState(e) {
-            
-            // 1. Evitar que se seleccionen "Corte sencillo" y "Degradado" a la vez
             if (e && e.target && e.target.classList && e.target.classList.contains('main-cut') && e.target.checked) {
                 checkboxes.forEach(cb => {
                     if (cb.classList.contains('main-cut') && cb !== e.target) {
@@ -310,7 +305,6 @@
                 });
             }
 
-            // 2. Calcular los totales
             let total = 0;
             let selectedCount = 0;
             let isDegradado = false;
@@ -329,17 +323,14 @@
                 }
             });
 
-            // 3. Calcular duración estimada
             let durationText = "--";
             if (selectedCount === 1) durationText = "30 minutos";
             else if (isDegradado && addonsCount === 3) durationText = "1 hora y 30 min";
             else if (selectedCount > 1) durationText = "1 hora aprox.";
 
-            // 4. Mostrar valores en pantalla
             liveTotal.textContent = `$${total}`;
             liveDuration.textContent = durationText;
 
-            // 5. Configurar opciones del horario
             if (dateInput.value) {
                 const selectedDate = new Date(dateInput.value + 'T00:00:00');
                 if (selectedDate.getDay() === 0) { 
@@ -364,7 +355,6 @@
                 timeSelect.disabled = true;
             }
 
-            // 6. Habilitar o Deshabilitar el botón
             submitBtn.disabled = !(selectedCount > 0 && dateInput.value && timeSelect.value && acceptTerms.checked);
         }
 
@@ -373,12 +363,23 @@
         timeSelect.addEventListener('change', updateFormState);
         acceptTerms.addEventListener('change', updateFormState);
 
-        // Preparar y enviar el mensaje final
         function sendToWhatsApp() {
             const rawDate = dateInput.value; 
             const time = timeSelect.value;
             const duration = liveDuration.textContent; 
             
+            // --- NUEVA LÓGICA DE FECHA FORMATEADA ---
+            const dateParts = rawDate.split('-'); // Separa el YYYY-MM-DD
+            const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+            
+            // Obtener el día de la semana (ej: jueves)
+            const options = { weekday: 'long' };
+            const dayName = new Intl.DateTimeFormat('es-ES', options).format(dateObj);
+            
+            // Formato final: jueves 02-04-2026
+            const formattedDate = `${dayName} ${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+            // ----------------------------------------
+
             let selected = [];
             let total = 0;
             
@@ -392,7 +393,7 @@
             let turnoTexto = time === "Cualquier horario" ? "Cualquier horario" : `Por la ${time.toLowerCase()}`;
             turnoTexto += " (Quedo a la espera de que me confirmes la hora exacta)";
             
-            const msg = `¡Hola Félix!%0AQuiero pedir una cita en%0A*Mono's Barbería Holguín*%0A%0A📍Dirección: Maceo 254 e/ Cables y Ángel Guerra%0A📅 Fecha: ${rawDate}%0A⏰ Horario: ${turnoTexto}%0A✂️ Servicio: ${selected.join(', ')}%0A⏱️ Duración apróx: ${duration}%0A💰 Total a pagar: $${total}`;
+            const msg = `¡Hola Félix!%0AQuiero pedir una cita en%0A*Mono's Barbería Holguín*%0A%0A📍Dirección: Maceo 254 e/ Cables y Ángel Guerra%0A📅 Fecha: ${formattedDate}%0A⏰ Horario: ${turnoTexto}%0A✂️ Servicio: ${selected.join(', ')}%0A⏱️ Duración apróx: ${duration}%0A💰 Total a pagar: $${total}`;
             
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
