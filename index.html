@@ -1,402 +1,169 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Mono's Barbería | Cortes Clásicos y Reserva Online</title>
-<meta name="description" content="Bienvenido a Mono's Barbería. Especialistas en cortes de caballero, barbas y estilo vintage. Reserva tu cita fácilmente desde nuestra web.">
-<meta name="keywords" content="barbería, corte de cabello, Mono's Barbería, barbero, reserva de citas, barber shop">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mono's Barbería | Cortes Clásicos y Reserva Online</title>
+
+<meta name="description" content="Especialistas en cortes de caballero y degradados en Holguín. Reserva fácil y rápido.">
 <meta name="author" content="Félix">
 
-<meta property="og:title" content="Mono's Barbería">
-<meta property="og:description" content="Agenda tu cita para un corte de nivel profesional.">
-<meta property="og:image" content="https://monosbarberia.github.io/Monos-barber-a/logo.jpg">
-<meta property="og:url" content="https://monosbarberia.github.io/Monos-barber-a/">
+<link rel="icon" href="favicon.jpg">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&display=swap" rel="stylesheet">
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mono's Barbería Holguín - Reservas</title>
-    
-    <meta property="og:title" content="Mono's Barbería - Reservas">
-    <meta property="og:description" content="Luce limpio, fino, mono... Reserva tu cita en Holguín.">
-    <meta property="og:image" content="m-logo.png">
-    
-    <link rel="icon" type="image/png" sizes="520x520" href="favicon.jpg">
-    <link rel="apple-touch-icon" sizes="520x520" href="favicon.jpg">
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --dark-forest-green: #1c3823;
-            --elegant-gold: #cbb26a; 
-            --elegant-gold-hover: #e0cca0;
-        }
+<style>
+:root {
+    --green: #1c3823;
+    --gold: #cbb26a;
+}
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+body {
+    background-color: var(--green);
+    color: var(--gold);
+    font-family: 'Cormorant Garamond', serif;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
 
-        body {
-            background-color: var(--dark-forest-green);
-            color: var(--elegant-gold);
-            font-family: 'Cormorant Garamond', serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+.container {
+    max-width: 500px;
+    width: 100%;
+    border: 2px solid var(--gold);
+    padding: 30px;
+    border-radius: 10px;
+}
 
-        .container {
-            max-width: 500px;
-            width: 100%;
-            border: 2px solid var(--elegant-gold);
-            padding: 40px 30px;
-            border-radius: 12px;
-            box-sizing: border-box;
-            background-color: var(--dark-forest-green);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            animation: fadeInUp 0.8s ease-out;
-        }
+.logo-container {
+    text-align: center;
+}
 
-        /* --- MODIFICACIÓN: Logo más grande --- */
-        .logo-container { text-align: center; margin-bottom: 15px; }
-        .logo-img { max-width: 320px; width: 100%; height: auto; }
+.logo-img {
+    width: 100%;
+    max-width: 300px;
+}
 
-        .info-header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 1px solid rgba(203, 178, 106, 0.3);
-            padding-bottom: 25px;
-        }
+.subtitle {
+    text-align: center;
+    font-style: italic;
+}
 
-        .subtitle { font-style: italic; font-size: 1.3em; margin: 5px 0; opacity: 0.9; }
-        .address { font-size: 1.1em; margin: 15px 0; letter-spacing: 1px; line-height: 1.4; }
+.address {
+    text-align: center;
+    margin: 10px 0;
+}
 
-        /* --- MODIFICACIÓN: Botones minimalistas y uniformes --- */
-        .action-links { 
-            margin-top: 20px; 
-            display: flex; 
-            justify-content: center; 
-            gap: 10px; 
-            width: 100%;
-        }
-        
-        .action-btn {
-            flex: 1; /* Hace que todos ocupen el mismo ancho */
-            text-decoration: none;
-            color: var(--elegant-gold);
-            border: 1px solid var(--elegant-gold);
-            padding: 8px 5px;
-            border-radius: 4px; /* Bordes menos redondeados para un look minimalista */
-            font-size: 0.85em;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            text-align: center;
-        }
-        
-        .action-btn:hover { 
-            background-color: var(--elegant-gold); 
-            color: var(--dark-forest-green); 
-        }
+.section-title {
+    text-align: center;
+    margin-top: 30px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 5px;
+}
 
-        /* --- MODIFICACIÓN: Títulos de sección --- */
-        .section-title {
-            font-size: 1.3em;
-            margin-top: 35px;
-            border-bottom: 1px solid rgba(203, 178, 106, 0.2); /* Línea sólida y sutil */
-            padding-bottom: 8px;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-align: center;
-        }
+.gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
 
-        .service-list { display: flex; flex-direction: column; gap: 12px; }
-        
-        .service-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.2em;
-            padding: 15px 20px;
-            border: 1px solid rgba(203, 178, 106, 0.4);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-        }
+.gallery img {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--gold);
+}
 
-        .service-item input[type="checkbox"] { position: absolute; opacity: 0; }
-        
-        .service-item.selected { 
-            background-color: var(--elegant-gold); 
-            color: var(--dark-forest-green); 
-            font-weight: bold; 
-        }
+/* Servicios */
+.service-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border: 1px solid var(--gold);
+    margin-top: 10px;
+    cursor: pointer;
+}
 
-        .form-group { margin: 20px 0; display: flex; flex-direction: column; gap: 8px; }
-        input[type="date"], select {
-            background-color: transparent;
-            color: var(--elegant-gold);
-            border: 1px solid var(--elegant-gold);
-            padding: 15px;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1em;
-            border-radius: 6px;
-            outline: none;
-            cursor: pointer;
-        }
+/* Botón */
+.btn-submit {
+    width: 100%;
+    padding: 15px;
+    background: var(--gold);
+    color: var(--green);
+    border: none;
+    margin-top: 20px;
+    font-size: 18px;
+    cursor: pointer;
+}
 
-        .terms-box {
-            background-color: rgba(0,0,0,0.2);
-            border: 1px solid rgba(203, 178, 106, 0.3);
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 25px;
-            font-size: 0.95em;
-            line-height: 1.4;
-        }
-
-        .checkbox-container {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-top: 12px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .checkbox-container input { width: 18px; height: 18px; cursor: pointer; accent-color: var(--elegant-gold); }
-
-        .live-summary {
-            background-color: rgba(0,0,0,0.2);
-            padding: 15px 20px;
-            border-radius: 6px;
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 3px solid var(--elegant-gold);
-        }
-
-        .btn-submit {
-            background-color: var(--elegant-gold);
-            color: var(--dark-forest-green);
-            border: none;
-            padding: 18px;
-            width: 100%;
-            font-size: 1.3em;
-            font-weight: bold;
-            font-family: 'Cormorant Garamond', serif;
-            cursor: pointer;
-            border-radius: 6px;
-            margin-top: 25px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-submit:disabled { background-color: rgba(203, 178, 106, 0.15); color: rgba(203, 178, 106, 0.4); cursor: not-allowed; }
-        .whatsapp-float { position: fixed; bottom: 25px; right: 25px; background-color: #25D366; color: white; border-radius: 50%; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; text-decoration: none; font-size: 30px; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: transform 0.3s; }
-        .whatsapp-float:hover { transform: scale(1.1); }
-    </style>
+/* WhatsApp */
+.whatsapp {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #25D366;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 30px;
+    text-decoration: none;
+}
+</style>
 </head>
+
 <body>
 
-    <div class="container">
-        <div class="logo-container">
-            <img src="logo.png" alt="Logo Mono's" class="logo-img">
-        </div>
+<div class="container">
 
-        <div class="info-header">
-            <div class="subtitle">Luce limpio, fino, mono...</div>
-            <div class="address">Maceo 254 e/ Cables y Ángel Guerra<br>Holguín, Cuba</div>
-            
-            <div class="action-links">
-                <a href="https://www.google.com/maps/search/?api=1&query=Monos+Barberia+Holguin" target="_blank" class="action-btn"> Mapa</a>
-                <a href="https://www.facebook.com/profile.php?id=61550881144010" class="action-btn" target="_blank">Facebook</a>
-                <a href="https://www.instagram.com/monos_barberia_holguin" class="action-btn" target="_blank">Instagram</a>
-            </div>
-        </div>
+<div class="logo-container">
+<img src="logo.png" class="logo-img">
+</div>
 
-        <form id="bookingForm">
-            <h3 class="section-title">Elige tu servicio</h3>
-            <div class="service-list">
-                <label class="service-item">
-                    <span><input type="checkbox" name="service" value="Corte sencillo" data-price="200" class="main-cut"> Corte sencillo</span>
-                    <span>$200</span>
-                </label>
-                <label class="service-item">
-                    <span><input type="checkbox" name="service" value="Degradado" data-price="400" class="main-cut"> Degradado</span>
-                    <span>$400</span>
-                </label>
-                <label class="service-item">
-                    <span><input type="checkbox" name="service" value="Barba" data-price="100" class="addon"> Barba</span>
-                    <span>$100</span>
-                </label>
-                <label class="service-item">
-                    <span><input type="checkbox" name="service" value="Diseño" data-price="100" class="addon"> Diseño</span>
-                    <span>$100</span>
-                </label>
-                <label class="service-item">
-                    <span><input type="checkbox" name="service" value="Peinado" data-price="200" class="addon"> Peinado</span>
-                    <span>$200</span>
-                </label>
-            </div>
+<p class="subtitle">Luce limpio, fino, mono...</p>
+<p class="address">Holguín, Cuba</p>
 
-            <h3 class="section-title">Elige la fecha</h3>
-            <div class="form-group">
-                <input type="date" id="date" required>
-            </div>
+<!-- GALERÍA -->
+<h3 class="section-title">Trabajos realizados</h3>
 
-            <div class="form-group">
-                <select id="time" required disabled>
-                    <option value="">Selecciona fecha primero...</option>
-                </select>
-            </div>
+<div class="gallery">
+    <img src="corte1.jpg">
+    <img src="corte2.jpg">
+</div>
 
-            <div class="live-summary">
-                <div>
-                    <div style="font-style: italic; opacity: 0.8; font-size: 0.9em;">Tiempo est.</div>
-                    <div id="live-duration">--</div>
-                </div>
-                <div style="text-align: right;">
-                    <div style="font-style: italic; opacity: 0.8; font-size: 0.9em;">Total</div>
-                    <div style="font-weight: bold; font-size: 1.3em;" id="live-total">$0</div>
-                </div>
-            </div>
+<!-- SERVICIOS -->
+<h3 class="section-title">Servicios</h3>
 
-            <div class="terms-box">
-                <strong style="display: block; margin-bottom: 5px;">Términos de reserva:</strong>
-                Para respetar el tiempo de todos, agradecemos que llegue puntual. Si no puede asistir, infórmanos con antelación para ceder el turno; de no hacerlo se le COBRARÁ en la próxima cita como si se le hubiera realizado el servicio.
-                <label class="checkbox-container">
-                    <input type="checkbox" id="acceptTerms"> He leído y acepto las condiciones
-                </label>
-            </div>
+<div class="service-item">
+<span>Corte sencillo</span>
+<span>$200</span>
+</div>
 
-            <button type="button" class="btn-submit" id="submitBtn" onclick="sendToWhatsApp()" disabled>Solicitar Cita</button>
-        </form>
-    </div>
+<div class="service-item">
+<span>Degradado</span>
+<span>$400</span>
+</div>
 
-    <a href="https://wa.me/5358592776" class="whatsapp-float" target="_blank">💬</a>
+<div class="service-item">
+<span>Barba</span>
+<span>$100</span>
+</div>
 
-    <script>
-        const dateInput = document.getElementById('date');
-        const timeSelect = document.getElementById('time');
-        const checkboxes = document.querySelectorAll('input[name="service"]');
-        const acceptTerms = document.getElementById('acceptTerms');
-        const submitBtn = document.getElementById('submitBtn');
-        const liveTotal = document.getElementById('live-total');
-        const liveDuration = document.getElementById('live-duration');
+<button class="btn-submit" onclick="reservar()">Reservar por WhatsApp</button>
 
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        dateInput.setAttribute('min', `${yyyy}-${mm}-${dd}`);
+</div>
 
-        function updateFormState(e) {
-            if (e && e.target && e.target.classList && e.target.classList.contains('main-cut') && e.target.checked) {
-                checkboxes.forEach(cb => {
-                    if (cb.classList.contains('main-cut') && cb !== e.target) {
-                        cb.checked = false; 
-                    }
-                });
-            }
+<a href="https://wa.me/5358592776" class="whatsapp">💬</a>
 
-            let total = 0;
-            let selectedCount = 0;
-            let isDegradado = false;
-            let addonsCount = 0;
+<script>
+function reservar() {
+    let msg = "Hola Félix, quiero reservar una cita en Mono's Barbería";
+    window.open("https://wa.me/5358592776?text=" + encodeURIComponent(msg));
+}
+</script>
 
-            checkboxes.forEach(cb => {
-                const parentLabel = cb.closest('.service-item');
-                if (cb.checked) {
-                    selectedCount++;
-                    total += parseInt(cb.getAttribute('data-price'));
-                    parentLabel.classList.add('selected'); 
-                    if (cb.value === "Degradado") isDegradado = true;
-                    if (cb.classList.contains('addon')) addonsCount++;
-                } else {
-                    parentLabel.classList.remove('selected'); 
-                }
-            });
-
-            let durationText = "--";
-            if (selectedCount === 1) durationText = "30 minutos";
-            else if (isDegradado && addonsCount === 3) durationText = "1 hora y 30 min";
-            else if (selectedCount > 1) durationText = "1 hora aprox.";
-
-            liveTotal.textContent = `$${total}`;
-            liveDuration.textContent = durationText;
-
-            if (dateInput.value) {
-                const selectedDate = new Date(dateInput.value + 'T00:00:00');
-                if (selectedDate.getDay() === 0) { 
-                    timeSelect.innerHTML = '<option value="">Cerrado Domingos</option>';
-                    timeSelect.disabled = true;
-                } else {
-                    timeSelect.disabled = false;
-                    const currentValue = timeSelect.value;
-                    const allSlots = ["Mañana", "Tarde", "Cualquier horario"];
-                    
-                    timeSelect.innerHTML = '<option value="">Elegir turno...</option>';
-                    allSlots.forEach(slot => {
-                        const opt = document.createElement('option');
-                        opt.value = slot; 
-                        opt.textContent = slot;
-                        if (slot === currentValue) opt.selected = true; 
-                        timeSelect.appendChild(opt);
-                    });
-                }
-            } else {
-                timeSelect.innerHTML = '<option value="">Selecciona fecha primero...</option>';
-                timeSelect.disabled = true;
-            }
-
-            submitBtn.disabled = !(selectedCount > 0 && dateInput.value && timeSelect.value && acceptTerms.checked);
-        }
-
-        checkboxes.forEach(cb => cb.addEventListener('change', updateFormState));
-        dateInput.addEventListener('change', updateFormState);
-        timeSelect.addEventListener('change', updateFormState);
-        acceptTerms.addEventListener('change', updateFormState);
-
-        function sendToWhatsApp() {
-            const rawDate = dateInput.value; 
-            const time = timeSelect.value;
-            const duration = liveDuration.textContent; 
-            
-            // --- NUEVA LÓGICA DE FECHA FORMATEADA ---
-            const dateParts = rawDate.split('-'); // Separa el YYYY-MM-DD
-            const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-            
-            // Obtener el día de la semana (ej: jueves)
-            const options = { weekday: 'long' };
-            const dayName = new Intl.DateTimeFormat('es-ES', options).format(dateObj);
-            
-            // Formato final: jueves 02-04-2026
-            const formattedDate = `${dayName} ${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-            // ----------------------------------------
-
-            let selected = [];
-            let total = 0;
-            
-            checkboxes.forEach(cb => { 
-                if (cb.checked) { 
-                    selected.push(cb.value); 
-                    total += parseInt(cb.getAttribute('data-price')); 
-                } 
-            });
-            
-            let turnoTexto = time === "Cualquier horario" ? "Cualquier horario" : `Por la ${time.toLowerCase()}`;
-            turnoTexto += " (Quedo a la espera de que me confirmes la hora exacta)";
-            
-            const msg = `¡Hola Félix!%0AQuiero pedir una cita en%0A*Mono's Barbería Holguín*%0A%0A📍Dirección: Maceo 254 e/ Cables y Ángel Guerra%0A📅 Fecha: ${formattedDate}%0A⏰ Horario: ${turnoTexto}%0A✂️ Servicio: ${selected.join(', ')}%0A⏱️ Duración apróx: ${duration}%0A💰 Total a pagar: $${total}`;
-            
-            window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
-        }
-    </script>
 </body>
 </html>
