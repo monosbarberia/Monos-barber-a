@@ -1,3 +1,8 @@
+¡Entendido, Félix! Queda claro: un apartado completamente independiente al final de los servicios, usando el término exacto de **"Combo de aperitivo"** tanto en la página como en el texto que te llega a WhatsApp, y manteniendo exactamente tu lógica original basada en WhatsApp, sin tocar nada más.
+
+Aquí tienes el código completo de tu archivo listo para que lo copies y lo pegues directamente en GitHub:
+
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -245,6 +250,15 @@
                 </label>
             </div>
 
+            <!-- APARTADO INDEPENDIENTE: Opciones adicionales (Aperitivos) -->
+            <h3 class="section-title">Opciones adicionales</h3>
+            <div class="service-list">
+                <label class="service-item" style="border-color: rgba(203, 178, 106, 0.6);">
+                    <span><input type="checkbox" id="aperitivoCheck" data-price="100"> ☕🍰 Combo de aperitivo</span>
+                    <span>+$100</span>
+                </label>
+            </div>
+
             <h3 class="section-title">Elige la fecha</h3>
             <div class="form-group">
                 <input type="date" id="date" required>
@@ -285,6 +299,7 @@
         const dateInput = document.getElementById('date');
         const timeSelect = document.getElementById('time');
         const checkboxes = document.querySelectorAll('input[name="service"]');
+        const aperitivoCheck = document.getElementById('aperitivoCheck'); // Nueva constante para el aperitivo
         const acceptTerms = document.getElementById('acceptTerms');
         const submitBtn = document.getElementById('submitBtn');
         const liveTotal = document.getElementById('live-total');
@@ -323,6 +338,15 @@
                 }
             });
 
+            // Lógica independiente para sumar el combo de aperitivo al total en vivo
+            const aperitivoLabel = aperitivoCheck.closest('.service-item');
+            if (aperitivoCheck.checked) {
+                total += parseInt(aperitivoCheck.getAttribute('data-price'));
+                aperitivoLabel.classList.add('selected');
+            } else {
+                aperitivoLabel.classList.remove('selected');
+            }
+
             let durationText = "--";
             if (selectedCount === 1) durationText = "30 minutos";
             else if (isDegradado && addonsCount === 3) durationText = "1 hora y 30 min";
@@ -359,6 +383,7 @@
         }
 
         checkboxes.forEach(cb => cb.addEventListener('change', updateFormState));
+        aperitivoCheck.addEventListener('change', updateFormState); // Escucha cambios en el aperitivo
         dateInput.addEventListener('change', updateFormState);
         timeSelect.addEventListener('change', updateFormState);
         acceptTerms.addEventListener('change', updateFormState);
@@ -389,6 +414,12 @@
                     total += parseInt(cb.getAttribute('data-price')); 
                 } 
             });
+
+            // Si está seleccionado el aperitivo, se agrega al texto de WhatsApp y al total
+            if (aperitivoCheck.checked) {
+                selected.push("combo de aperitivo incluido");
+                total += parseInt(aperitivoCheck.getAttribute('data-price'));
+            }
             
             let turnoTexto = time === "Cualquier horario" ? "Cualquier horario" : `Por la ${time.toLowerCase()}`;
             turnoTexto += " (Quedo a la espera de que me confirmes la hora exacta)";
@@ -400,3 +431,5 @@
     </script>
 </body>
 </html>
+
+```
