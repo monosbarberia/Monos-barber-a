@@ -54,9 +54,7 @@
             backdrop-filter: blur(6px);
             transition: background 0.3s;
         }
-        .nav-toggle:hover {
-            background: rgba(203, 178, 106, 0.22);
-        }
+        .nav-toggle:hover { background: rgba(203, 178, 106, 0.22); }
         .nav-dropdown {
             display: none;
             position: absolute;
@@ -83,9 +81,7 @@
             border-bottom: 1px solid rgba(203, 178, 106, 0.1);
         }
         .nav-dropdown a:last-child { border-bottom: none; }
-        .nav-dropdown a:hover {
-            background: rgba(203, 178, 106, 0.15);
-        }
+        .nav-dropdown a:hover { background: rgba(203, 178, 106, 0.15); }
 
         /* ---- SECCIONES ---- */
         .page-section {
@@ -98,7 +94,6 @@
             box-sizing: border-box;
             position: relative;
         }
-
         .section-arrow {
             position: absolute;
             bottom: 20px;
@@ -115,11 +110,7 @@
             pointer-events: none;
             user-select: none;
         }
-        .section-arrow .arrow {
-            font-size: 1.6em;
-            margin-top: 4px;
-            display: block;
-        }
+        .section-arrow .arrow { font-size: 1.6em; margin-top: 4px; display: block; }
 
         @keyframes bounce {
             0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
@@ -128,46 +119,21 @@
         }
 
         /* ---- HERO ---- */
-        .hero-logo-container {
-            text-align: center;
-            margin-bottom: 16px;
-        }
+        .hero-logo-container { text-align: center; margin-bottom: 16px; }
         .hero-logo-img {
             max-width: 300px;
             width: 100%;
             height: auto;
             filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
         }
-        .hero-title-row {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            text-align: center;
-            margin-bottom: 10px;
-        }
         .hero-title {
-            font-size: 2.4em;
+            font-size: 2.6em;
             font-weight: 700;
             letter-spacing: 4px;
-            margin: 0;
+            margin: 0 0 10px;
             text-transform: uppercase;
             line-height: 1.1;
-            white-space: nowrap;
-        }
-        .hero-divider {
-            width: 1px;
-            height: 36px;
-            background-color: rgba(203, 178, 106, 0.5);
-            flex-shrink: 0;
-        }
-        .hero-location {
-            font-size: 1.15em;
-            letter-spacing: 2px;
-            margin: 0;
-            opacity: 0.8;
-            text-transform: uppercase;
+            text-align: center;
             white-space: nowrap;
         }
         .hero-subtitle {
@@ -178,12 +144,8 @@
             text-align: center;
         }
 
-        /* ---- SECCION INFO - sin recuadro ---- */
-        .about-section {
-            max-width: 550px;
-            width: 100%;
-            text-align: center;
-        }
+        /* ---- SECCION INFO ---- */
+        .about-section { max-width: 550px; width: 100%; text-align: center; }
         .about-title {
             font-size: 2.2em;
             font-weight: 700;
@@ -201,17 +163,11 @@
             text-align: justify;
             margin-bottom: 30px;
         }
-        .slogan {
-            font-style: italic;
-            font-size: 1.3em;
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        /* Dirección sin fondo oscuro */
+        .slogan { font-style: italic; font-size: 1.3em; text-align: center; margin-bottom: 25px; }
         .address {
             text-align: center;
             font-size: 1.1em;
-            margin: 0 0 25px;
+            margin: 0 0 10px;
             letter-spacing: 1px;
             line-height: 1.6;
         }
@@ -223,12 +179,14 @@
             letter-spacing: 2px;
             opacity: 0.7;
         }
-        .action-links {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            width: 100%;
+        .siguenos {
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            opacity: 0.6;
+            margin: 18px 0 12px;
         }
+        .action-links { display: flex; justify-content: center; gap: 15px; width: 100%; }
         .action-btn {
             flex: 1;
             text-decoration: none;
@@ -243,10 +201,7 @@
             letter-spacing: 1px;
             text-align: center;
         }
-        .action-btn:hover {
-            background-color: var(--elegant-gold);
-            color: var(--dark-forest-green);
-        }
+        .action-btn:hover { background-color: var(--elegant-gold); color: var(--dark-forest-green); }
 
         /* ---- FORMULARIO ---- */
         .content-box {
@@ -270,13 +225,16 @@
             letter-spacing: 1px;
             text-align: center;
         }
-        .service-list {
+        .service-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; }
+
+        /* Fila que envuelve item + botón info */
+        .service-row {
             display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 30px;
+            align-items: center;
+            gap: 10px;
         }
         .service-item {
+            flex: 1;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -303,12 +261,52 @@
             font-weight: bold;
             border-color: var(--elegant-gold);
         }
-        .form-group {
-            margin: 25px 0;
+
+        /* Boton de info ! */
+        .info-btn {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 1px solid rgba(203, 178, 106, 0.6);
+            background: transparent;
+            color: var(--elegant-gold);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
             display: flex;
-            flex-direction: column;
-            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            line-height: 1;
+            padding: 0;
         }
+        .info-btn:hover {
+            background: rgba(203, 178, 106, 0.2);
+            border-color: var(--elegant-gold);
+        }
+
+        /* Tooltip de info */
+        .info-tooltip {
+            display: none;
+            position: fixed;
+            z-index: 300;
+            background: rgba(20, 45, 25, 0.98);
+            border: 1px solid rgba(203, 178, 106, 0.5);
+            border-radius: 8px;
+            padding: 16px 20px;
+            font-size: 1.05em;
+            line-height: 1.5;
+            color: var(--elegant-gold);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            max-width: 260px;
+            backdrop-filter: blur(8px);
+            pointer-events: none;
+        }
+        .info-tooltip.visible { display: block; }
+
+        .form-group { margin: 25px 0; display: flex; flex-direction: column; gap: 10px; }
         input[type="date"], select {
             background-color: rgba(0,0,0,0.25);
             color: var(--elegant-gold);
@@ -396,8 +394,7 @@
         }
 
         @media (max-width: 600px) {
-            .hero-title { font-size: 1.5em; letter-spacing: 2px; }
-            .hero-location { font-size: 0.95em; }
+            .hero-title { font-size: 1.8em; letter-spacing: 2px; }
             .content-box { padding: 30px 20px; }
             .action-links { flex-direction: column; }
             .nav-toggle { font-size: 0.9em; padding: 9px 14px; }
@@ -406,7 +403,10 @@
 </head>
 <body>
 
-    <!-- MENU SUPERIOR DERECHO -->
+    <!-- Tooltip global -->
+    <div class="info-tooltip" id="globalTooltip"></div>
+
+    <!-- MENU SUPERIOR -->
     <nav class="top-nav">
         <button class="nav-toggle" onclick="toggleNav()">Menu</button>
         <div class="nav-dropdown" id="navDropdown">
@@ -420,11 +420,7 @@
         <div class="hero-logo-container">
             <img src="logo.png" alt="Logo Mono's" class="hero-logo-img">
         </div>
-        <div class="hero-title-row">
-            <h1 class="hero-title">Barbería</h1>
-            <div class="hero-divider"></div>
-            <span class="hero-location">Holguín</span>
-        </div>
+        <h1 class="hero-title">Barbería Holguín</h1>
         <p class="hero-subtitle">+300 clientes satisfechos</p>
         <div class="section-arrow">
             <span>Desliza para continuar</span>
@@ -437,13 +433,14 @@
         <div class="about-section">
             <h2 class="about-title">Bienvenido</h2>
             <p class="about-text">
-                Estás en el lugar ideal para asegurar tu espacio y vivir una experiencia de primer nivel. En Mono's Barbería Holguín, dirigida y atendida por Félix, combinamos la elegancia del caballero clásico con el estilo más moderno. Nuestra historia se forja en la atención al detalle y la pasión por nuestro oficio. Selecciona tus servicios a continuación y permítenos cuidar de tu imagen.
+                Estás en el lugar ideal para asegurar tu espacio y vivir una experiencia de primer nivel. En Mono's Barbería Holguín, dirigida y atendida por Félix y Paola, combinamos la elegancia del caballero clásico con el estilo más moderno. Nuestra historia se forja en la atención al detalle y la pasión por nuestro oficio. Selecciona tus servicios a continuación y permítenos cuidar de tu imagen.
             </p>
             <div class="slogan">Luce limpio, fino, mono...</div>
             <div class="address">
                 <strong>Dirección</strong>
                 Maceo 254 e/ Cables y Angel Guerra<br>Holguín, Cuba
             </div>
+            <div class="siguenos">Síguenos</div>
             <div class="action-links">
                 <a href="https://www.google.com/maps/search/?api=1&query=Monos+Barberia+Holguin" target="_blank" class="action-btn">Mapa</a>
                 <a href="https://www.facebook.com/profile.php?id=61550881144010" class="action-btn" target="_blank">Facebook</a>
@@ -463,26 +460,47 @@
             <div class="content-box">
                 <h3 class="section-title">Elige tus servicios</h3>
                 <div class="service-list">
-                    <label class="service-item" onclick="toggleService(this, 'main-cut')">
-                        <span><input type="checkbox" name="service" value="Corte sencillo" data-price="200" data-group="main-cut"> Corte sencillo</span>
-                        <span>$200</span>
-                    </label>
-                    <label class="service-item" onclick="toggleService(this, 'main-cut')">
-                        <span><input type="checkbox" name="service" value="Degradado" data-price="400" data-group="main-cut"> Degradado</span>
-                        <span>$400</span>
-                    </label>
-                    <label class="service-item" onclick="toggleService(this, 'addon')">
-                        <span><input type="checkbox" name="service" value="Barba" data-price="100" data-group="addon"> Barba</span>
-                        <span>$100</span>
-                    </label>
-                    <label class="service-item" onclick="toggleService(this, 'addon')">
-                        <span><input type="checkbox" name="service" value="Diseno" data-price="100" data-group="addon"> Diseno</span>
-                        <span>$100</span>
-                    </label>
-                    <label class="service-item" onclick="toggleService(this, 'addon')">
-                        <span><input type="checkbox" name="service" value="Peinado" data-price="200" data-group="addon"> Peinado</span>
-                        <span>$200</span>
-                    </label>
+
+                    <div class="service-row">
+                        <label class="service-item" onclick="toggleService(this, 'main-cut')">
+                            <span><input type="checkbox" name="service" value="Corte sencillo" data-price="200" data-group="main-cut"> Corte sencillo</span>
+                            <span>$200</span>
+                        </label>
+                        <button type="button" class="info-btn" data-info="Corte con tijera o con maquina sencillo. Tambien puede ser un afeitado completo de cabeza.">!</button>
+                    </div>
+
+                    <div class="service-row">
+                        <label class="service-item" onclick="toggleService(this, 'main-cut')">
+                            <span><input type="checkbox" name="service" value="Degradado" data-price="400" data-group="main-cut"> Degradado</span>
+                            <span>$400</span>
+                        </label>
+                        <button type="button" class="info-btn" data-info="Corte degradado desde el cero o desde el afeitado, hasta el numero que desee, segun el tipo de corte y estilo que se vaya a realizar.">!</button>
+                    </div>
+
+                    <div class="service-row">
+                        <label class="service-item" onclick="toggleService(this, 'addon')">
+                            <span><input type="checkbox" name="service" value="Barba" data-price="100" data-group="addon"> Barba</span>
+                            <span>$100</span>
+                        </label>
+                        <button type="button" class="info-btn" data-info="Perfilado de barba o afeitado completo, segun la preferencia del cliente.">!</button>
+                    </div>
+
+                    <div class="service-row">
+                        <label class="service-item" onclick="toggleService(this, 'addon')">
+                            <span><input type="checkbox" name="service" value="Diseño Personalizado" data-price="100" data-group="addon"> Diseno</span>
+                            <span>$100</span>
+                        </label>
+                        <button type="button" class="info-btn" data-info="Diseno personalizado que puede incluir dibujos o figuras a eleccion del cliente.">!</button>
+                    </div>
+
+                    <div class="service-row">
+                        <label class="service-item" onclick="toggleService(this, 'addon')">
+                            <span><input type="checkbox" name="service" value="Peinado" data-price="200" data-group="addon"> Peinado</span>
+                            <span>$200</span>
+                        </label>
+                        <button type="button" class="info-btn" data-info="Peinado y estilizado con los productos disponibles en el momento.">!</button>
+                    </div>
+
                 </div>
 
                 <h3 class="section-title">Opciones adicionales</h3>
@@ -546,24 +564,55 @@
         const submitBtn = document.getElementById('submitBtn');
         const liveTotal = document.getElementById('live-total');
         const liveDuration = document.getElementById('live-duration');
+        const tooltip = document.getElementById('globalTooltip');
 
-        // Fecha mínima hoy
-        const today = new Date();
-        dateInput.setAttribute('min', `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`);
+        // Fecha mínima: mañana
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const ty = tomorrow.getFullYear();
+        const tm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+        const td = String(tomorrow.getDate()).padStart(2, '0');
+        dateInput.setAttribute('min', `${ty}-${tm}-${td}`);
 
         // Menu nav
-        function toggleNav() {
-            document.getElementById('navDropdown').classList.toggle('open');
-        }
-        function closeNav() {
-            document.getElementById('navDropdown').classList.remove('open');
-        }
+        function toggleNav() { document.getElementById('navDropdown').classList.toggle('open'); }
+        function closeNav() { document.getElementById('navDropdown').classList.remove('open'); }
         document.addEventListener('click', function(e) {
             const nav = document.querySelector('.top-nav');
             if (!nav.contains(e.target)) closeNav();
         });
 
-        // Toggle servicios principales (mutuamente exclusivos, deseleccionables)
+        // Tooltip de info
+        let tooltipVisible = false;
+        document.querySelectorAll('.info-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const info = this.getAttribute('data-info');
+                // Si ya está visible con este mismo contenido, ocultar
+                if (tooltipVisible && tooltip.textContent === info) {
+                    tooltip.classList.remove('visible');
+                    tooltipVisible = false;
+                    return;
+                }
+                tooltip.textContent = info;
+                // Posicionar cerca del botón
+                const rect = this.getBoundingClientRect();
+                let left = rect.left - 270;
+                if (left < 10) left = rect.right + 10;
+                let top = rect.top - 10;
+                if (top + 120 > window.innerHeight) top = window.innerHeight - 130;
+                tooltip.style.left = left + 'px';
+                tooltip.style.top = top + 'px';
+                tooltip.classList.add('visible');
+                tooltipVisible = true;
+            });
+        });
+        document.addEventListener('click', function() {
+            tooltip.classList.remove('visible');
+            tooltipVisible = false;
+        });
+
+        // Toggle servicios principales
         function toggleService(label, group) {
             const cb = label.querySelector('input[type="checkbox"]');
             if (group === 'main-cut') {
@@ -585,7 +634,6 @@
             updateSummary();
         }
 
-        // Toggle extras (cafe, ponque)
         function toggleExtra(label, id) {
             const cb = document.getElementById(id);
             cb.checked = !cb.checked;
@@ -626,7 +674,7 @@
         function updateTimeSlots() {
             if (dateInput.value) {
                 const p = dateInput.value.split('-');
-                const d = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]));
+                const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
                 if (d.getDay() === 0) {
                     timeSelect.innerHTML = '<option value="">Cerrado los domingos</option>';
                     timeSelect.disabled = true;
@@ -661,7 +709,7 @@
             const time = timeSelect.value;
             const duration = liveDuration.textContent;
             const p = rawDate.split('-');
-            const dateObj = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]));
+            const dateObj = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
             const dayName = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(dateObj);
             const formattedDate = `${dayName} ${p[2]}-${p[1]}-${p[0]}`;
 
