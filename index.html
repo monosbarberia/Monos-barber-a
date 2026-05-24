@@ -506,11 +506,11 @@
                 <h3 class="section-title">Opciones adicionales</h3>
                 <div class="service-list" style="margin-bottom: 0;">
                     <label class="service-item" style="border-color: rgba(203, 178, 106, 0.8);" onclick="toggleExtra(this, 'cafeCheck')">
-                        <span><input type="checkbox" id="cafeCheck" data-price="40"> Cafe expreso</span>
+                        <span><input type="checkbox" id="cafeCheck" data-price="40"> Cafe expresso</span>
                         <span>+$40</span>
                     </label>
                     <label class="service-item" style="border-color: rgba(203, 178, 106, 0.8);" onclick="toggleExtra(this, 'ponqueCheck')">
-                        <span><input type="checkbox" id="ponqueCheck" data-price="60"> Ponqucito casero</span>
+                        <span><input type="checkbox" id="ponqueCheck" data-price="60"> Ponquecito casero</span>
                         <span>+$60</span>
                     </label>
                 </div>
@@ -721,8 +721,8 @@
             });
 
             const extras = [
-                { id: 'cafeCheck', label: 'cafe expreso' },
-                { id: 'ponqueCheck', label: 'ponqucito casero' }
+                { id: 'cafeCheck', label: 'Cafe expresso' },
+                { id: 'ponqueCheck', label: 'Ponquecito casero' }
             ];
             extras.forEach(ex => {
                 const cb = document.getElementById(ex.id);
@@ -737,7 +737,7 @@
                 : `Por la ${time.toLowerCase()}`;
             turnoTexto += ' (Quedo a la espera de que me confirmes la hora exacta)';
 
-            const msg = `Hola Felix!%0AQuiero pedir una cita en%0A*Mono's Barberia Holguin*%0A%0ADireccion: Maceo 254 e/ Cables y Angel Guerra%0AFecha: ${formattedDate}%0AHorario: ${turnoTexto}%0AServicio: ${selected.join(', ')}%0ADuracion aprox: ${duration}%0ATotal a pagar: $${total}`;
+            const msg = `¡Hola Felix!%0AQuiero pedir una cita en%0A*Mono's Barberia Holguin*%0A%0A📍Direccion: Maceo 254 e/ Cables y Angel Guerra%0A📆Fecha: ${formattedDate}%0A🕙Horario: ${turnoTexto}%0A☕️Servicio: ${selected.join(', ')}%0A⌛️Duracion aprox: ${duration}%0A💰Total a pagar: $${total}`;
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
     </script>
