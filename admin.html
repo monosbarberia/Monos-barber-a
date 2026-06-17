@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Turnos | Mono's Barbería</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --dark-forest-green: #1c3823;
+            --elegant-gold: #cbb26a;
+            --elegant-gold-hover: #e0cca0;
+            --soft-gold-bg: rgba(203, 178, 106, 0.05);
+            --danger: #c0524a;
+            --danger-hover: #d96a61;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--dark-forest-green);
+            color: var(--elegant-gold);
+            font-family: 'Cormorant Garamond', serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pin-screen {
+            text-align: center;
+            padding: 40px;
+            max-width: 360px;
+        }
+        .pin-screen h1 {
+            font-size: 1.8em;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+        .pin-input {
+            width: 100%;
+            background-color: rgba(0,0,0,0.25);
+            color: var(--elegant-gold);
+            border: 1px solid rgba(203, 178, 106, 0.5);
+            padding: 18px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6em;
+            text-align: center;
+            letter-spacing: 8px;
+            border-radius: 6px;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .pin-input:focus { border-color: var(--elegant-gold); }
+        .pin-btn {
+            margin-top: 20px;
+            width: 100%;
+            background-color: var(--elegant-gold);
+            color: var(--dark-forest-green);
+            border: none;
+            padding: 16px;
+            font-size: 1.2em;
+            font-weight: bold;
+            font-family: 'Cormorant Garamond', serif;
+            cursor: pointer;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .pin-btn:hover { background-color: var(--elegant-gold-hover); }
+        .pin-error {
+            color: var(--danger);
+            margin-top: 15px;
+            font-size: 1.05em;
+            display: none;
+        }
+
+        .panel {
+            display: none;
+            width: 100%;
+            max-width: 480px;
+            padding: 30px 20px;
+            box-sizing: border-box;
+        }
+        .panel-title {
+            font-size: 1.9em;
+            text-align: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .panel-subtitle {
+            text-align: center;
+            opacity: 0.7;
+            font-style: italic;
+            margin-bottom: 30px;
+        }
+
+        .content-box {
+            background-color: var(--soft-gold-bg);
+            border: 1px solid rgba(203, 178, 106, 0.2);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .form-group { margin-bottom: 25px; display: flex; flex-direction: column; gap: 10px; }
+        label.field-label {
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.75;
+        }
+        input[type="date"] {
+            background-color: rgba(0,0,0,0.25);
+            color: var(--elegant-gold);
+            border: 1px solid rgba(203, 178, 106, 0.5);
+            padding: 16px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2em;
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(75%) sepia(40%) saturate(400%) hue-rotate(5deg);
+            cursor: pointer;
+        }
+
+        .slot-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 18px;
+            background-color: rgba(0,0,0,0.15);
+            border: 1px solid rgba(203, 178, 106, 0.3);
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 1.15em;
+        }
+        .slot-status {
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .status-libre {
+            background: rgba(120, 200, 130, 0.15);
+            color: #8fd49a;
+        }
+        .status-ocupado {
+            background: rgba(192, 82, 74, 0.2);
+            color: #e08a83;
+        }
+        .slot-actions button {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.95em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 9px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            margin-left: 8px;
+        }
+        .btn-ocupar {
+            background-color: var(--elegant-gold);
+            color: var(--dark-forest-green);
+        }
+        .btn-ocupar:hover { background-color: var(--elegant-gold-hover); }
+        .btn-liberar {
+            background-color: var(--danger);
+            color: white;
+        }
+        .btn-liberar:hover { background-color: var(--danger-hover); }
+
+        .loading-text {
+            text-align: center;
+            opacity: 0.7;
+            font-style: italic;
+            padding: 20px 0;
+        }
+
+        .logout-btn {
+            display: block;
+            margin: 25px auto 0;
+            background: transparent;
+            border: 1px solid rgba(203, 178, 106, 0.4);
+            color: var(--elegant-gold);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.95em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .logout-btn:hover { background: rgba(203, 178, 106, 0.1); }
+
+        @media (max-width: 480px) {
+            .slot-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .slot-actions { width: 100%; display: flex; gap: 8px; }
+            .slot-actions button { flex: 1; margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="pin-screen" id="pinScreen">
+        <h1>Panel de Turnos</h1>
+        <input type="password" inputmode="numeric" maxlength="6" class="pin-input" id="pinInput" placeholder="••••" autocomplete="off">
+        <button class="pin-btn" onclick="checkPin()">Entrar</button>
+        <div class="pin-error" id="pinError">PIN incorrecto, intenta de nuevo</div>
+    </div>
+
+    <div class="panel" id="panel">
+        <div class="panel-title">Gestión de Turnos</div>
+        <div class="panel-subtitle">Mono's Barbería Holguín</div>
+
+        <div class="content-box">
+            <div class="form-group">
+                <label class="field-label">Selecciona una fecha</label>
+                <input type="date" id="adminDate">
+            </div>
+
+            <div id="slotsContainer">
+                <div class="loading-text">Elige una fecha para ver los turnos</div>
+            </div>
+        </div>
+
+        <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCelVTNgTU3DnodZg4DgF_xEnJWLSzDPeA",
+            authDomain: "monos-barberia-c5cd8.firebaseapp.com",
+            projectId: "monos-barberia-c5cd8",
+            storageBucket: "monos-barberia-c5cd8.firebasestorage.app",
+            messagingSenderId: "738673077559",
+            appId: "1:738673077559:web:becdb9b3c779e23ac07eb2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.firebaseDB = db;
+        window.firestoreFns = { collection, getDocs, query, where, addDoc, deleteDoc, doc };
+        window.firebaseReady = true;
+    </script>
+
+    <script>
+        const CORRECT_PIN = "2802";
+        const ALL_SLOTS = ["Mañana", "Tarde", "Cualquier horario"];
+
+        const pinScreen = document.getElementById('pinScreen');
+        const panel = document.getElementById('panel');
+        const pinInput = document.getElementById('pinInput');
+        const pinError = document.getElementById('pinError');
+        const adminDate = document.getElementById('adminDate');
+        const slotsContainer = document.getElementById('slotsContainer');
+
+        function checkPin() {
+            if (pinInput.value === CORRECT_PIN) {
+                sessionStorage.setItem('monos_admin_auth', 'ok');
+                showPanel();
+            } else {
+                pinError.style.display = 'block';
+                pinInput.value = '';
+            }
+        }
+
+        pinInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') checkPin();
+        });
+
+        function showPanel() {
+            pinScreen.style.display = 'none';
+            panel.style.display = 'block';
+        }
+
+        function logout() {
+            sessionStorage.removeItem('monos_admin_auth');
+            panel.style.display = 'none';
+            pinScreen.style.display = 'block';
+            pinInput.value = '';
+        }
+
+        if (sessionStorage.getItem('monos_admin_auth') === 'ok') {
+            showPanel();
+        }
+
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        adminDate.setAttribute('min', `${yyyy}-${mm}-${dd}`);
+
+        adminDate.addEventListener('change', loadSlots);
+
+        async function loadSlots() {
+            if (!adminDate.value) {
+                slotsContainer.innerHTML = '<div class="loading-text">Elige una fecha para ver los turnos</div>';
+                return;
+            }
+
+            slotsContainer.innerHTML = '<div class="loading-text">Cargando...</div>';
+
+            const { collection, getDocs, query, where } = window.firestoreFns;
+            const q = query(collection(window.firebaseDB, "turnos"), where("fecha", "==", adminDate.value));
+
+            let occupiedDocs = {};
+            try {
+                const snapshot = await getDocs(q);
+                snapshot.forEach(docSnap => {
+                    occupiedDocs[docSnap.data().turno] = docSnap.id;
+                });
+            } catch (err) {
+                slotsContainer.innerHTML = '<div class="loading-text">Error al cargar. Revisa tu conexion.</div>';
+                console.error(err);
+                return;
+            }
+
+            renderSlots(occupiedDocs);
+        }
+
+        function renderSlots(occupiedDocs) {
+            slotsContainer.innerHTML = '';
+
+            ALL_SLOTS.forEach(slot => {
+                const isOccupied = occupiedDocs.hasOwnProperty(slot);
+                const row = document.createElement('div');
+                row.className = 'slot-row';
+
+                row.innerHTML = `
+                    <span>${slot}</span>
+                    <span class="slot-status ${isOccupied ? 'status-ocupado' : 'status-libre'}">
+                        ${isOccupied ? 'Ocupado' : 'Libre'}
+                    </span>
+                    <span class="slot-actions"></span>
+                `;
+
+                const actionsSpan = row.querySelector('.slot-actions');
+                const btn = document.createElement('button');
+
+                if (isOccupied) {
+                    btn.textContent = 'Liberar';
+                    btn.className = 'btn-liberar';
+                    btn.onclick = () => liberarTurno(occupiedDocs[slot]);
+                } else {
+                    btn.textContent = 'Ocupar';
+                    btn.className = 'btn-ocupar';
+                    btn.onclick = () => ocuparTurno(slot);
+                }
+
+                actionsSpan.appendChild(btn);
+                slotsContainer.appendChild(row);
+            });
+        }
+
+        async function ocuparTurno(slot) {
+            const { collection, addDoc } = window.firestoreFns;
+            try {
+                await addDoc(collection(window.firebaseDB, "turnos"), {
+                    fecha: adminDate.value,
+                    turno: slot,
+                    estado: 'ocupado'
+                });
+                loadSlots();
+            } catch (err) {
+                alert('No se pudo marcar el turno como ocupado. Revisa tu conexion.');
+                console.error(err);
+            }
+        }
+
+        async function liberarTurno(docId) {
+            const { doc, deleteDoc } = window.firestoreFns;
+            try {
+                await deleteDoc(doc(window.firebaseDB, "turnos", docId));
+                loadSlots();
+            } catch (err) {
+                alert('No se pudo liberar el turno. Revisa tu conexion.');
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>
