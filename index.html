@@ -34,7 +34,6 @@
             overflow-x: hidden;
         }
 
-        /* ---- MENU SUPERIOR ---- */
         .top-nav {
             position: fixed;
             top: 15px;
@@ -83,7 +82,6 @@
         .nav-dropdown a:last-child { border-bottom: none; }
         .nav-dropdown a:hover { background: rgba(203, 178, 106, 0.15); }
 
-        /* ---- SECCIONES ---- */
         .page-section {
             min-height: 100vh;
             display: flex;
@@ -118,7 +116,6 @@
             60% { transform: translateX(-50%) translateY(-4px); }
         }
 
-        /* ---- HERO ---- */
         .hero-logo-container { text-align: center; margin-bottom: 16px; }
         .hero-logo-img {
             max-width: 300px;
@@ -144,7 +141,6 @@
             text-align: center;
         }
 
-        /* ---- SECCION INFO ---- */
         .about-section { max-width: 550px; width: 100%; text-align: center; }
         .about-title {
             font-size: 2.2em;
@@ -203,7 +199,6 @@
         }
         .action-btn:hover { background-color: var(--elegant-gold); color: var(--dark-forest-green); }
 
-        /* ---- FORMULARIO ---- */
         .content-box {
             max-width: 550px;
             width: 100%;
@@ -227,7 +222,6 @@
         }
         .service-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; }
 
-        /* Fila que envuelve item + botón info */
         .service-row {
             display: flex;
             align-items: center;
@@ -262,7 +256,6 @@
             border-color: var(--elegant-gold);
         }
 
-        /* Boton de info ! */
         .info-btn {
             flex-shrink: 0;
             width: 28px;
@@ -287,7 +280,6 @@
             border-color: var(--elegant-gold);
         }
 
-        /* Tooltip de info */
         .info-tooltip {
             display: none;
             position: fixed;
@@ -332,6 +324,10 @@
         input[type="date"]::-webkit-calendar-picker-indicator {
             filter: invert(75%) sepia(40%) saturate(400%) hue-rotate(5deg);
             cursor: pointer;
+        }
+        select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         .live-summary {
             background-color: rgba(0,0,0,0.3);
@@ -403,10 +399,8 @@
 </head>
 <body>
 
-    <!-- Tooltip global -->
     <div class="info-tooltip" id="globalTooltip"></div>
 
-    <!-- MENU SUPERIOR -->
     <nav class="top-nav">
         <button class="nav-toggle" onclick="toggleNav()">Menu</button>
         <div class="nav-dropdown" id="navDropdown">
@@ -415,7 +409,6 @@
         </div>
     </nav>
 
-    <!-- SECCION 1: HERO -->
     <section class="page-section" id="inicio">
         <div class="hero-logo-container">
             <img src="logo.png" alt="Logo Mono's" class="hero-logo-img">
@@ -428,7 +421,6 @@
         </div>
     </section>
 
-    <!-- SECCION 2: INFO -->
     <section class="page-section" id="historia">
         <div class="about-section">
             <h2 class="about-title">Bienvenido</h2>
@@ -453,7 +445,6 @@
 
     <form id="bookingForm">
 
-        <!-- SECCION 3: SERVICIOS -->
         <section class="page-section" id="servicios">
             <div class="content-box">
                 <h3 class="section-title">Elige tus servicios</h3>
@@ -519,7 +510,6 @@
             </div>
         </section>
 
-        <!-- SECCION 4: FECHA Y PAGO -->
         <section class="page-section" id="reserva">
             <div class="content-box">
                 <h3 class="section-title">Fecha y Horario</h3>
@@ -555,6 +545,28 @@
 
     </form>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCelVTNgTU3DnodZg4DgF_xEnJWLSzDPeA",
+            authDomain: "monos-barberia-c5cd8.firebaseapp.com",
+            projectId: "monos-barberia-c5cd8",
+            storageBucket: "monos-barberia-c5cd8.firebasestorage.app",
+            messagingSenderId: "738673077559",
+            appId: "1:738673077559:web:becdb9b3c779e23ac07eb2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.firebaseDB = db;
+        window.firestoreFns = { collection, getDocs, query, where };
+        window.firebaseReady = true;
+        document.dispatchEvent(new Event('firebase-ready'));
+    </script>
+
     <script>
         const dateInput = document.getElementById('date');
         const timeSelect = document.getElementById('time');
@@ -564,7 +576,6 @@
         const liveDuration = document.getElementById('live-duration');
         const tooltip = document.getElementById('globalTooltip');
 
-        // Fecha mínima: mañana
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         const ty = tomorrow.getFullYear();
@@ -572,7 +583,6 @@
         const td = String(tomorrow.getDate()).padStart(2, '0');
         dateInput.setAttribute('min', `${ty}-${tm}-${td}`);
 
-        // Menu nav
         function toggleNav() { document.getElementById('navDropdown').classList.toggle('open'); }
         function closeNav() { document.getElementById('navDropdown').classList.remove('open'); }
         document.addEventListener('click', function(e) {
@@ -580,20 +590,17 @@
             if (!nav.contains(e.target)) closeNav();
         });
 
-        // Tooltip de info
         let tooltipVisible = false;
         document.querySelectorAll('.info-btn').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 const info = this.getAttribute('data-info');
-                // Si ya está visible con este mismo contenido, ocultar
                 if (tooltipVisible && tooltip.textContent === info) {
                     tooltip.classList.remove('visible');
                     tooltipVisible = false;
                     return;
                 }
                 tooltip.textContent = info;
-                // Posicionar cerca del botón
                 const rect = this.getBoundingClientRect();
                 let left = rect.left - 270;
                 if (left < 10) left = rect.right + 10;
@@ -610,7 +617,6 @@
             tooltipVisible = false;
         });
 
-        // Toggle servicios principales
         function toggleService(label, group) {
             const cb = label.querySelector('input[type="checkbox"]');
             if (group === 'main-cut') {
@@ -669,27 +675,66 @@
             validateSubmit();
         }
 
-        function updateTimeSlots() {
-            if (dateInput.value) {
-                const p = dateInput.value.split('-');
-                const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
-                if (d.getDay() === 0) {
-                    timeSelect.innerHTML = '<option value="">Cerrado los domingos</option>';
-                    timeSelect.disabled = true;
-                } else {
-                    timeSelect.disabled = false;
-                    timeSelect.innerHTML = '<option value="">Elegir turno...</option>';
-                    ['Mañana', 'Tarde', 'Cualquier horario'].forEach(slot => {
-                        const opt = document.createElement('option');
-                        opt.value = slot;
-                        opt.textContent = slot;
-                        timeSelect.appendChild(opt);
-                    });
-                }
-            } else {
+        async function updateTimeSlots() {
+            if (!dateInput.value) {
                 timeSelect.innerHTML = '<option value="">Selecciona fecha primero...</option>';
                 timeSelect.disabled = true;
+                validateSubmit();
+                return;
             }
+
+            const p = dateInput.value.split('-');
+            const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
+
+            if (d.getDay() === 0) {
+                timeSelect.innerHTML = '<option value="">Cerrado los domingos</option>';
+                timeSelect.disabled = true;
+                validateSubmit();
+                return;
+            }
+
+            timeSelect.innerHTML = '<option value="">Cargando turnos...</option>';
+            timeSelect.disabled = true;
+
+            const allSlots = ['Mañana', 'Tarde', 'Cualquier horario'];
+            let occupiedSlots = [];
+
+            try {
+                if (window.firebaseReady) {
+                    const { collection, getDocs, query, where } = window.firestoreFns;
+                    const q = query(collection(window.firebaseDB, "turnos"), where("fecha", "==", dateInput.value));
+                    const snapshot = await getDocs(q);
+                    snapshot.forEach(doc => {
+                        occupiedSlots.push(doc.data().turno);
+                    });
+                }
+            } catch (err) {
+                console.error("Error consultando Firebase:", err);
+            }
+
+            const fullDay = occupiedSlots.includes('Cualquier horario') ||
+                             (occupiedSlots.includes('Mañana') && occupiedSlots.includes('Tarde'));
+
+            if (fullDay) {
+                timeSelect.innerHTML = '<option value="">No hay turnos disponibles este dia</option>';
+                timeSelect.disabled = true;
+                validateSubmit();
+                return;
+            }
+
+            timeSelect.innerHTML = '<option value="">Elegir turno...</option>';
+            timeSelect.disabled = false;
+
+            allSlots.forEach(slot => {
+                if (slot === 'Cualquier horario' && occupiedSlots.length > 0) return;
+                if (occupiedSlots.includes(slot)) return;
+
+                const opt = document.createElement('option');
+                opt.value = slot;
+                opt.textContent = slot;
+                timeSelect.appendChild(opt);
+            });
+
             validateSubmit();
         }
 
