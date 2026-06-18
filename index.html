@@ -11,6 +11,9 @@
     <meta property="og:url" content="https://monosbarberia.github.io/Monos-barber-a/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <link rel="icon" type="image/png" sizes="520x520" href="favicon.jpg">
     <link rel="apple-touch-icon" sizes="520x520" href="favicon.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap" rel="stylesheet">
@@ -545,24 +548,15 @@
 
     </form>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    <!-- ============================================= -->
+    <!-- SUPABASE: inicialización y conexión a la base de datos -->
+    <!-- ============================================= -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script>
+        const SUPABASE_URL = "https://ldxxflhwpyzldisydhmd.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCelVTNgTU3DnodZg4DgF_xEnJWLSzDPeA",
-            authDomain: "monos-barberia-c5cd8.firebaseapp.com",
-            projectId: "monos-barberia-c5cd8",
-            storageBucket: "monos-barberia-c5cd8.firebasestorage.app",
-            messagingSenderId: "738673077559",
-            appId: "1:738673077559:web:becdb9b3c779e23ac07eb2"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        window.firebaseDB = db;
-        window.firestoreFns = { collection, getDocs, query, where };
+        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         window.firebaseReady = true;
         document.dispatchEvent(new Event('firebase-ready'));
     </script>
@@ -576,6 +570,7 @@
         const liveDuration = document.getElementById('live-duration');
         const tooltip = document.getElementById('globalTooltip');
 
+        // Fecha mínima: mañana
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         const ty = tomorrow.getFullYear();
@@ -583,6 +578,7 @@
         const td = String(tomorrow.getDate()).padStart(2, '0');
         dateInput.setAttribute('min', `${ty}-${tm}-${td}`);
 
+        // Menu nav
         function toggleNav() { document.getElementById('navDropdown').classList.toggle('open'); }
         function closeNav() { document.getElementById('navDropdown').classList.remove('open'); }
         document.addEventListener('click', function(e) {
@@ -590,6 +586,7 @@
             if (!nav.contains(e.target)) closeNav();
         });
 
+        // Tooltip de info
         let tooltipVisible = false;
         document.querySelectorAll('.info-btn').forEach(btn => {
             btn.addEventListener('click', function(e) {
@@ -617,6 +614,7 @@
             tooltipVisible = false;
         });
 
+        // Toggle servicios principales
         function toggleService(label, group) {
             const cb = label.querySelector('input[type="checkbox"]');
             if (group === 'main-cut') {
@@ -675,6 +673,9 @@
             validateSubmit();
         }
 
+        // ============================================
+        // CONSULTA A SUPABASE: solo turnos REALMENTE libres
+        // ============================================
         async function updateTimeSlots() {
             if (!dateInput.value) {
                 timeSelect.innerHTML = '<option value="">Selecciona fecha primero...</option>';
@@ -699,17 +700,35 @@
             const allSlots = ['Mañana', 'Tarde', 'Cualquier horario'];
             let occupiedSlots = [];
 
+            let waited = 0;
+            while (!window.firebaseReady && waited < 5000) {
+                await new Promise(r => setTimeout(r, 200));
+                waited += 200;
+            }
+
+            if (!window.firebaseReady) {
+                timeSelect.innerHTML = '<option value="">Error: no se pudo conectar. Revisa tu conexion e intenta de nuevo.</option>';
+                timeSelect.disabled = true;
+                validateSubmit();
+                return;
+            }
+
             try {
-                if (window.firebaseReady) {
-                    const { collection, getDocs, query, where } = window.firestoreFns;
-                    const q = query(collection(window.firebaseDB, "turnos"), where("fecha", "==", dateInput.value));
-                    const snapshot = await getDocs(q);
-                    snapshot.forEach(doc => {
-                        occupiedSlots.push(doc.data().turno);
-                    });
-                }
+                const { data, error } = await window.supabaseClient
+                    .from('turnos')
+                    .select('turno')
+                    .eq('fecha', dateInput.value);
+
+                if (error) throw error;
+
+                data.forEach(row => {
+                    occupiedSlots.push(row.turno);
+                });
             } catch (err) {
-                console.error("Error consultando Firebase:", err);
+                timeSelect.innerHTML = '<option value="">Error al consultar disponibilidad, intenta de nuevo</option>';
+                timeSelect.disabled = true;
+                validateSubmit();
+                return;
             }
 
             const fullDay = occupiedSlots.includes('Cualquier horario') ||
