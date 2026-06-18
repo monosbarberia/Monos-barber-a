@@ -123,15 +123,24 @@
             padding: 16px;
             font-family: 'Cormorant Garamond', serif;
             font-size: 1.2em;
+            text-align: center;
+            text-align-last: center;
             border-radius: 6px;
             outline: none;
             cursor: pointer;
             width: 100%;
             box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+        }
+        input[type="date"]::-webkit-datetime-edit {
+            flex: 1;
+            text-align: center;
         }
         input[type="date"]::-webkit-calendar-picker-indicator {
             filter: invert(75%) sepia(40%) saturate(400%) hue-rotate(5deg);
             cursor: pointer;
+            margin-left: 8px;
         }
 
         .slot-divider {
@@ -263,11 +272,11 @@
 
     <script>
         const CORRECT_PIN = "2802";
-        // Genera la lista de horarios: 9:00 a 12:00 y 2:00 a 4:00 PM, cada 30 min
+        // Genera la lista de horarios: 9:00 a 11:30 y 2:00 a 4:00 PM, cada 30 min
         function buildAllSlots() {
             const slots = [];
             const ranges = [
-                { startH: 9, startM: 0, endH: 12, endM: 0 },
+                { startH: 9, startM: 0, endH: 11, endM: 30 },
                 { startH: 14, startM: 0, endH: 16, endM: 0 }
             ];
             ranges.forEach(r => {
