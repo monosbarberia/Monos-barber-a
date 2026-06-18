@@ -570,7 +570,6 @@
         const liveDuration = document.getElementById('live-duration');
         const tooltip = document.getElementById('globalTooltip');
 
-        // Fecha mínima: mañana
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         const ty = tomorrow.getFullYear();
@@ -578,7 +577,6 @@
         const td = String(tomorrow.getDate()).padStart(2, '0');
         dateInput.setAttribute('min', `${ty}-${tm}-${td}`);
 
-        // Menu nav
         function toggleNav() { document.getElementById('navDropdown').classList.toggle('open'); }
         function closeNav() { document.getElementById('navDropdown').classList.remove('open'); }
         document.addEventListener('click', function(e) {
@@ -586,7 +584,6 @@
             if (!nav.contains(e.target)) closeNav();
         });
 
-        // Tooltip de info
         let tooltipVisible = false;
         document.querySelectorAll('.info-btn').forEach(btn => {
             btn.addEventListener('click', function(e) {
@@ -614,7 +611,6 @@
             tooltipVisible = false;
         });
 
-        // Toggle servicios principales
         function toggleService(label, group) {
             const cb = label.querySelector('input[type="checkbox"]');
             if (group === 'main-cut') {
@@ -673,9 +669,32 @@
             validateSubmit();
         }
 
-        // ============================================
-        // CONSULTA A SUPABASE: solo turnos REALMENTE libres
-        // ============================================
+        // Genera la lista de horarios: 9:00 a 12:00 y 2:00 a 4:00 PM, cada 30 min
+        function buildAllSlots() {
+            const slots = [];
+            const ranges = [
+                { startH: 9, startM: 0, endH: 12, endM: 0 },
+                { startH: 14, startM: 0, endH: 16, endM: 0 }
+            ];
+            ranges.forEach(r => {
+                let h = r.startH, m = r.startM;
+                while (h < r.endH || (h === r.endH && m <= r.endM)) {
+                    slots.push(formatTime12h(h, m));
+                    m += 30;
+                    if (m >= 60) { m -= 60; h += 1; }
+                }
+            });
+            return slots;
+        }
+
+        function formatTime12h(h, m) {
+            const period = h >= 12 ? 'PM' : 'AM';
+            let h12 = h % 12;
+            if (h12 === 0) h12 = 12;
+            const mm = String(m).padStart(2, '0');
+            return `${h12}:${mm} ${period}`;
+        }
+
         async function updateTimeSlots() {
             if (!dateInput.value) {
                 timeSelect.innerHTML = '<option value="">Selecciona fecha primero...</option>';
@@ -697,7 +716,7 @@
             timeSelect.innerHTML = '<option value="">Cargando turnos...</option>';
             timeSelect.disabled = true;
 
-            const allSlots = ['Mañana', 'Tarde', 'Cualquier horario'];
+            const allSlots = buildAllSlots();
             let occupiedSlots = [];
 
             let waited = 0;
@@ -731,23 +750,19 @@
                 return;
             }
 
-            const fullDay = occupiedSlots.includes('Cualquier horario') ||
-                             (occupiedSlots.includes('Mañana') && occupiedSlots.includes('Tarde'));
+            const availableSlots = allSlots.filter(slot => !occupiedSlots.includes(slot));
 
-            if (fullDay) {
+            if (availableSlots.length === 0) {
                 timeSelect.innerHTML = '<option value="">No hay turnos disponibles este dia</option>';
                 timeSelect.disabled = true;
                 validateSubmit();
                 return;
             }
 
-            timeSelect.innerHTML = '<option value="">Elegir turno...</option>';
+            timeSelect.innerHTML = '<option value="">Elegir horario...</option>';
             timeSelect.disabled = false;
 
-            allSlots.forEach(slot => {
-                if (slot === 'Cualquier horario' && occupiedSlots.length > 0) return;
-                if (occupiedSlots.includes(slot)) return;
-
+            availableSlots.forEach(slot => {
                 const opt = document.createElement('option');
                 opt.value = slot;
                 opt.textContent = slot;
@@ -794,10 +809,7 @@
                 }
             });
 
-            let turnoTexto = time === 'Cualquier horario'
-                ? 'Cualquier horario'
-                : `Por la ${time.toLowerCase()}`;
-            turnoTexto += ' (Quedo a la espera de que me confirmes la hora exacta)';
+            const turnoTexto = time;
 
             const msg = `¡Hola Felix!%0AQuiero pedir una cita en%0A*Mono's Barberia Holguin*%0A%0A📍Direccion: Maceo 254 e/ Cables y Angel Guerra%0A📆Fecha: ${formattedDate}%0A🕙Horario: ${turnoTexto}%0A☕️Servicio: ${selected.join(', ')}%0A⌛️Duracion aprox: ${duration}%0A💰Total a pagar: $${total}`;
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
