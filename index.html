@@ -630,6 +630,7 @@
                 label.classList.toggle('selected', cb.checked);
             }
             updateSummary();
+            if (dateInput.value) updateTimeSlots();
         }
 
         function toggleExtra(label, id) {
@@ -637,6 +638,12 @@
             cb.checked = !cb.checked;
             label.classList.toggle('selected', cb.checked);
             updateSummary();
+        }
+
+        function getSelectedBlocksCount() {
+            const selectedCount = document.querySelectorAll('input[name="service"]:checked').length;
+            if (selectedCount <= 1) return 1;
+            return 2;
         }
 
         function updateSummary() {
@@ -669,11 +676,11 @@
             validateSubmit();
         }
 
-        // Genera la lista de horarios: 9:00 a 12:00 y 2:00 a 4:00 PM, cada 30 min
+        // Genera la lista de horarios: 9:00 a 11:30 y 2:00 a 4:00 PM, cada 30 min
         function buildAllSlots() {
             const slots = [];
             const ranges = [
-                { startH: 9, startM: 0, endH: 12, endM: 0 },
+                { startH: 9, startM: 0, endH: 11, endM: 30 },
                 { startH: 14, startM: 0, endH: 16, endM: 0 }
             ];
             ranges.forEach(r => {
@@ -717,6 +724,8 @@
             timeSelect.disabled = true;
 
             const allSlots = buildAllSlots();
+            const morningSlots = allSlots.filter(s => s.includes('AM'));
+            const afternoonSlots = allSlots.filter(s => s.includes('PM'));
             let occupiedSlots = [];
 
             let waited = 0;
@@ -750,7 +759,19 @@
                 return;
             }
 
-            const availableSlots = allSlots.filter(slot => !occupiedSlots.includes(slot));
+            const blocksNeeded = getSelectedBlocksCount();
+            const freeSlots = allSlots.filter(slot => !occupiedSlots.includes(slot));
+            let availableSlots = freeSlots;
+
+            if (blocksNeeded === 2) {
+                availableSlots = freeSlots.filter(slot => {
+                    const sameGroup = morningSlots.includes(slot) ? morningSlots : afternoonSlots;
+                    const idx = sameGroup.indexOf(slot);
+                    const nextSlot = sameGroup[idx + 1];
+                    if (!nextSlot) return false;
+                    return freeSlots.includes(nextSlot);
+                });
+            }
 
             if (availableSlots.length === 0) {
                 timeSelect.innerHTML = '<option value="">No hay turnos disponibles este dia</option>';
