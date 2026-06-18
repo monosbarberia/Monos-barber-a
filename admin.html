@@ -241,24 +241,13 @@
         <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, where, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    <!-- SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script>
+        const SUPABASE_URL = "https://ldxxflhwpyzldisydhmd.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCelVTNgTU3DnodZg4DgF_xEnJWLSzDPeA",
-            authDomain: "monos-barberia-c5cd8.firebaseapp.com",
-            projectId: "monos-barberia-c5cd8",
-            storageBucket: "monos-barberia-c5cd8.firebasestorage.app",
-            messagingSenderId: "738673077559",
-            appId: "1:738673077559:web:becdb9b3c779e23ac07eb2"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        window.firebaseDB = db;
-        window.firestoreFns = { collection, getDocs, query, where, addDoc, deleteDoc, doc };
+        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         window.firebaseReady = true;
     </script>
 
@@ -319,14 +308,17 @@
 
             slotsContainer.innerHTML = '<div class="loading-text">Cargando...</div>';
 
-            const { collection, getDocs, query, where } = window.firestoreFns;
-            const q = query(collection(window.firebaseDB, "turnos"), where("fecha", "==", adminDate.value));
-
             let occupiedDocs = {};
             try {
-                const snapshot = await getDocs(q);
-                snapshot.forEach(docSnap => {
-                    occupiedDocs[docSnap.data().turno] = docSnap.id;
+                const { data, error } = await window.supabaseClient
+                    .from('turnos')
+                    .select('id, turno')
+                    .eq('fecha', adminDate.value);
+
+                if (error) throw error;
+
+                data.forEach(row => {
+                    occupiedDocs[row.turno] = row.id;
                 });
             } catch (err) {
                 slotsContainer.innerHTML = '<div class="loading-text">Error al cargar. Revisa tu conexion.</div>';
@@ -372,13 +364,12 @@
         }
 
         async function ocuparTurno(slot) {
-            const { collection, addDoc } = window.firestoreFns;
             try {
-                await addDoc(collection(window.firebaseDB, "turnos"), {
-                    fecha: adminDate.value,
-                    turno: slot,
-                    estado: 'ocupado'
-                });
+                const { error } = await window.supabaseClient
+                    .from('turnos')
+                    .insert({ fecha: adminDate.value, turno: slot, estado: 'ocupado' });
+
+                if (error) throw error;
                 loadSlots();
             } catch (err) {
                 alert('No se pudo marcar el turno como ocupado. Revisa tu conexion.');
@@ -386,10 +377,14 @@
             }
         }
 
-        async function liberarTurno(docId) {
-            const { doc, deleteDoc } = window.firestoreFns;
+        async function liberarTurno(rowId) {
             try {
-                await deleteDoc(doc(window.firebaseDB, "turnos", docId));
+                const { error } = await window.supabaseClient
+                    .from('turnos')
+                    .delete()
+                    .eq('id', rowId);
+
+                if (error) throw error;
                 loadSlots();
             } catch (err) {
                 alert('No se pudo liberar el turno. Revisa tu conexion.');
