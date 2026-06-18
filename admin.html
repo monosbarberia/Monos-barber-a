@@ -134,16 +134,26 @@
             cursor: pointer;
         }
 
+        .slot-divider {
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.55;
+            margin: 18px 0 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(203, 178, 106, 0.2);
+        }
+        .slot-divider:first-child { margin-top: 0; }
         .slot-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 18px;
+            padding: 12px 16px;
             background-color: rgba(0,0,0,0.15);
             border: 1px solid rgba(203, 178, 106, 0.3);
             border-radius: 6px;
-            margin-bottom: 12px;
-            font-size: 1.15em;
+            margin-bottom: 10px;
+            font-size: 1.05em;
         }
         .slot-status {
             font-size: 0.85em;
@@ -253,7 +263,33 @@
 
     <script>
         const CORRECT_PIN = "2802";
-        const ALL_SLOTS = ["Mañana", "Tarde", "Cualquier horario"];
+        // Genera la lista de horarios: 9:00 a 12:00 y 2:00 a 4:00 PM, cada 30 min
+        function buildAllSlots() {
+            const slots = [];
+            const ranges = [
+                { startH: 9, startM: 0, endH: 12, endM: 0 },
+                { startH: 14, startM: 0, endH: 16, endM: 0 }
+            ];
+            ranges.forEach(r => {
+                let h = r.startH, m = r.startM;
+                while (h < r.endH || (h === r.endH && m <= r.endM)) {
+                    slots.push(formatTime12h(h, m));
+                    m += 30;
+                    if (m >= 60) { m -= 60; h += 1; }
+                }
+            });
+            return slots;
+        }
+
+        function formatTime12h(h, m) {
+            const period = h >= 12 ? 'PM' : 'AM';
+            let h12 = h % 12;
+            if (h12 === 0) h12 = 12;
+            const mm = String(m).padStart(2, '0');
+            return `${h12}:${mm} ${period}`;
+        }
+
+        const ALL_SLOTS = buildAllSlots();
 
         const pinScreen = document.getElementById('pinScreen');
         const panel = document.getElementById('panel');
@@ -332,7 +368,19 @@
         function renderSlots(occupiedDocs) {
             slotsContainer.innerHTML = '';
 
-            ALL_SLOTS.forEach(slot => {
+            ALL_SLOTS.forEach((slot, index) => {
+                if (slot === '2:00 PM') {
+                    const divider = document.createElement('div');
+                    divider.className = 'slot-divider';
+                    divider.textContent = 'Tarde';
+                    slotsContainer.appendChild(divider);
+                } else if (index === 0) {
+                    const divider = document.createElement('div');
+                    divider.className = 'slot-divider';
+                    divider.textContent = 'Mañana';
+                    slotsContainer.appendChild(divider);
+                }
+
                 const isOccupied = occupiedDocs.hasOwnProperty(slot);
                 const row = document.createElement('div');
                 row.className = 'slot-row';
