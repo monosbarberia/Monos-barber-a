@@ -209,6 +209,13 @@
             font-style: italic;
             padding: 20px 0;
         }
+        .error-text {
+            text-align: center;
+            color: #e08a83;
+            font-style: italic;
+            padding: 20px 10px;
+            word-break: break-word;
+        }
 
         .logout-btn {
             display: block;
@@ -260,14 +267,23 @@
         <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
     </div>
 
-    <!-- SUPABASE -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <!-- SUPABASE: archivo alojado localmente, ya NO depende de un CDN externo -->
+    <script src="supabase.js"></script>
     <script>
         const SUPABASE_URL = "https://ldxxflhwpyzldisydhmd.supabase.co";
         const SUPABASE_KEY = "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
 
-        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        window.firebaseReady = true;
+        if (typeof window.supabase === 'undefined') {
+            // Esto solo pasa si supabase.js no se subió junto a este HTML, o tiene otro nombre/ruta
+            document.body.innerHTML =
+                '<div style="max-width:360px;text-align:center;padding:40px;font-family:sans-serif;color:#e08a83;">' +
+                'No se pudo cargar la librería de Supabase (supabase.js). ' +
+                'Verifica que ese archivo esté subido en la MISMA carpeta que este HTML, con ese nombre exacto.' +
+                '</div>';
+        } else {
+            window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            window.firebaseReady = true;
+        }
     </script>
 
     <script>
@@ -345,9 +361,20 @@
 
         adminDate.addEventListener('change', loadSlots);
 
+        function describeError(err) {
+            if (!err) return 'Error desconocido';
+            // Los errores de Supabase suelen traer message / details / hint
+            return err.message || err.details || err.hint || JSON.stringify(err);
+        }
+
         async function loadSlots() {
             if (!adminDate.value) {
                 slotsContainer.innerHTML = '<div class="loading-text">Elige una fecha para ver los turnos</div>';
+                return;
+            }
+
+            if (!window.supabaseClient) {
+                slotsContainer.innerHTML = '<div class="error-text">Supabase no está inicializado. Revisa que supabase.js esté subido correctamente.</div>';
                 return;
             }
 
@@ -366,7 +393,9 @@
                     occupiedDocs[row.turno] = row.id;
                 });
             } catch (err) {
-                slotsContainer.innerHTML = '<div class="loading-text">Error al cargar. Revisa tu conexion.</div>';
+                // Antes esto siempre decía "revisa tu conexión" sin importar la causa real.
+                // Ahora se muestra el motivo real que devuelve Supabase (permisos, tabla, clave, red, etc.)
+                slotsContainer.innerHTML = `<div class="error-text">Error al cargar: ${describeError(err)}</div>`;
                 console.error(err);
                 return;
             }
@@ -429,7 +458,7 @@
                 if (error) throw error;
                 loadSlots();
             } catch (err) {
-                alert('No se pudo marcar el turno como ocupado. Revisa tu conexion.');
+                alert('No se pudo marcar el turno como ocupado.\n\n' + describeError(err));
                 console.error(err);
             }
         }
@@ -444,7 +473,7 @@
                 if (error) throw error;
                 loadSlots();
             } catch (err) {
-                alert('No se pudo liberar el turno. Revisa tu conexion.');
+                alert('No se pudo liberar el turno.\n\n' + describeError(err));
                 console.error(err);
             }
         }
