@@ -302,7 +302,7 @@
         .info-tooltip.visible { display: block; }
 
         .form-group { margin: 25px 0; display: flex; flex-direction: column; gap: 10px; }
-        input[type="date"], select {
+        input[type="date"], input[type="text"], input[type="tel"], select {
             background-color: rgba(0,0,0,0.25);
             color: var(--elegant-gold);
             border: 1px solid rgba(203, 178, 106, 0.5);
@@ -318,7 +318,9 @@
             -webkit-appearance: none;
             appearance: none;
         }
-        input[type="date"]:focus, select:focus { border-color: var(--elegant-gold); }
+        input[type="text"], input[type="tel"] { cursor: text; }
+        input[type="date"]:focus, input[type="text"]:focus, input[type="tel"]:focus, select:focus { border-color: var(--elegant-gold); }
+        input[type="text"]::placeholder, input[type="tel"]::placeholder { color: rgba(203, 178, 106, 0.45); }
         select option { background-color: #1c3823; color: var(--elegant-gold); }
         input[type="date"]::-webkit-datetime-edit-text,
         input[type="date"]::-webkit-datetime-edit-month-field,
@@ -331,6 +333,12 @@
         select:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+        .field-hint {
+            font-size: 0.8em;
+            opacity: 0.55;
+            margin-top: -4px;
+            padding-left: 4px;
         }
         .live-summary {
             background-color: rgba(0,0,0,0.3);
@@ -515,6 +523,15 @@
 
         <section class="page-section" id="reserva">
             <div class="content-box">
+                <h3 class="section-title">Tus Datos</h3>
+                <div class="form-group">
+                    <input type="text" id="clientName" placeholder="Nombre completo" required maxlength="60" autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <input type="tel" id="clientPhone" placeholder="Teléfono (8 dígitos)" required pattern="[0-9]{8}" maxlength="8" inputmode="numeric" autocomplete="tel">
+                    <span class="field-hint">Ej: 58592776 — se usa para confirmar tu cita y evitar reservas duplicadas</span>
+                </div>
+
                 <h3 class="section-title">Fecha y Horario</h3>
                 <div class="form-group">
                     <input type="date" id="date" required>
@@ -542,7 +559,7 @@
                         <span>He leído y acepto las condiciones</span>
                     </label>
                 </div>
-                <button type="button" class="btn-submit" id="submitBtn" onclick="sendToWhatsApp()" disabled>Solicitar Cita</button>
+                <button type="button" class="btn-submit" id="submitBtn" onclick="crearReserva()" disabled>Solicitar Cita</button>
             </div>
         </section>
 
@@ -569,6 +586,8 @@
         const liveTotal = document.getElementById('live-total');
         const liveDuration = document.getElementById('live-duration');
         const tooltip = document.getElementById('globalTooltip');
+        const nameInput = document.getElementById('clientName');
+        const phoneInput = document.getElementById('clientPhone');
 
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
@@ -793,16 +812,82 @@
             validateSubmit();
         }
 
+        // Dado el turno elegido, devuelve el/los turnos que hay que marcar como ocupados
+        // (1 si el servicio dura 30 min, 2 si necesita el bloque siguiente)
+        function getSlotsForBooking(selectedTurno) {
+            const blocksNeeded = getSelectedBlocksCount();
+            if (blocksNeeded === 1) return [selectedTurno];
+
+            const allSlots = buildAllSlots();
+            const sameGroup = selectedTurno.includes('AM')
+                ? allSlots.filter(s => s.includes('AM'))
+                : allSlots.filter(s => s.includes('PM'));
+            const idx = sameGroup.indexOf(selectedTurno);
+            const nextSlot = sameGroup[idx + 1];
+            return nextSlot ? [selectedTurno, nextSlot] : [selectedTurno];
+        }
+
         function validateSubmit() {
             const anyService = document.querySelectorAll('input[name="service"]:checked').length > 0;
-            submitBtn.disabled = !(anyService && dateInput.value && timeSelect.value && acceptTerms.checked);
+            const nameOk = nameInput.value.trim().length > 0;
+            const phoneOk = /^[0-9]{8}$/.test(phoneInput.value.trim());
+            submitBtn.disabled = !(anyService && dateInput.value && timeSelect.value && acceptTerms.checked && nameOk && phoneOk);
         }
 
         dateInput.addEventListener('change', updateTimeSlots);
         timeSelect.addEventListener('change', validateSubmit);
         acceptTerms.addEventListener('change', validateSubmit);
+        nameInput.addEventListener('input', validateSubmit);
+        phoneInput.addEventListener('input', validateSubmit);
 
-        function sendToWhatsApp() {
+        // Ocupa el/los turnos en Supabase. Si Supabase lo rechaza (limite semanal
+        // superado o el turno se acaba de ocupar), avisa al cliente y no abre WhatsApp.
+        async function crearReserva() {
+            const nombre = nameInput.value.trim();
+            const telefono = phoneInput.value.trim();
+            const turnoSeleccionado = timeSelect.value;
+            const fecha = dateInput.value;
+
+            if (!nombre || !telefono || !fecha || !turnoSeleccionado) {
+                validateSubmit();
+                return;
+            }
+
+            const reservaId = crypto.randomUUID();
+            const turnosAOcupar = getSlotsForBooking(turnoSeleccionado);
+            const filas = turnosAOcupar.map(turno => ({
+                fecha,
+                turno,
+                nombre,
+                telefono,
+                reserva_id: reservaId
+            }));
+
+            const textoOriginal = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Reservando...';
+
+            const { error } = await window.supabaseClient.from('turnos').insert(filas);
+
+            if (error) {
+                submitBtn.textContent = textoOriginal;
+                validateSubmit();
+
+                if (error.message && error.message.includes('LIMITE_SEMANAL')) {
+                    alert('Este numero de telefono ya tiene 3 citas reservadas esta semana. Si necesitas otro turno, escribenos directo por WhatsApp.');
+                } else if (error.code === '23505') {
+                    alert('Ese horario se acaba de ocupar. Elige otro turno disponible.');
+                    updateTimeSlots();
+                } else {
+                    alert('No se pudo completar la reserva. Intenta de nuevo en unos segundos.');
+                }
+                return;
+            }
+
+            sendToWhatsApp(nombre, telefono);
+        }
+
+        function sendToWhatsApp(nombre, telefono) {
             const rawDate = dateInput.value;
             const time = timeSelect.value;
             const duration = liveDuration.textContent;
@@ -832,7 +917,7 @@
 
             const turnoTexto = time;
 
-            const msg = `¡Hola Felix!%0AQuiero pedir una cita en%0A*Mono's Barberia Holguin*%0A%0A📍Direccion: Maceo 254 e/ Cables y Angel Guerra%0A📆Fecha: ${formattedDate}%0A🕙Horario: ${turnoTexto}%0A☕️Servicio: ${selected.join(', ')}%0A⌛️Duracion aprox: ${duration}%0A💰Total a pagar: $${total}`;
+            const msg = `¡Hola Felix!%0AQuiero pedir una cita en%0A*Mono's Barberia Holguin*%0A%0A👤Nombre: ${encodeURIComponent(nombre)}%0A📱Telefono: ${encodeURIComponent(telefono)}%0A📍Direccion: Maceo 254 e/ Cables y Angel Guerra%0A📆Fecha: ${formattedDate}%0A🕙Horario: ${turnoTexto}%0A☕️Servicio: ${selected.join(', ')}%0A⌛️Duracion aprox: ${duration}%0A💰Total a pagar: $${total}`;
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
     </script>
