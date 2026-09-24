@@ -856,17 +856,13 @@
             const reservaId = crypto.randomUUID();
             const turnosAOcupar = getSlotsForBooking(turnoSeleccionado);
             const filas = turnosAOcupar.map(turno => ({
-    fecha,
-    turno,
-    nombre,
-    telefono,
-    reserva_id: reservaId,
-    notificado: false,
-    estado: 'ocupado'
-}));
-
-}));
-
+                fecha,
+                turno,
+                nombre,
+                telefono,
+                reserva_id: reservaId,
+                notificado: false,
+                estado: 'ocupado'
             }));
 
             const textoOriginal = submitBtn.textContent;
