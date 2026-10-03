@@ -589,12 +589,24 @@
         const nameInput = document.getElementById('clientName');
         const phoneInput = document.getElementById('clientPhone');
 
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const ty = tomorrow.getFullYear();
-        const tm = String(tomorrow.getMonth() + 1).padStart(2, '0');
-        const td = String(tomorrow.getDate()).padStart(2, '0');
-        dateInput.setAttribute('min', `${ty}-${tm}-${td}`);
+        function getTodayStr() {
+            const n = new Date();
+            return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
+        }
+        dateInput.setAttribute('min', getTodayStr());
+
+        // Convierte "9:30 AM" / "2:00 PM" a minutos desde medianoche
+        function slotToMinutes(slot) {
+            const m = slot.match(/^(\d{1,2}):(\d{2}) (AM|PM)$/);
+            if (!m) return 0;
+            let h = parseInt(m[1]) % 12;
+            if (m[3] === 'PM') h += 12;
+            return h * 60 + parseInt(m[2]);
+        }
+        function slotYaPaso(slot) {
+            const n = new Date();
+            return slotToMinutes(slot) <= n.getHours() * 60 + n.getMinutes();
+        }
 
         function toggleNav() { document.getElementById('navDropdown').classList.toggle('open'); }
         function closeNav() { document.getElementById('navDropdown').classList.remove('open'); }
@@ -732,6 +744,13 @@
             const p = dateInput.value.split('-');
             const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
 
+            if (dateInput.value < getTodayStr()) {
+                timeSelect.innerHTML = '<option value="">No puedes elegir fechas pasadas</option>';
+                timeSelect.disabled = true;
+                validateSubmit();
+                return;
+            }
+
             if (d.getDay() === 0) {
                 timeSelect.innerHTML = '<option value="">Cerrado los domingos</option>';
                 timeSelect.disabled = true;
@@ -779,7 +798,10 @@
             }
 
             const blocksNeeded = getSelectedBlocksCount();
-            const freeSlots = allSlots.filter(slot => !occupiedSlots.includes(slot));
+            const esHoy = dateInput.value === getTodayStr();
+            const freeSlots = allSlots.filter(slot =>
+                !occupiedSlots.includes(slot) && !(esHoy && slotYaPaso(slot))
+            );
             let availableSlots = freeSlots;
 
             if (blocksNeeded === 2) {
@@ -853,6 +875,27 @@
                 return;
             }
 
+            if (fecha < getTodayStr() || (fecha === getTodayStr() && slotYaPaso(turnoSeleccionado))) {
+                alert('Ese horario ya pasó. Elige otro turno disponible.');
+                updateTimeSlots();
+                return;
+            }
+
+            // Servicios elegidos y total (incluye extras), para guardarlos con la reserva
+            const serviciosElegidos = [];
+            let totalReserva = 0;
+            document.querySelectorAll('input[name="service"]:checked').forEach(cb => {
+                serviciosElegidos.push(cb.value);
+                totalReserva += parseInt(cb.getAttribute('data-price'));
+            });
+            [{ id: 'cafeCheck', label: 'Cafe expresso' }, { id: 'ponqueCheck', label: 'Ponquecito casero' }].forEach(ex => {
+                const cb = document.getElementById(ex.id);
+                if (cb && cb.checked) {
+                    serviciosElegidos.push(ex.label);
+                    totalReserva += parseInt(cb.getAttribute('data-price'));
+                }
+            });
+
             const reservaId = crypto.randomUUID();
             const turnosAOcupar = getSlotsForBooking(turnoSeleccionado);
             const filas = turnosAOcupar.map(turno => ({
@@ -862,7 +905,9 @@
                 telefono,
                 reserva_id: reservaId,
                 notificado: false,
-                estado: 'ocupado'
+                estado: 'ocupado',
+                servicios: serviciosElegidos.join(', '),
+                total: totalReserva
             }));
 
             const textoOriginal = submitBtn.textContent;
