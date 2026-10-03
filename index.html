@@ -762,7 +762,7 @@
 
             try {
                 const { data, error } = await window.supabaseClient
-                    .from('turnos')
+                    .from('turnos_ocupados')
                     .select('turno')
                     .eq('fecha', dateInput.value);
 
