@@ -1,0 +1,5257 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
+
+<title>Mono's | Administración</title>
+
+<link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+>
+
+<link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+>
+
+<link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<style>
+
+:root {
+
+    --green-dark: #0b160e;
+    --green: #1c3823;
+    --green-light: #294832;
+
+    --gold: #cbb26a;
+    --gold-light: #e1ce91;
+
+    --cream: #f4f0e7;
+
+    --text: #eee9dc;
+
+    --muted: #a9aa9d;
+
+    --danger: #b96b64;
+
+    --warning: #c99a55;
+
+    --success: #88a978;
+
+    --card: rgba(255,255,255,.045);
+
+    --border: rgba(203,178,106,.20);
+
+}
+
+
+* {
+
+    box-sizing: border-box;
+
+    -webkit-tap-highlight-color: transparent;
+
+}
+
+
+html,
+body {
+
+    margin: 0;
+
+    padding: 0;
+
+    min-height: 100%;
+
+    background:
+
+        radial-gradient(
+            circle at top,
+            #294832 0%,
+            #102317 42%,
+            #0b160e 100%
+        );
+
+    color: var(--text);
+
+    font-family: "Montserrat", sans-serif;
+
+}
+
+
+body {
+
+    min-height: 100vh;
+
+}
+
+
+button,
+input,
+select {
+
+    font-family: inherit;
+
+}
+
+
+/* =====================================================
+LOGIN
+===================================================== */
+
+#loginScreen {
+
+    min-height: 100vh;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 25px;
+
+}
+
+
+.login-box {
+
+    width: 100%;
+
+    max-width: 390px;
+
+    padding: 35px 25px;
+
+    text-align: center;
+
+    background: rgba(10,25,15,.88);
+
+    border: 1px solid var(--border);
+
+    border-radius: 20px;
+
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+
+}
+
+
+.logo-title {
+
+    font-family: "Cormorant Garamond", serif;
+
+    font-size: 54px;
+
+    color: var(--gold);
+
+}
+
+
+.logo-subtitle {
+
+    letter-spacing: 3px;
+
+    font-size: 9px;
+
+    color: var(--muted);
+
+    text-transform: uppercase;
+
+    margin-bottom: 35px;
+
+}
+
+
+input,
+select {
+
+    width: 100%;
+
+    background: rgba(255,255,255,.05);
+
+    color: var(--text);
+
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+
+    padding: 14px;
+
+    margin-bottom: 12px;
+
+    font-size: 14px;
+
+    outline: none;
+
+}
+
+
+select option {
+
+    background: var(--green-dark);
+
+}
+
+
+.gold-button {
+
+    width: 100%;
+
+    padding: 14px;
+
+    border: 0;
+
+    border-radius: 10px;
+
+    background: var(--gold);
+
+    color: var(--green-dark);
+
+    font-weight: 700;
+
+}
+
+
+.error {
+
+    color: var(--danger);
+
+    font-size: 12px;
+
+    margin-top: 12px;
+
+}
+
+
+/* =====================================================
+APP
+===================================================== */
+
+#app {
+
+    display: none;
+
+    min-height: 100vh;
+
+}
+
+
+header {
+
+    padding: 18px;
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 20;
+
+    background: rgba(12,27,17,.94);
+
+    backdrop-filter: blur(15px);
+
+    border-bottom: 1px solid rgba(203,178,106,.12);
+
+}
+
+
+.header-row {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+}
+
+
+.brand {
+
+    font-family: "Cormorant Garamond", serif;
+
+    font-size: 32px;
+
+    color: var(--gold);
+
+}
+
+
+.header-sub {
+
+    font-size: 8px;
+
+    letter-spacing: 2px;
+
+    color: var(--muted);
+
+    text-transform: uppercase;
+
+}
+
+
+.logout {
+
+    background: transparent;
+
+    color: var(--gold);
+
+    border: 1px solid var(--border);
+
+    padding: 7px 10px;
+
+    border-radius: 8px;
+
+    font-size: 10px;
+
+}
+
+
+/* =====================================================
+NAV
+===================================================== */
+
+nav {
+
+    display: flex;
+
+    gap: 7px;
+
+    overflow-x: auto;
+
+    padding: 10px 15px;
+
+    position: sticky;
+
+    top: 76px;
+
+    z-index: 19;
+
+    background: rgba(12,27,17,.91);
+
+    backdrop-filter: blur(15px);
+
+}
+
+
+nav::-webkit-scrollbar {
+
+    display: none;
+
+}
+
+
+.nav-btn {
+
+    flex: 0 0 auto;
+
+    padding: 9px 13px;
+
+    background: transparent;
+
+    color: var(--muted);
+
+    border: 1px solid transparent;
+
+    border-radius: 20px;
+
+    font-size: 10px;
+
+}
+
+
+.nav-btn.active {
+
+    color: var(--green-dark);
+
+    background: var(--gold);
+
+}
+
+
+/* =====================================================
+MAIN
+===================================================== */
+
+main {
+
+    max-width: 850px;
+
+    margin: auto;
+
+    padding: 15px;
+
+}
+
+
+.section {
+
+    display: none;
+
+}
+
+
+.section.active {
+
+    display: block;
+
+}
+
+
+.page-title {
+
+    font-family: "Cormorant Garamond", serif;
+
+    font-size: 35px;
+
+    margin: 8px 0 2px;
+
+    color: var(--cream);
+
+}
+
+
+.page-description {
+
+    color: var(--muted);
+
+    font-size: 11px;
+
+    margin-bottom: 18px;
+
+}
+
+
+/* =====================================================
+PERIOD
+===================================================== */
+
+.period {
+
+    display: flex;
+
+    gap: 7px;
+
+    margin-bottom: 15px;
+
+}
+
+
+.period button {
+
+    flex: 1;
+
+    padding: 9px;
+
+    border-radius: 8px;
+
+    color: var(--muted);
+
+    background: rgba(255,255,255,.04);
+
+    border: 1px solid transparent;
+
+    font-size: 10px;
+
+}
+
+
+.period button.active {
+
+    background: var(--gold);
+
+    color: var(--green-dark);
+
+}
+
+
+/* =====================================================
+CARDS
+===================================================== */
+
+.grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(2,1fr);
+
+    gap: 10px;
+
+}
+
+
+.card {
+
+    background: var(--card);
+
+    border: 1px solid var(--border);
+
+    border-radius: 15px;
+
+    padding: 15px;
+
+    box-shadow: 0 8px 25px rgba(0,0,0,.12);
+
+}
+
+
+.card.full {
+
+    grid-column: 1/-1;
+
+}
+
+
+.card-label {
+
+    color: var(--muted);
+
+    font-size: 8px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1.2px;
+
+    margin-bottom: 7px;
+
+}
+
+
+.card-value {
+
+    font-family: "Cormorant Garamond", serif;
+
+    font-size: 29px;
+
+    color: var(--gold-light);
+
+    font-weight: 600;
+
+}
+
+
+.card-small {
+
+    color: var(--muted);
+
+    font-size: 10px;
+
+    line-height: 1.5;
+
+}
+
+
+/* =====================================================
+CHARTS
+===================================================== */
+
+.chart-card {
+
+    margin-top: 12px;
+
+}
+
+
+.chart-wrapper {
+
+    height: 230px;
+
+    position: relative;
+
+}
+
+
+/* =====================================================
+TABLE
+===================================================== */
+
+.table-container {
+
+    overflow-x: auto;
+
+}
+
+
+table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    font-size: 10px;
+
+}
+
+
+th {
+
+    text-align: left;
+
+    color: var(--gold);
+
+    padding: 10px 6px;
+
+    border-bottom: 1px solid var(--border);
+
+}
+
+
+td {
+
+    padding: 10px 6px;
+
+    border-bottom: 1px solid rgba(255,255,255,.05);
+
+}
+
+
+/* =====================================================
+FORMS
+===================================================== */
+
+.form-card {
+
+    margin-top: 12px;
+
+}
+
+
+.form-title {
+
+    font-family: "Cormorant Garamond", serif;
+
+    color: var(--gold);
+
+    font-size: 25px;
+
+    margin-bottom: 15px;
+
+}
+
+
+.save-btn {
+
+    width: 100%;
+
+    padding: 13px;
+
+    border: 0;
+
+    border-radius: 9px;
+
+    background: var(--gold);
+
+    color: var(--green-dark);
+
+    font-weight: 700;
+
+}
+
+
+/* =====================================================
+GOAL
+===================================================== */
+
+.goal-bar {
+
+    height: 9px;
+
+    margin-top: 12px;
+
+    background: rgba(255,255,255,.08);
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
+}
+
+
+.goal-fill {
+
+    height: 100%;
+
+    width: 0%;
+
+    background: var(--gold);
+
+    transition: width .6s ease;
+
+}
+
+
+/* =====================================================
+HEALTH
+===================================================== */
+
+.health-card {
+
+    margin-top: 12px;
+
+}
+
+
+.health-row {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 9px 0;
+
+    border-bottom: 1px solid rgba(255,255,255,.05);
+
+}
+
+
+.health-name {
+
+    font-size: 10px;
+
+}
+
+
+.health-value {
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+}
+
+
+.good {
+
+    color: var(--success);
+
+}
+
+
+.warning {
+
+    color: var(--warning);
+
+}
+
+
+.bad {
+
+    color: var(--danger);
+
+}
+
+
+/* =====================================================
+CLIENT DETAIL
+===================================================== */
+
+.client-detail {
+
+    display: none;
+
+    margin-top: 12px;
+
+}
+
+
+.back-button {
+
+    background: transparent;
+
+    color: var(--gold);
+
+    border: 0;
+
+    padding: 0;
+
+    margin-bottom: 10px;
+
+}
+
+
+/* =====================================================
+LOADING
+===================================================== */
+
+#loading {
+
+    position: fixed;
+
+    inset: 0;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: rgba(7,17,10,.94);
+
+    z-index: 100;
+
+}
+
+
+.loader {
+
+    font-family: "Cormorant Garamond", serif;
+
+    font-size: 26px;
+
+    color: var(--gold);
+
+}
+
+
+/* =====================================================
+DESKTOP
+===================================================== */
+
+@media (min-width:700px) {
+
+    body {
+
+        max-width: 850px;
+
+        margin: auto;
+
+        border-left: 1px solid rgba(203,178,106,.08);
+
+        border-right: 1px solid rgba(203,178,106,.08);
+
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+LOGIN
+===================================================== -->
+
+<div id="loginScreen">
+
+<div class="login-box">
+
+<div class="logo-title">
+Mono's
+</div>
+
+<div class="logo-subtitle">
+Barbería Holguín · Administración
+</div>
+
+<input
+    id="email"
+    type="email"
+    placeholder="Correo electrónico"
+>
+
+<input
+    id="password"
+    type="password"
+    placeholder="Contraseña"
+>
+
+<button
+    class="gold-button"
+    onclick="login()"
+>
+ENTRAR
+</button>
+
+<div
+    id="loginError"
+    class="error"
+></div>
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+APP
+===================================================== -->
+
+<div id="app">
+
+
+<header>
+
+<div class="header-row">
+
+<div>
+
+<div class="brand">
+Mono's
+</div>
+
+<div class="header-sub">
+Administración privada
+</div>
+
+</div>
+
+<button
+    class="logout"
+    onclick="logout()"
+>
+Salir
+</button>
+
+</div>
+
+</header>
+
+
+<nav>
+
+<button
+    class="nav-btn active"
+    onclick="showSection('inicio',this)"
+>
+Inicio
+</button>
+
+<button
+    class="nav-btn"
+    onclick="showSection('dinero',this)"
+>
+Dinero
+</button>
+
+<button
+    class="nav-btn"
+    onclick="showSection('clientes',this)"
+>
+Clientes
+</button>
+
+<button
+    class="nav-btn"
+    onclick="showSection('servicios',this)"
+>
+Servicios
+</button>
+
+<button
+    class="nav-btn"
+    onclick="showSection('agenda',this)"
+>
+Agenda
+</button>
+
+<button
+    class="nav-btn"
+    onclick="showSection('gastos',this)"
+>
+Gastos
+</button>
+
+</nav>
+
+
+<main>
+
+
+<!-- =====================================================
+INICIO
+===================================================== -->
+
+<section
+    id="inicio"
+    class="section active"
+>
+
+<h1 class="page-title">
+Resumen
+</h1>
+
+<div class="page-description">
+La salud de Mono's Barbería
+</div>
+
+
+<div class="period">
+
+<button
+    class="active"
+    onclick="changePeriod('day',this)"
+>
+HOY
+</button>
+
+<button
+    onclick="changePeriod('week',this)"
+>
+SEMANA
+</button>
+
+<button
+    onclick="changePeriod('month',this)"
+>
+MES
+</button>
+
+</div>
+
+
+<div class="grid">
+
+
+<div class="card">
+
+<div class="card-label">
+Clientes atendidos
+</div>
+
+<div
+    id="clientsCount"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Ingresos
+</div>
+
+<div
+    id="income"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Gastos
+</div>
+
+<div
+    id="expenses"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Ganancia neta
+</div>
+
+<div
+    id="netProfit"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+No-shows
+</div>
+
+<div
+    id="noShows"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Ticket promedio
+</div>
+
+<div
+    id="averageTicket"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card chart-card">
+
+<div class="card-label">
+Ingresos por día
+</div>
+
+<div class="chart-wrapper">
+
+<canvas id="incomeChart"></canvas>
+
+</div>
+
+</div>
+
+
+<div class="card chart-card">
+
+<div class="card-label">
+Clientes atendidos por día
+</div>
+
+<div class="chart-wrapper">
+
+<canvas id="clientsChart"></canvas>
+
+</div>
+
+</div>
+
+
+<div class="card health-card">
+
+<div class="card-label">
+Salud del negocio
+</div>
+
+<div id="health"></div>
+
+</div>
+
+
+<div class="card chart-card">
+
+<div class="card-label">
+Meta mensual de ingresos
+</div>
+
+<div
+    id="goalText"
+    class="card-small"
+>
+Sin meta configurada.
+</div>
+
+<div class="goal-bar">
+
+<div
+    id="goalFill"
+    class="goal-fill"
+></div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+DINERO
+===================================================== -->
+
+<section
+    id="dinero"
+    class="section"
+>
+
+<h1 class="page-title">
+Dinero
+</h1>
+
+<div class="page-description">
+Control financiero de la barbería
+</div>
+
+
+<div class="grid">
+
+
+<div class="card">
+
+<div class="card-label">
+Ingresos totales
+</div>
+
+<div
+    id="moneyTotal"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Propinas
+</div>
+
+<div
+    id="tips"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Descuentos
+</div>
+
+<div
+    id="discounts"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Gastos
+</div>
+
+<div
+    id="moneyExpenses"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Ganancia neta
+</div>
+
+<div
+    id="moneyNet"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Ganancia sin propinas
+</div>
+
+<div
+    id="moneyNetNoTips"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Margen neto
+</div>
+
+<div
+    id="margin"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Ingreso promedio
+</div>
+
+<div
+    id="avgClientIncome"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card chart-card">
+
+<div class="card-label">
+Ingresos vs gastos
+</div>
+
+<div class="chart-wrapper">
+
+<canvas id="financeChart"></canvas>
+
+</div>
+
+</div>
+
+
+<div class="card chart-card">
+
+<div class="card-label">
+Clientes que reciben más descuentos
+</div>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Cliente</th>
+<th>Descuento</th>
+<th>Veces</th>
+</tr>
+
+</thead>
+
+<tbody id="discountTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+CLIENTES
+===================================================== -->
+
+<section
+    id="clientes"
+    class="section"
+>
+
+<h1 class="page-title">
+Clientes
+</h1>
+
+<div class="page-description">
+Valor, frecuencia y comportamiento
+</div>
+
+
+<div class="grid">
+
+
+<div class="card">
+
+<div class="card-label">
+Clientes únicos
+</div>
+
+<div
+    id="uniqueClients"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Clientes nuevos
+</div>
+
+<div
+    id="newClients"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Recurrentes
+</div>
+
+<div
+    id="returningClients"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Frecuencia media
+</div>
+
+<div
+    id="frequency"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card chart-card">
+
+<div class="card-label">
+Clientes más frecuentes
+</div>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Cliente</th>
+
+<th>Visitas</th>
+
+<th>Ingresos</th>
+
+</tr>
+
+</thead>
+
+<tbody id="topClients"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<div class="card chart-card">
+
+<div class="card-label">
+Clientes desaparecidos
+</div>
+
+<div class="card-small">
+Clientes que llevan al menos 45 días sin venir.
+</div>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Cliente</th>
+
+<th>Última visita</th>
+
+<th>Días</th>
+
+</tr>
+
+</thead>
+
+<tbody id="lostClients"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<div class="card chart-card">
+
+<div class="card-label">
+Buscar cliente
+</div>
+
+<input
+    id="clientSearch"
+    placeholder="Nombre o teléfono..."
+    oninput="searchClients()"
+>
+
+<div id="searchResults"></div>
+
+</div>
+
+
+<div
+    id="clientDetail"
+    class="card client-detail"
+></div>
+
+</section>
+
+
+<!-- =====================================================
+SERVICIOS
+===================================================== -->
+
+<section
+    id="servicios"
+    class="section"
+>
+
+<h1 class="page-title">
+Servicios
+</h1>
+
+<div class="page-description">
+Qué vendes y qué genera más dinero
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Servicios más vendidos
+</div>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Servicio</th>
+
+<th>Cantidad</th>
+
+<th>Ingresos</th>
+
+</tr>
+
+</thead>
+
+<tbody id="serviceTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<div class="card chart-card">
+
+<div class="card-label">
+Distribución
+</div>
+
+<div class="chart-wrapper">
+
+<canvas id="serviceChart"></canvas>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+AGENDA
+===================================================== -->
+
+<section
+    id="agenda"
+    class="section"
+>
+
+<h1 class="page-title">
+Agenda
+</h1>
+
+<div class="page-description">
+Rendimiento de tus horarios
+</div>
+
+
+<div class="grid">
+
+
+<div class="card">
+
+<div class="card-label">
+No-shows
+</div>
+
+<div
+    id="agendaNoShows"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Cancelaciones
+</div>
+
+<div
+    id="cancellations"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Hora más solicitada
+</div>
+
+<div
+    id="bestHour"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-label">
+Día más productivo
+</div>
+
+<div
+    id="bestDay"
+    class="card-value"
+>
+—
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card chart-card">
+
+<div class="card-label">
+Reservas por hora
+</div>
+
+<div class="chart-wrapper">
+
+<canvas id="hoursChart"></canvas>
+
+</div>
+
+</div>
+
+
+<div class="card chart-card">
+
+<div class="card-label">
+Clientes por día de semana
+</div>
+
+<div class="chart-wrapper">
+
+<canvas id="daysChart"></canvas>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+GASTOS
+===================================================== -->
+
+<section
+    id="gastos"
+    class="section"
+>
+
+<h1 class="page-title">
+Gastos
+</h1>
+
+<div class="page-description">
+Controla dónde está saliendo el dinero
+</div>
+
+
+<div class="card form-card">
+
+<div class="form-title">
+Registrar gasto
+</div>
+
+
+<input
+    id="expenseDate"
+    type="date"
+>
+
+
+<select id="expenseCategory">
+
+<option value="productos">
+Productos
+</option>
+
+<option value="mantenimiento de máquinas">
+Mantenimiento de máquinas
+</option>
+
+<option value="navajas">
+Navajas
+</option>
+
+<option value="otros">
+Otros
+</option>
+
+</select>
+
+
+<input
+    id="expenseDescription"
+    placeholder="Descripción"
+>
+
+
+<input
+    id="expenseAmount"
+    type="number"
+    min="0"
+    step="0.01"
+    placeholder="Monto CUP"
+>
+
+
+<button
+    class="save-btn"
+    onclick="addExpense()"
+>
+GUARDAR GASTO
+</button>
+
+
+<div
+    id="expenseMessage"
+    class="card-small"
+></div>
+
+</div>
+
+
+<div class="card form-card">
+
+<div class="form-title">
+Meta mensual
+</div>
+
+
+<input
+    id="goalMonth"
+    type="month"
+>
+
+
+<input
+    id="goalIncome"
+    type="number"
+    min="0"
+    placeholder="Meta de ingresos"
+>
+
+
+<input
+    id="goalProfit"
+    type="number"
+    min="0"
+    placeholder="Meta de ganancia neta"
+>
+
+
+<button
+    class="save-btn"
+    onclick="saveGoal()"
+>
+GUARDAR META
+</button>
+
+
+<div
+    id="goalMessage"
+    class="card-small"
+></div>
+
+</div>
+
+
+<div class="card chart-card">
+
+<div class="card-label">
+Gastos por categoría
+</div>
+
+<div class="chart-wrapper">
+
+<canvas id="expenseChart"></canvas>
+
+</div>
+
+</div>
+
+
+<div class="card chart-card">
+
+<div class="card-label">
+Últimos gastos
+</div>
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Fecha</th>
+
+<th>Categoría</th>
+
+<th>Descripción</th>
+
+<th>Monto</th>
+
+</tr>
+
+</thead>
+
+<tbody id="expenseTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</section>
+
+
+</main>
+
+</div>
+
+
+<!-- =====================================================
+LOADING
+===================================================== -->
+
+<div id="loading">
+
+<div class="loader">
+Cargando Mono's...
+</div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+CONFIGURACIÓN SUPABASE
+===================================================== */
+
+
+/*
+IMPORTANTE:
+
+Tu tabla real se llama:
+
+turnos
+*/
+
+const RESERVAS_TABLE = "turnos";
+
+
+/*
+Tu Publishable Key ya está identificada.
+
+NO utilices Secret Key aquí.
+*/
+
+
+const SUPABASE_URL =
+    "PON_AQUI_TU_URL_DE_SUPABASE";
+
+
+const SUPABASE_PUBLISHABLE_KEY =
+    "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
+
+
+/*
+Las estadísticas empiezan desde:
+
+8 de octubre de 2026
+
+Esto evita utilizar los datos antiguos
+que no están completos.
+*/
+
+const ANALYTICS_START_DATE =
+    "2026-10-08";
+
+
+/* =====================================================
+SUPABASE
+===================================================== */
+
+const db =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
+
+
+/* =====================================================
+VARIABLES
+===================================================== */
+
+let reservas = [];
+
+let gastos = [];
+
+let currentPeriod = "day";
+
+let charts = {};
+
+
+/* =====================================================
+LOGIN
+===================================================== */
+
+async function login() {
+
+    const email =
+        document
+            .getElementById("email")
+            .value
+            .trim();
+
+    const password =
+        document
+            .getElementById("password")
+            .value;
+
+    const error =
+        document
+            .getElementById("loginError");
+
+
+    error.textContent = "";
+
+
+    if (!email || !password) {
+
+        error.textContent =
+            "Introduce correo y contraseña.";
+
+        return;
+
+    }
+
+
+    showLoading(true);
+
+
+    const result =
+        await db.auth.signInWithPassword({
+
+            email,
+            password
+
+        });
+
+
+    showLoading(false);
+
+
+    if (result.error) {
+
+        error.textContent =
+            "Correo o contraseña incorrectos.";
+
+        return;
+
+    }
+
+
+    await startDashboard();
+
+}
+
+
+/* =====================================================
+LOGOUT
+===================================================== */
+
+async function logout() {
+
+    await db.auth.signOut();
+
+    location.reload();
+
+}
+
+
+/* =====================================================
+INICIO
+===================================================== */
+
+async function init() {
+
+    const result =
+        await db.auth.getSession();
+
+
+    const session =
+        result
+            .data
+            .session;
+
+
+    if (session) {
+
+        await startDashboard();
+
+    } else {
+
+        document
+            .getElementById("loginScreen")
+            .style.display =
+            "flex";
+
+    }
+
+}
+
+
+/* =====================================================
+START DASHBOARD
+===================================================== */
+
+async function startDashboard() {
+
+    document
+        .getElementById("loginScreen")
+        .style.display =
+        "none";
+
+
+    document
+        .getElementById("app")
+        .style.display =
+        "block";
+
+
+    showLoading(true);
+
+
+    try {
+
+        await loadData();
+
+        await refreshDashboard();
+
+    }
+
+    catch(error) {
+
+        console.error(error);
+
+        alert(
+            "No se pudieron cargar los datos de Supabase."
+        );
+
+    }
+
+
+    showLoading(false);
+
+}
+
+
+/* =====================================================
+CARGAR DATOS
+===================================================== */
+
+async function loadData() {
+
+
+    /*
+    TURNOS
+
+    Traemos todos los registros desde
+    nuestra fecha de inicio.
+    */
+
+
+    const reservations =
+        await db
+            .from(RESERVAS_TABLE)
+            .select("*")
+            .gte(
+                "fecha",
+                ANALYTICS_START_DATE
+            )
+            .order(
+                "fecha",
+                {
+                    ascending: true
+                }
+            );
+
+
+    if (reservations.error)
+        throw reservations.error;
+
+
+    reservas =
+        reservations.data || [];
+
+
+    /*
+    GASTOS
+    */
+
+
+    const expenseResult =
+        await db
+            .from("gastos")
+            .select("*")
+            .gte(
+                "fecha",
+                ANALYTICS_START_DATE
+            )
+            .order(
+                "fecha",
+                {
+                    ascending: false
+                }
+            );
+
+
+    if (expenseResult.error)
+        throw expenseResult.error;
+
+
+    gastos =
+        expenseResult.data || [];
+
+}
+
+
+/* =====================================================
+FECHAS
+===================================================== */
+
+function todayString() {
+
+    return new Date()
+        .toLocaleDateString(
+            "en-CA"
+        );
+
+}
+
+
+function dateOnly(date) {
+
+    return new Date(
+        date + "T12:00:00"
+    );
+
+}
+
+
+function startOfWeek() {
+
+    const d =
+        dateOnly(
+            todayString()
+        );
+
+
+    const day =
+        d.getDay();
+
+
+    const difference =
+        day === 0
+            ? -6
+            : 1 - day;
+
+
+    d.setDate(
+        d.getDate() +
+        difference
+    );
+
+
+    return d
+        .toLocaleDateString(
+            "en-CA"
+        );
+
+}
+
+
+function startOfMonth() {
+
+    const d =
+        dateOnly(
+            todayString()
+        );
+
+
+    return new Date(
+        d.getFullYear(),
+        d.getMonth(),
+        1
+    )
+        .toLocaleDateString(
+            "en-CA"
+        );
+
+}
+
+
+function periodRange(period) {
+
+    const today =
+        todayString();
+
+
+    if (period === "day") {
+
+        return {
+            start: today,
+            end: today
+        };
+
+    }
+
+
+    if (period === "week") {
+
+        return {
+            start: startOfWeek(),
+            end: today
+        };
+
+    }
+
+
+    return {
+
+        start: startOfMonth(),
+
+        end: today
+
+    };
+
+}
+
+
+/* =====================================================
+ESTADOS
+===================================================== */
+
+function isNoShow(r) {
+
+    return r.no_show === true;
+
+}
+
+
+function isCancelled(r) {
+
+    const status =
+        String(
+            r.estado || ""
+        )
+        .toLowerCase();
+
+
+    return (
+
+        status.includes(
+            "cancel"
+        )
+
+    );
+
+}
+
+
+/*
+Un cliente se considera atendido
+cuando existe dinero cobrado
+y NO es un no-show.
+*/
+
+function isAttended(r) {
+
+    return (
+
+        !isNoShow(r) &&
+
+        Number(
+            r.precio_cobrado || 0
+        ) > 0
+
+    );
+
+}
+
+
+/* =====================================================
+DINERO
+===================================================== */
+
+function expectedPrice(r) {
+
+    return Number(
+        r.precio_esperado ||
+        r.total ||
+        0
+    );
+
+}
+
+
+function collectedPrice(r) {
+
+    return Number(
+        r.precio_cobrado || 0
+    );
+
+}
+
+
+function noShowCharge(r) {
+
+    return Number(
+        r.cobro_no_show || 0
+    );
+
+}
+
+
+function discountAmount(r) {
+
+    return Number(
+        r.descuento || 0
+    );
+
+}
+
+
+function tipAmount(r) {
+
+    return Number(
+        r.propina || 0
+    );
+
+}
+
+
+/* =====================================================
+FORMATO
+===================================================== */
+
+function money(value) {
+
+    return Number(value || 0)
+        .toLocaleString(
+            "es-CU",
+            {
+                maximumFractionDigits: 0
+            }
+        )
+        + " CUP";
+
+}
+
+
+function number(value) {
+
+    return Number(value || 0)
+        .toLocaleString(
+            "es-CU"
+        );
+
+}
+
+
+/* =====================================================
+REFRESH
+===================================================== */
+
+async function refreshDashboard() {
+
+    const range =
+        periodRange(
+            currentPeriod
+        );
+
+
+    const data =
+        reservas.filter(
+            r =>
+                r.fecha >= range.start &&
+                r.fecha <= range.end
+        );
+
+
+    const attended =
+        data.filter(
+            isAttended
+        );
+
+
+    const income =
+        attended.reduce(
+            (sum,r) =>
+                sum +
+                collectedPrice(r),
+            0
+        );
+
+
+    const periodExpenses =
+        gastos
+            .filter(
+                g =>
+                    g.fecha >= range.start &&
+                    g.fecha <= range.end
+            )
+            .reduce(
+                (sum,g) =>
+                    sum +
+                    Number(
+                        g.monto || 0
+                    ),
+                0
+            );
+
+
+    const noShows =
+        data.filter(
+            isNoShow
+        ).length;
+
+
+    const profit =
+        income -
+        periodExpenses;
+
+
+    document
+        .getElementById(
+            "clientsCount"
+        )
+        .textContent =
+        number(
+            attended.length
+        );
+
+
+    document
+        .getElementById(
+            "income"
+        )
+        .textContent =
+        money(
+            income
+        );
+
+
+    document
+        .getElementById(
+            "expenses"
+        )
+        .textContent =
+        money(
+            periodExpenses
+        );
+
+
+    document
+        .getElementById(
+            "netProfit"
+        )
+        .textContent =
+        money(
+            profit
+        );
+
+
+    document
+        .getElementById(
+            "noShows"
+        )
+        .textContent =
+        noShows;
+
+
+    document
+        .getElementById(
+            "averageTicket"
+        )
+        .textContent =
+        money(
+            attended.length
+                ? income / attended.length
+                : 0
+        );
+
+
+    updateMoney(
+        data,
+        periodExpenses
+    );
+
+
+    updateClients(
+        data
+    );
+
+
+    updateServices(
+        data
+    );
+
+
+    updateAgenda(
+        data
+    );
+
+
+    updateCharts(
+        data
+    );
+
+
+    updateHealth(
+        data,
+        periodExpenses
+    );
+
+
+    await updateGoal();
+
+}
+
+
+/* =====================================================
+DINERO
+===================================================== */
+
+function updateMoney(
+    data,
+    expenses
+) {
+
+    const attended =
+        data.filter(
+            isAttended
+        );
+
+
+    const total =
+        attended.reduce(
+            (sum,r) =>
+                sum +
+                collectedPrice(r),
+            0
+        );
+
+
+    const tips =
+        attended.reduce(
+            (sum,r) =>
+                sum +
+                tipAmount(r),
+            0
+        );
+
+
+    const discounts =
+        attended.reduce(
+            (sum,r) =>
+                sum +
+                discountAmount(r),
+            0
+        );
+
+
+    const net =
+        total -
+        expenses;
+
+
+    const netNoTips =
+        total -
+        tips -
+        expenses;
+
+
+    const margin =
+        total
+            ? (
+                net /
+                total
+            ) * 100
+            : 0;
+
+
+    document
+        .getElementById(
+            "moneyTotal"
+        )
+        .textContent =
+        money(total);
+
+
+    document
+        .getElementById(
+            "tips"
+        )
+        .textContent =
+        money(tips);
+
+
+    document
+        .getElementById(
+            "discounts"
+        )
+        .textContent =
+        money(discounts);
+
+
+    document
+        .getElementById(
+            "moneyExpenses"
+        )
+        .textContent =
+        money(expenses);
+
+
+    document
+        .getElementById(
+            "moneyNet"
+        )
+        .textContent =
+        money(net);
+
+
+    document
+        .getElementById(
+            "moneyNetNoTips"
+        )
+        .textContent =
+        money(netNoTips);
+
+
+    document
+        .getElementById(
+            "margin"
+        )
+        .textContent =
+        margin.toFixed(1)
+        + "%";
+
+
+    document
+        .getElementById(
+            "avgClientIncome"
+        )
+        .textContent =
+        money(
+            attended.length
+                ? total /
+                  attended.length
+                : 0
+        );
+
+
+    updateDiscountTable(
+        attended
+    );
+
+}
+
+
+/* =====================================================
+DESCUENTOS
+===================================================== */
+
+function normalizePhone(phone) {
+
+    return String(
+        phone || ""
+    )
+    .replace(
+        /\D/g,
+        ""
+    );
+
+}
+
+
+function updateDiscountTable(
+    data
+) {
+
+    const clients = {};
+
+
+    data.forEach(
+        r => {
+
+            const discount =
+                discountAmount(r);
+
+
+            if (
+                discount <= 0
+            )
+                return;
+
+
+            const phone =
+                normalizePhone(
+                    r.teléfono
+                );
+
+
+            if (!phone)
+                return;
+
+
+            if (
+                !clients[phone]
+            ) {
+
+                clients[phone] = {
+
+                    nombre:
+                        r.nombre ||
+                        "Sin nombre",
+
+                    total: 0,
+
+                    veces: 0
+
+                };
+
+            }
+
+
+            clients[phone].total +=
+                discount;
+
+
+            clients[phone].veces++;
+
+        }
+    );
+
+
+    const rows =
+        Object.values(
+            clients
+        )
+        .sort(
+            (a,b) =>
+                b.total -
+                a.total
+        )
+        .slice(
+            0,
+            10
+        );
+
+
+    document
+        .getElementById(
+            "discountTable"
+        )
+        .innerHTML =
+
+        rows.map(
+            c => `
+
+            <tr>
+
+                <td>
+                    ${escapeHTML(
+                        c.nombre
+                    )}
+                </td>
+
+                <td>
+                    ${money(
+                        c.total
+                    )}
+                </td>
+
+                <td>
+                    ${c.veces}
+                </td>
+
+            </tr>
+
+            `
+        )
+        .join("");
+
+}
+
+
+/* =====================================================
+CLIENTES
+===================================================== */
+
+function updateClients(
+    data
+) {
+
+    /*
+    Para conocer frecuencia real
+    utilizamos el historial completo
+    desde la fecha de inicio.
+    */
+
+
+    const attended =
+        reservas.filter(
+            isAttended
+        );
+
+
+    const clients = {};
+
+
+    attended.forEach(
+        r => {
+
+            const phone =
+                normalizePhone(
+                    r.teléfono
+                );
+
+
+            if (!phone)
+                return;
+
+
+            if (
+                !clients[phone]
+            ) {
+
+                clients[phone] = {
+
+                    nombre:
+                        r.nombre ||
+                        "Sin nombre",
+
+                    visits: 0,
+
+                    income: 0,
+
+                    dates: [],
+
+                    discounts: 0,
+
+                    tips: 0
+
+                };
+
+            }
+
+
+            clients[phone].visits++;
+
+
+            clients[phone].income +=
+                collectedPrice(r);
+
+
+            clients[phone].discounts +=
+                discountAmount(r);
+
+
+            clients[phone].tips +=
+                tipAmount(r);
+
+
+            clients[phone].dates.push(
+                r.fecha
+            );
+
+        }
+    );
+
+
+    const list =
+        Object.values(
+            clients
+        );
+
+
+    const unique =
+        list.length;
+
+
+    const recurrent =
+        list.filter(
+            c =>
+                c.visits > 1
+        ).length;
+
+
+    const newClients =
+        list.filter(
+            c =>
+                c.visits === 1
+        ).length;
+
+
+    document
+        .getElementById(
+            "uniqueClients"
+        )
+        .textContent =
+        number(unique);
+
+
+    document
+        .getElementById(
+            "newClients"
+        )
+        .textContent =
+        number(newClients);
+
+
+    document
+        .getElementById(
+            "returningClients"
+        )
+        .textContent =
+        number(recurrent);
+
+
+    const frequencies = [];
+
+
+    list.forEach(
+        c => {
+
+            if (
+                c.dates.length < 2
+            )
+                return;
+
+
+            const dates =
+                c.dates
+                    .map(
+                        dateOnly
+                    )
+                    .sort(
+                        (a,b) =>
+                            a-b
+                    );
+
+
+            for (
+                let i = 1;
+                i < dates.length;
+                i++
+            ) {
+
+                frequencies.push(
+
+                    (
+                        dates[i] -
+                        dates[i-1]
+                    )
+                    /
+                    86400000
+
+                );
+
+            }
+
+        }
+    );
+
+
+    const avgFrequency =
+        frequencies.length
+            ? frequencies.reduce(
+                (a,b) =>
+                    a+b,
+                0
+            )
+            /
+            frequencies.length
+            : 0;
+
+
+    document
+        .getElementById(
+            "frequency"
+        )
+        .textContent =
+        avgFrequency
+            ? avgFrequency.toFixed(0)
+              + " días"
+            : "—";
+
+
+    updateTopClients(
+        list
+    );
+
+
+    updateLostClients(
+        list
+    );
+
+}
+
+
+/* =====================================================
+TOP CLIENTES
+===================================================== */
+
+function updateTopClients(
+    clients
+) {
+
+    const rows =
+        [...clients]
+            .sort(
+                (a,b) =>
+                    b.visits -
+                    a.visits
+            )
+            .slice(
+                0,
+                10
+            );
+
+
+    document
+        .getElementById(
+            "topClients"
+        )
+        .innerHTML =
+
+        rows.map(
+            c => `
+
+            <tr>
+
+                <td>
+                    ${escapeHTML(
+                        c.nombre
+                    )}
+                </td>
+
+                <td>
+                    ${c.visits}
+                </td>
+
+                <td>
+                    ${money(
+                        c.income
+                    )}
+                </td>
+
+            </tr>
+
+            `
+        )
+        .join("");
+
+}
+
+
+/* =====================================================
+CLIENTES DESAPARECIDOS
+===================================================== */
+
+function updateLostClients(
+    clients
+) {
+
+    const today =
+        dateOnly(
+            todayString()
+        );
+
+
+    const rows =
+        clients
+            .map(
+                c => {
+
+                    const latest =
+                        c.dates
+                            .map(
+                                dateOnly
+                            )
+                            .sort(
+                                (a,b) =>
+                                    b-a
+                            )[0];
+
+
+                    const days =
+                        Math.floor(
+
+                            (
+                                today -
+                                latest
+                            )
+                            /
+                            86400000
+
+                        );
+
+
+                    return {
+
+                        ...c,
+
+                        latest,
+
+                        days
+
+                    };
+
+                }
+            )
+            .filter(
+                c =>
+                    c.days >= 45
+            )
+            .sort(
+                (a,b) =>
+                    b.days -
+                    a.days
+            )
+            .slice(
+                0,
+                10
+            );
+
+
+    document
+        .getElementById(
+            "lostClients"
+        )
+        .innerHTML =
+
+        rows.map(
+            c => `
+
+            <tr>
+
+                <td>
+                    ${escapeHTML(
+                        c.nombre
+                    )}
+                </td>
+
+                <td>
+                    ${formatDate(
+                        c.latest
+                    )}
+                </td>
+
+                <td>
+                    ${c.days}
+                </td>
+
+            </tr>
+
+            `
+        )
+        .join("");
+
+}
+
+
+/* =====================================================
+BUSCAR CLIENTE
+===================================================== */
+
+function searchClients() {
+
+    const query =
+        document
+            .getElementById(
+                "clientSearch"
+            )
+            .value
+            .toLowerCase()
+            .trim();
+
+
+    const result =
+        document
+            .getElementById(
+                "searchResults"
+            );
+
+
+    if (!query) {
+
+        result.innerHTML = "";
+
+        return;
+
+    }
+
+
+    const numericQuery =
+        query.replace(
+            /\D/g,
+            ""
+        );
+
+
+    const clients = {};
+
+
+    reservas
+        .filter(
+            isAttended
+        )
+        .forEach(
+            r => {
+
+                const phone =
+                    normalizePhone(
+                        r.teléfono
+                    );
+
+
+                const name =
+                    String(
+                        r.nombre || ""
+                    )
+                    .toLowerCase();
+
+
+                if (
+
+                    !name.includes(
+                        query
+                    )
+
+                    &&
+
+                    !phone.includes(
+                        numericQuery
+                    )
+
+                )
+                    return;
+
+
+                if (
+                    !clients[phone]
+                ) {
+
+                    clients[phone] = {
+
+                        phone,
+
+                        nombre:
+                            r.nombre ||
+                            "Sin nombre",
+
+                        visits: 0,
+
+                        income: 0
+
+                    };
+
+                }
+
+
+                clients[phone].visits++;
+
+
+                clients[phone].income +=
+                    collectedPrice(r);
+
+            }
+        );
+
+
+    result.innerHTML =
+
+        Object.values(
+            clients
+        )
+        .slice(
+            0,
+            10
+        )
+        .map(
+            c => `
+
+            <div
+                class="card"
+                style="margin-top:8px"
+                onclick="
+                    showClient('${c.phone}')
+                "
+            >
+
+                <div class="card-label">
+                    ${escapeHTML(
+                        c.nombre
+                    )}
+                </div>
+
+                <div class="card-small">
+
+                    ${c.visits}
+                    visitas ·
+                    ${money(
+                        c.income
+                    )}
+
+                </div>
+
+            </div>
+
+            `
+        )
+        .join("");
+
+}
+
+
+/* =====================================================
+DETALLE CLIENTE
+===================================================== */
+
+function showClient(
+    phone
+) {
+
+    const records =
+        reservas
+            .filter(
+                isAttended
+            )
+            .filter(
+                r =>
+                    normalizePhone(
+                        r.teléfono
+                    ) === phone
+            );
+
+
+    if (!records.length)
+        return;
+
+
+    const name =
+        records[0].nombre ||
+        "Cliente";
+
+
+    const income =
+        records.reduce(
+            (s,r) =>
+                s +
+                collectedPrice(r),
+            0
+        );
+
+
+    const discounts =
+        records.reduce(
+            (s,r) =>
+                s +
+                discountAmount(r),
+            0
+        );
+
+
+    const tips =
+        records.reduce(
+            (s,r) =>
+                s +
+                tipAmount(r),
+            0
+        );
+
+
+    const noShows =
+        reservas.filter(
+            r =>
+                normalizePhone(
+                    r.teléfono
+                ) === phone
+                &&
+                isNoShow(r)
+        ).length;
+
+
+    const dates =
+        records
+            .map(
+                r =>
+                    dateOnly(
+                        r.fecha
+                    )
+            )
+            .sort(
+                (a,b) =>
+                    a-b
+            );
+
+
+    let frequency = 0;
+
+
+    if (
+        dates.length > 1
+    ) {
+
+        let total = 0;
+
+
+        for (
+            let i=1;
+            i<dates.length;
+            i++
+        ) {
+
+            total +=
+                (
+                    dates[i] -
+                    dates[i-1]
+                )
+                /
+                86400000;
+
+        }
+
+
+        frequency =
+            total /
+            (
+                dates.length -
+                1
+            );
+
+    }
+
+
+    const detail =
+        document
+            .getElementById(
+                "clientDetail"
+            );
+
+
+    detail.innerHTML = `
+
+        <button
+            class="back-button"
+            onclick="
+                document
+                .getElementById(
+                    'clientDetail'
+                )
+                .style.display='none'
+            "
+        >
+            ← Volver
+        </button>
+
+
+        <div class="page-title">
+
+            ${escapeHTML(
+                name
+            )}
+
+        </div>
+
+
+        <div class="page-description">
+
+            ${phone}
+
+        </div>
+
+
+        <div class="grid">
+
+
+            <div class="card">
+
+                <div class="card-label">
+                    Visitas
+                </div>
+
+                <div class="card-value">
+                    ${records.length}
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-label">
+                    Ingresos
+                </div>
+
+                <div class="card-value">
+                    ${money(income)}
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-label">
+                    Descuentos
+                </div>
+
+                <div class="card-value">
+                    ${money(discounts)}
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-label">
+                    Propinas
+                </div>
+
+                <div class="card-value">
+                    ${money(tips)}
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-label">
+                    No-shows
+                </div>
+
+                <div class="card-value">
+                    ${noShows}
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-label">
+                    Frecuencia
+                </div>
+
+                <div class="card-value">
+
+                    ${
+                        frequency
+                        ? frequency.toFixed(0)
+                          + " días"
+                        : "—"
+                    }
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    `;
+
+
+    detail.style.display =
+        "block";
+
+
+    detail.scrollIntoView({
+        behavior: "smooth"
+    });
+
+}
+
+
+/* =====================================================
+SERVICIOS
+===================================================== */
+
+function parseServices(
+    value
+) {
+
+    if (!value)
+        return [];
+
+
+    let text =
+        String(value)
+            .trim();
+
+
+    /*
+    Tu Supabase guarda:
+
+    {degradado, barba}
+
+    Eliminamos las llaves.
+    */
+
+
+    text =
+        text
+            .replace(
+                /^\{/,
+                ""
+            )
+            .replace(
+                /\}$/,
+                ""
+            );
+
+
+    return text
+        .split(",")
+        .map(
+            x =>
+                x
+                    .trim()
+                    .replace(
+                        /^"|"$/g,
+                        ""
+                    )
+        )
+        .filter(Boolean);
+
+}
+
+
+/* =====================================================
+SERVICIOS
+===================================================== */
+
+function updateServices(
+    data
+) {
+
+    const attended =
+        data.filter(
+            isAttended
+        );
+
+
+    const services = {};
+
+
+    attended.forEach(
+        r => {
+
+            const list =
+                parseServices(
+                    r.servicios
+                );
+
+
+            /*
+            Cada servicio se cuenta
+            individualmente.
+            */
+
+
+            list.forEach(
+                service => {
+
+                    const key =
+                        service
+                            .toLowerCase();
+
+
+                    if (
+                        !services[key]
+                    ) {
+
+                        services[key] = {
+
+                            name:
+                                service,
+
+                            count: 0,
+
+                            income: 0
+
+                        };
+
+                    }
+
+
+                    services[key].count++;
+
+
+                    /*
+                    Para un combo:
+
+                    800 total
+                    2 servicios
+
+                    asignamos provisionalmente
+                    400 a cada uno.
+
+                    Más adelante podemos
+                    guardar el precio individual
+                    de cada servicio.
+                    */
+
+
+                    services[key].income +=
+
+                        collectedPrice(r)
+                        /
+                        Math.max(
+                            list.length,
+                            1
+                        );
+
+                }
+            );
+
+
+        }
+    );
+
+
+    const rows =
+        Object.values(
+            services
+        )
+        .sort(
+            (a,b) =>
+                b.count -
+                a.count
+        );
+
+
+    document
+        .getElementById(
+            "serviceTable"
+        )
+        .innerHTML =
+
+        rows.map(
+            s => `
+
+            <tr>
+
+                <td>
+                    ${escapeHTML(
+                        s.name
+                    )}
+                </td>
+
+                <td>
+                    ${s.count}
+                </td>
+
+                <td>
+                    ${money(
+                        s.income
+                    )}
+                </td>
+
+            </tr>
+
+            `
+        )
+        .join("");
+
+
+    drawChart(
+
+        "serviceChart",
+
+        "doughnut",
+
+        rows
+            .slice(0,8)
+            .map(
+                x =>
+                    x.name
+            ),
+
+        rows
+            .slice(0,8)
+            .map(
+                x =>
+                    x.count
+            )
+
+    );
+
+}
+
+
+/* =====================================================
+AGENDA
+===================================================== */
+
+function updateAgenda(
+    data
+) {
+
+    const noShows =
+        data.filter(
+            isNoShow
+        ).length;
+
+
+    const cancellations =
+        data.filter(
+            isCancelled
+        ).length;
+
+
+    document
+        .getElementById(
+            "agendaNoShows"
+        )
+        .textContent =
+        noShows;
+
+
+    document
+        .getElementById(
+            "cancellations"
+        )
+        .textContent =
+        cancellations;
+
+
+    const hours = {};
+
+
+    data.forEach(
+        r => {
+
+            const hour =
+                r.turno ||
+                "Sin hora";
+
+
+            hours[hour] =
+                (
+                    hours[hour] ||
+                    0
+                ) + 1;
+
+        }
+    );
+
+
+    const sortedHours =
+        Object.entries(
+            hours
+        )
+        .sort(
+            (a,b) =>
+                b[1] -
+                a[1]
+        );
+
+
+    document
+        .getElementById(
+            "bestHour"
+        )
+        .textContent =
+
+        sortedHours.length
+            ? sortedHours[0][0]
+            : "—";
+
+
+    const days = {
+
+        "Lunes": 0,
+
+        "Martes": 0,
+
+        "Miércoles": 0,
+
+        "Jueves": 0,
+
+        "Viernes": 0,
+
+        "Sábado": 0
+
+    };
+
+
+    data.forEach(
+        r => {
+
+            const date =
+                dateOnly(
+                    r.fecha
+                );
+
+
+            const day =
+                date.getDay();
+
+
+            const names = [
+
+                "Domingo",
+
+                "Lunes",
+
+                "Martes",
+
+                "Miércoles",
+
+                "Jueves",
+
+                "Viernes",
+
+                "Sábado"
+
+            ];
+
+
+            if (
+                days[
+                    names[day]
+                ] !== undefined
+            ) {
+
+                days[
+                    names[day]
+                ]++;
+
+            }
+
+        }
+    );
+
+
+    const sortedDays =
+        Object.entries(
+            days
+        )
+        .sort(
+            (a,b) =>
+                b[1] -
+                a[1]
+        );
+
+
+    document
+        .getElementById(
+            "bestDay"
+        )
+        .textContent =
+
+        sortedDays.length
+            ? sortedDays[0][0]
+            : "—";
+
+
+    drawChart(
+
+        "hoursChart",
+
+        "bar",
+
+        Object.keys(
+            hours
+        ),
+
+        Object.values(
+            hours
+        )
+
+    );
+
+
+    drawChart(
+
+        "daysChart",
+
+        "bar",
+
+        Object.keys(
+            days
+        ),
+
+        Object.values(
+            days
+        )
+
+    );
+
+}
+
+
+/* =====================================================
+GRÁFICOS
+===================================================== */
+
+function updateCharts(
+    data
+) {
+
+    const income = {};
+
+    const clients = {};
+
+    const expenses = {};
+
+
+    data.forEach(
+        r => {
+
+            if (
+                !isAttended(r)
+            )
+                return;
+
+
+            income[r.fecha] =
+
+                (
+                    income[r.fecha] ||
+                    0
+                )
+
+                +
+
+                collectedPrice(r);
+
+
+            clients[r.fecha] =
+
+                (
+                    clients[r.fecha] ||
+                    0
+                )
+
+                + 1;
+
+        }
+    );
+
+
+    gastos.forEach(
+        g => {
+
+            if (
+                data.some(
+                    r =>
+                        r.fecha ===
+                        g.fecha
+                )
+            ) {
+
+                expenses[g.fecha] =
+
+                    (
+                        expenses[g.fecha] ||
+                        0
+                    )
+
+                    +
+
+                    Number(
+                        g.monto || 0
+                    );
+
+            }
+
+        }
+    );
+
+
+    drawChart(
+
+        "incomeChart",
+
+        "line",
+
+        Object.keys(
+            income
+        ),
+
+        Object.values(
+            income
+        )
+
+    );
+
+
+    drawChart(
+
+        "clientsChart",
+
+        "bar",
+
+        Object.keys(
+            clients
+        ),
+
+        Object.values(
+            clients
+        )
+
+    );
+
+
+    const financeDates =
+        [
+            ...new Set(
+                [
+                    ...Object.keys(income),
+
+                    ...Object.keys(expenses)
+
+                ]
+            )
+        ]
+        .sort();
+
+
+    drawChart(
+
+        "financeChart",
+
+        "line",
+
+        financeDates,
+
+        financeDates.map(
+            date =>
+                (
+                    income[date] ||
+                    0
+                )
+                -
+                (
+                    expenses[date] ||
+                    0
+                )
+        )
+
+    );
+
+
+    updateExpenseChart();
+
+}
+
+
+/* =====================================================
+GRÁFICO
+===================================================== */
+
+function drawChart(
+    id,
+    type,
+    labels,
+    values
+) {
+
+    const canvas =
+        document.getElementById(
+            id
+        );
+
+
+    if (!canvas)
+        return;
+
+
+    if (
+        charts[id]
+    ) {
+
+        charts[id].destroy();
+
+    }
+
+
+    charts[id] =
+        new Chart(
+            canvas,
+            {
+
+                type,
+
+                data: {
+
+                    labels,
+
+                    datasets: [{
+
+                        data: values,
+
+                        borderColor:
+                            "#cbb26a",
+
+                        backgroundColor:
+                            "rgba(203,178,106,.18)",
+
+                        borderWidth: 2,
+
+                        tension: .35,
+
+                        fill:
+                            type ===
+                            "line"
+
+                    }]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    plugins: {
+
+                        legend: {
+
+                            display: false
+
+                        }
+
+                    },
+
+                    scales:
+
+                        type ===
+                        "doughnut"
+
+                        ? {}
+
+                        : {
+
+                            x: {
+
+                                ticks: {
+
+                                    color:
+                                        "#a9aa9d",
+
+                                    font: {
+
+                                        size: 9
+
+                                    }
+
+                                },
+
+                                grid: {
+
+                                    display: false
+
+                                }
+
+                            },
+
+                            y: {
+
+                                ticks: {
+
+                                    color:
+                                        "#a9aa9d",
+
+                                    font: {
+
+                                        size: 9
+
+                                    }
+
+                                },
+
+                                grid: {
+
+                                    color:
+                                        "rgba(255,255,255,.05)"
+
+                                }
+
+                            }
+
+                        }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+GASTOS
+===================================================== */
+
+async function addExpense() {
+
+    const fecha =
+        document
+            .getElementById(
+                "expenseDate"
+            )
+            .value;
+
+
+    const categoria =
+        document
+            .getElementById(
+                "expenseCategory"
+            )
+            .value;
+
+
+    const descripcion =
+        document
+            .getElementById(
+                "expenseDescription"
+            )
+            .value
+            .trim();
+
+
+    const monto =
+        Number(
+            document
+                .getElementById(
+                    "expenseAmount"
+                )
+                .value
+        );
+
+
+    if (
+        !fecha ||
+        !monto
+    ) {
+
+        document
+            .getElementById(
+                "expenseMessage"
+            )
+            .textContent =
+            "Introduce fecha y monto.";
+
+        return;
+
+    }
+
+
+    showLoading(true);
+
+
+    const result =
+        await db
+            .from("gastos")
+            .insert({
+
+                fecha,
+
+                categoria,
+
+                descripcion,
+
+                monto
+
+            });
+
+
+    showLoading(false);
+
+
+    if (
+        result.error
+    ) {
+
+        console.error(
+            result.error
+        );
+
+
+        document
+            .getElementById(
+                "expenseMessage"
+            )
+            .textContent =
+            "No se pudo guardar el gasto.";
+
+        return;
+
+    }
+
+
+    document
+        .getElementById(
+            "expenseMessage"
+        )
+        .textContent =
+        "Gasto guardado correctamente.";
+
+
+    document
+        .getElementById(
+            "expenseDescription"
+        )
+        .value = "";
+
+
+    document
+        .getElementById(
+            "expenseAmount"
+        )
+        .value = "";
+
+
+    await loadData();
+
+    await refreshDashboard();
+
+}
+
+
+/* =====================================================
+METAS
+===================================================== */
+
+async function saveGoal() {
+
+    const month =
+        document
+            .getElementById(
+                "goalMonth"
+            )
+            .value;
+
+
+    const income =
+        Number(
+            document
+                .getElementById(
+                    "goalIncome"
+                )
+                .value ||
+            0
+        );
+
+
+    const profit =
+        Number(
+            document
+                .getElementById(
+                    "goalProfit"
+                )
+                .value ||
+            0
+        );
+
+
+    if (!month) {
+
+        document
+            .getElementById(
+                "goalMessage"
+            )
+            .textContent =
+            "Selecciona un mes.";
+
+        return;
+
+    }
+
+
+    const mes =
+        month +
+        "-01";
+
+
+    showLoading(true);
+
+
+    const result =
+        await db
+            .from(
+                "metas_mensuales"
+            )
+            .upsert(
+
+                {
+
+                    mes,
+
+                    meta_ingresos:
+                        income,
+
+                    meta_ganancia_neta:
+                        profit
+
+                },
+
+                {
+
+                    onConflict:
+                        "mes"
+
+                }
+
+            );
+
+
+    showLoading(false);
+
+
+    if (
+        result.error
+    ) {
+
+        console.error(
+            result.error
+        );
+
+
+        document
+            .getElementById(
+                "goalMessage"
+            )
+            .textContent =
+            "No se pudo guardar.";
+
+        return;
+
+    }
+
+
+    document
+        .getElementById(
+            "goalMessage"
+        )
+        .textContent =
+        "Meta guardada.";
+
+
+    await updateGoal();
+
+}
+
+
+/* =====================================================
+META
+===================================================== */
+
+async function updateGoal() {
+
+    const month =
+        todayString()
+            .slice(
+                0,
+                7
+            );
+
+
+    const result =
+        await db
+            .from(
+                "metas_mensuales"
+            )
+            .select("*")
+            .eq(
+                "mes",
+                month +
+                "-01"
+            )
+            .maybeSingle();
+
+
+    if (
+        result.error ||
+        !result.data
+    )
+        return;
+
+
+    const meta =
+        result.data;
+
+
+    const monthData =
+        reservas.filter(
+            r =>
+                r.fecha >=
+                startOfMonth()
+                &&
+                r.fecha <=
+                todayString()
+        );
+
+
+    const income =
+        monthData
+            .filter(
+                isAttended
+            )
+            .reduce(
+                (s,r) =>
+                    s +
+                    collectedPrice(r),
+                0
+            );
+
+
+    const percentage =
+        meta.meta_ingresos
+            ? Math.min(
+
+                (
+                    income /
+                    Number(
+                        meta.meta_ingresos
+                    )
+                )
+                *
+                100,
+
+                100
+
+            )
+            : 0;
+
+
+    document
+        .getElementById(
+            "goalText"
+        )
+        .textContent =
+
+        money(income)
+        +
+        " / "
+        +
+        money(
+            meta.meta_ingresos
+        );
+
+
+    document
+        .getElementById(
+            "goalFill"
+        )
+        .style.width =
+
+        percentage +
+        "%";
+
+}
+
+
+/* =====================================================
+GASTOS GRÁFICO
+===================================================== */
+
+function updateExpenseChart() {
+
+    const categories = {};
+
+
+    gastos.forEach(
+        g => {
+
+            categories[
+                g.categoria
+            ] =
+
+                (
+                    categories[
+                        g.categoria
+                    ] ||
+                    0
+                )
+
+                +
+
+                Number(
+                    g.monto || 0
+                );
+
+        }
+    );
+
+
+    drawChart(
+
+        "expenseChart",
+
+        "doughnut",
+
+        Object.keys(
+            categories
+        ),
+
+        Object.values(
+            categories
+        )
+
+    );
+
+
+    document
+        .getElementById(
+            "expenseTable"
+        )
+        .innerHTML =
+
+        gastos
+            .slice(
+                0,
+                20
+            )
+            .map(
+                g => `
+
+                <tr>
+
+                    <td>
+                        ${formatDate(
+                            dateOnly(
+                                g.fecha
+                            )
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            g.categoria
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            g.descripcion ||
+                            ""
+                        )}
+                    </td>
+
+                    <td>
+                        ${money(
+                            g.monto
+                        )}
+                    </td>
+
+                </tr>
+
+                `
+            )
+            .join("");
+
+}
+
+
+/* =====================================================
+SALUD DEL NEGOCIO
+===================================================== */
+
+function updateHealth(
+    data,
+    expenses
+) {
+
+    const attended =
+        data.filter(
+            isAttended
+        );
+
+
+    const income =
+        attended.reduce(
+            (s,r) =>
+                s +
+                collectedPrice(r),
+            0
+        );
+
+
+    const noShows =
+        data.filter(
+            isNoShow
+        ).length;
+
+
+    const discounts =
+        attended.reduce(
+            (s,r) =>
+                s +
+                discountAmount(r),
+            0
+        );
+
+
+    const margin =
+        income
+            ? (
+                (
+                    income -
+                    expenses
+                )
+                /
+                income
+            )
+            *
+            100
+            : 0;
+
+
+    const noShowRate =
+        data.length
+            ? (
+                noShows /
+                data.length
+            )
+            *
+            100
+            : 0;
+
+
+    let marginClass =
+        "good";
+
+    if (
+        margin < 40
+    )
+        marginClass =
+            "warning";
+
+    if (
+        margin < 20
+    )
+        marginClass =
+            "bad";
+
+
+    let noShowClass =
+        "good";
+
+    if (
+        noShowRate > 8
+    )
+        noShowClass =
+            "warning";
+
+    if (
+        noShowRate > 15
+    )
+        noShowClass =
+            "bad";
+
+
+    const html = `
+
+        <div class="health-row">
+
+            <span class="health-name">
+                Margen neto
+            </span>
+
+            <span
+                class="health-value ${marginClass}"
+            >
+                ${margin.toFixed(1)}%
+            </span>
+
+        </div>
+
+
+        <div class="health-row">
+
+            <span class="health-name">
+                No-shows
+            </span>
+
+            <span
+                class="health-value ${noShowClass}"
+            >
+                ${noShowRate.toFixed(1)}%
+            </span>
+
+        </div>
+
+
+        <div class="health-row">
+
+            <span class="health-name">
+                Descuentos
+            </span>
+
+            <span class="health-value">
+
+                ${money(
+                    discounts
+                )}
+
+            </span>
+
+        </div>
+
+
+        <div class="health-row">
+
+            <span class="health-name">
+                Clientes atendidos
+            </span>
+
+            <span class="health-value good">
+
+                ${attended.length}
+
+            </span>
+
+        </div>
+
+    `;
+
+
+    document
+        .getElementById(
+            "health"
+        )
+        .innerHTML =
+        html;
+
+}
+
+
+/* =====================================================
+NAVEGACIÓN
+===================================================== */
+
+function showSection(
+    id,
+    button
+) {
+
+    document
+        .querySelectorAll(
+            ".section"
+        )
+        .forEach(
+            section =>
+                section.classList.remove(
+                    "active"
+                )
+        );
+
+
+    document
+        .getElementById(
+            id
+        )
+        .classList.add(
+            "active"
+        );
+
+
+    document
+        .querySelectorAll(
+            ".nav-btn"
+        )
+        .forEach(
+            btn =>
+                btn.classList.remove(
+                    "active"
+                )
+        );
+
+
+    button.classList.add(
+        "active"
+    );
+
+}
+
+
+/* =====================================================
+PERIODOS
+===================================================== */
+
+async function changePeriod(
+    period,
+    button
+) {
+
+    currentPeriod =
+        period;
+
+
+    document
+        .querySelectorAll(
+            ".period button"
+        )
+        .forEach(
+            b =>
+                b.classList.remove(
+                    "active"
+                )
+        );
+
+
+    button.classList.add(
+        "active"
+    );
+
+
+    await refreshDashboard();
+
+}
+
+
+/* =====================================================
+UTILIDADES
+===================================================== */
+
+function formatDate(
+    date
+) {
+
+    return date.toLocaleDateString(
+        "es-CU",
+        {
+
+            day: "2-digit",
+
+            month: "2-digit",
+
+            year: "numeric"
+
+        }
+    );
+
+}
+
+
+function escapeHTML(
+    value
+) {
+
+    return String(
+        value || ""
+    )
+    .replace(
+        /[&<>"']/g,
+        char => ({
+
+            "&": "&amp;",
+
+            "<": "&lt;",
+
+            ">": "&gt;",
+
+            '"': "&quot;",
+
+            "'": "&#039;"
+
+        })[char]
+    );
+
+}
+
+
+function showLoading(
+    visible
+) {
+
+    document
+        .getElementById(
+            "loading"
+        )
+        .style.display =
+        visible
+            ? "flex"
+            : "none";
+
+}
+
+
+/* =====================================================
+FECHAS FORMULARIOS
+===================================================== */
+
+document
+    .getElementById(
+        "expenseDate"
+    )
+    .value =
+    todayString();
+
+
+document
+    .getElementById(
+        "goalMonth"
+    )
+    .value =
+    todayString()
+        .slice(
+            0,
+            7
+        );
+
+
+/* =====================================================
+ARRANQUE
+===================================================== */
+
+init();
+
+</script>
+
+</body>
+
+</html>
