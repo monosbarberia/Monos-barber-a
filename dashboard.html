@@ -2,8 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 
 <title>Mono's — Administrador</title>
 
@@ -11,456 +10,486 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4"></script>
 
 <style>
-:root {
-    --verde: #1c3823;
-    --verde-2: #233925;
-    --verde-3: #102417;
-    --dorado: #cbb26a;
-    --dorado-claro: #e3cf8c;
-    --fondo: #0d160f;
-    --tarjeta: #142319;
-    --texto: #f5f1e5;
-    --muted: #a9ad9f;
-    --rojo: #d96c6c;
-    --verde-ok: #78bd83;
+:root{
+    --green:#1c3823;
+    --green2:#233925;
+    --green3:#0d180f;
+    --gold:#cbb26a;
+    --gold2:#e3cf8c;
+    --bg:#09110b;
+    --card:#142319;
+    --text:#f5f1e5;
+    --muted:#a9ad9f;
+    --red:#d96c6c;
+    --ok:#78bd83;
 }
 
-* {
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
 }
 
-body {
-    margin: 0;
-    background:
-        radial-gradient(circle at top, #233925 0%, #0d160f 42%);
-    color: var(--texto);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    min-height: 100vh;
+html,body{
+    margin:0;
+    padding:0;
+    min-height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 
-button,
-input,
-select {
-    font: inherit;
+button,input,select{
+    font:inherit;
 }
 
-.hidden {
-    display: none !important;
+button{
+    cursor:pointer;
+}
+
+.hidden{
+    display:none!important;
 }
 
 /* LOGIN */
 
-#loginScreen {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
+#loginScreen{
+    min-height:100vh;
+    min-height:100dvh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:22px;
+    background:
+        radial-gradient(circle at 50% 0%,#28472d 0%,#09110b 52%);
 }
 
-.login-box {
-    width: 100%;
-    max-width: 390px;
-    background: rgba(20,35,25,.96);
-    border: 1px solid rgba(203,178,106,.35);
-    border-radius: 24px;
-    padding: 30px 22px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+.loginBox{
+    width:100%;
+    max-width:390px;
+    background:rgba(20,35,25,.97);
+    border:1px solid rgba(203,178,106,.3);
+    border-radius:24px;
+    padding:30px 22px;
+    box-shadow:0 25px 70px rgba(0,0,0,.5);
 }
 
-.logo-mono {
-    text-align: center;
-    margin-bottom: 28px;
+.logo{
+    text-align:center;
+    margin-bottom:28px;
 }
 
-.logo-mono .m {
-    color: var(--dorado);
-    font-family: Georgia, serif;
-    font-size: 64px;
-    font-weight: bold;
-    line-height: .9;
+.logoM{
+    color:var(--gold);
+    font-family:Georgia,serif;
+    font-size:65px;
+    font-weight:bold;
+    line-height:.85;
 }
 
-.logo-mono .name {
-    color: var(--dorado);
-    font-family: Georgia, serif;
-    font-size: 34px;
+.logoName{
+    color:var(--gold);
+    font-family:Georgia,serif;
+    font-size:35px;
+    margin-top:5px;
 }
 
-.logo-mono .sub {
-    font-size: 11px;
-    letter-spacing: 4px;
-    color: #d7d0b5;
-    margin-top: 7px;
+.logoSub{
+    color:#d8d0b2;
+    font-size:10px;
+    letter-spacing:4px;
+    margin-top:7px;
 }
 
-.field {
-    margin-bottom: 15px;
+.field{
+    margin-bottom:15px;
 }
 
-.field label {
-    display: block;
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 7px;
+.field label{
+    display:block;
+    color:var(--muted);
+    font-size:12px;
+    margin-bottom:7px;
 }
 
 .field input,
-.field select {
-    width: 100%;
-    border: 1px solid rgba(203,178,106,.25);
-    background: #0e1a11;
-    color: white;
-    padding: 14px;
-    border-radius: 12px;
-    outline: none;
+.field select{
+    width:100%;
+    background:#0c170e;
+    color:white;
+    border:1px solid rgba(203,178,106,.25);
+    border-radius:12px;
+    padding:14px;
+    outline:none;
 }
 
 .field input:focus,
-.field select:focus {
-    border-color: var(--dorado);
+.field select:focus{
+    border-color:var(--gold);
 }
 
-.gold-button {
-    width: 100%;
-    border: 0;
-    border-radius: 13px;
-    padding: 15px;
-    background: var(--dorado);
-    color: #172319;
-    font-weight: 700;
-    margin-top: 6px;
+.goldButton{
+    width:100%;
+    border:0;
+    border-radius:13px;
+    padding:15px;
+    background:var(--gold);
+    color:#142319;
+    font-weight:700;
 }
 
-.error {
-    background: rgba(217,108,108,.12);
-    border: 1px solid rgba(217,108,108,.4);
-    color: #ffb2b2;
-    border-radius: 12px;
-    padding: 12px;
-    margin-top: 15px;
-    font-size: 13px;
-    line-height: 1.4;
+.error{
+    margin-top:14px;
+    padding:12px;
+    border-radius:12px;
+    background:rgba(217,108,108,.12);
+    border:1px solid rgba(217,108,108,.35);
+    color:#ffb8b8;
+    font-size:13px;
+    line-height:1.45;
 }
 
-.success {
-    background: rgba(120,189,131,.12);
-    border: 1px solid rgba(120,189,131,.4);
-    color: #b9e8bf;
-    border-radius: 12px;
-    padding: 12px;
-    margin-top: 15px;
-    font-size: 13px;
+.success{
+    margin-top:14px;
+    padding:12px;
+    border-radius:12px;
+    background:rgba(120,189,131,.12);
+    border:1px solid rgba(120,189,131,.35);
+    color:#bce8c2;
+    font-size:13px;
 }
 
 /* APP */
 
-#app {
-    padding-bottom: 90px;
+#app{
+    padding-bottom:92px;
+    min-height:100vh;
+    background:
+        radial-gradient(circle at 50% -10%,#213b27 0%,#09110b 45%);
 }
 
-.topbar {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background: rgba(13,22,15,.92);
-    backdrop-filter: blur(15px);
-    border-bottom: 1px solid rgba(203,178,106,.15);
+.topbar{
+    position:sticky;
+    top:0;
+    z-index:20;
     padding:
-        calc(env(safe-area-inset-top) + 12px)
-        17px
-        12px;
+        calc(env(safe-area-inset-top) + 11px)
+        16px
+        11px;
+    background:rgba(9,17,11,.91);
+    backdrop-filter:blur(16px);
+    border-bottom:1px solid rgba(203,178,106,.13);
 }
 
-.topbar-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.topbarRow{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 }
 
-.brand-small {
-    font-family: Georgia, serif;
-    color: var(--dorado);
-    font-size: 23px;
+.brand{
+    color:var(--gold);
+    font-family:Georgia,serif;
+    font-size:23px;
 }
 
-.user-name {
-    color: var(--muted);
-    font-size: 11px;
+.userEmail{
+    color:var(--muted);
+    font-size:10px;
+    margin-top:2px;
 }
 
-.logout {
-    background: transparent;
-    color: var(--dorado);
-    border: 1px solid rgba(203,178,106,.35);
-    padding: 7px 10px;
-    border-radius: 9px;
-    font-size: 11px;
+.logout{
+    border:1px solid rgba(203,178,106,.3);
+    background:transparent;
+    color:var(--gold);
+    border-radius:9px;
+    padding:7px 10px;
+    font-size:11px;
 }
 
-.content {
-    padding: 18px 15px;
-    max-width: 700px;
-    margin: auto;
+.content{
+    width:100%;
+    max-width:720px;
+    margin:auto;
+    padding:18px 15px 25px;
 }
 
-.section-title {
-    font-family: Georgia, serif;
-    color: var(--dorado);
-    font-size: 25px;
-    margin: 8px 0 4px;
+.title{
+    color:var(--gold);
+    font-family:Georgia,serif;
+    font-size:26px;
+    margin:6px 0 4px;
 }
 
-.section-sub {
-    color: var(--muted);
-    font-size: 12px;
-    margin-bottom: 18px;
+.subtitle{
+    color:var(--muted);
+    font-size:12px;
+    margin-bottom:18px;
 }
 
-.periods {
-    display: flex;
-    gap: 7px;
-    overflow-x: auto;
-    padding-bottom: 5px;
-    margin-bottom: 17px;
+.periods{
+    display:flex;
+    gap:7px;
+    overflow-x:auto;
+    margin-bottom:15px;
 }
 
-.periods button {
-    white-space: nowrap;
-    border: 1px solid rgba(203,178,106,.25);
-    background: var(--tarjeta);
-    color: #d9d8ce;
-    border-radius: 10px;
-    padding: 8px 12px;
-    font-size: 12px;
+.period{
+    white-space:nowrap;
+    padding:8px 13px;
+    border-radius:10px;
+    border:1px solid rgba(203,178,106,.25);
+    background:var(--card);
+    color:#dddacf;
+    font-size:12px;
 }
 
-.periods button.active {
-    background: var(--dorado);
-    color: #172319;
-    border-color: var(--dorado);
+.period.active{
+    background:var(--gold);
+    color:#142319;
+    border-color:var(--gold);
 }
 
-.cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+.cards{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
 }
 
-.card {
-    background: rgba(20,35,25,.92);
-    border: 1px solid rgba(203,178,106,.13);
-    border-radius: 16px;
-    padding: 15px;
-    min-height: 105px;
+.card{
+    background:rgba(20,35,25,.94);
+    border:1px solid rgba(203,178,106,.13);
+    border-radius:16px;
+    padding:15px;
+    min-height:105px;
 }
 
-.card.full {
-    grid-column: 1 / -1;
+.card.full{
+    grid-column:1/-1;
 }
 
-.card-label {
-    color: var(--muted);
-    font-size: 11px;
-    margin-bottom: 8px;
+.card.gold .value{
+    color:var(--gold);
 }
 
-.card-value {
-    color: white;
-    font-size: 23px;
-    font-weight: 700;
+.label{
+    color:var(--muted);
+    font-size:11px;
+    margin-bottom:8px;
 }
 
-.card.gold .card-value {
-    color: var(--dorado);
+.value{
+    color:white;
+    font-size:22px;
+    font-weight:700;
 }
 
-.card-small {
-    color: var(--muted);
-    font-size: 10px;
-    margin-top: 7px;
+.small{
+    color:var(--muted);
+    font-size:10px;
+    margin-top:6px;
+    line-height:1.4;
 }
 
-.chart-card {
-    background: rgba(20,35,25,.92);
-    border: 1px solid rgba(203,178,106,.13);
-    border-radius: 17px;
-    padding: 15px;
-    margin-top: 12px;
+.chartCard{
+    background:rgba(20,35,25,.94);
+    border:1px solid rgba(203,178,106,.13);
+    border-radius:17px;
+    padding:15px;
+    margin-top:12px;
 }
 
-.chart-title {
-    color: var(--dorado);
-    font-family: Georgia, serif;
-    font-size: 17px;
-    margin-bottom: 15px;
+.chartTitle{
+    color:var(--gold);
+    font-family:Georgia,serif;
+    font-size:17px;
+    margin-bottom:14px;
 }
 
-.chart-container {
-    height: 230px;
+.chartBox{
+    height:230px;
 }
 
-.list {
-    margin-top: 12px;
+.listItem{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:12px 0;
+    border-bottom:1px solid rgba(255,255,255,.07);
 }
 
-.list-item {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255,255,255,.07);
+.listItem:last-child{
+    border-bottom:0;
 }
 
-.list-item:last-child {
-    border-bottom: 0;
+.listMain{
+    min-width:0;
 }
 
-.list-main {
-    min-width: 0;
+.listTitle{
+    color:white;
+    font-size:13px;
+    font-weight:600;
 }
 
-.list-title {
-    color: white;
-    font-size: 13px;
-    font-weight: 600;
+.listSub{
+    color:var(--muted);
+    font-size:11px;
+    margin-top:4px;
+    line-height:1.4;
 }
 
-.list-sub {
-    color: var(--muted);
-    font-size: 11px;
-    margin-top: 4px;
+.listValue{
+    color:var(--gold);
+    font-weight:700;
+    white-space:nowrap;
 }
 
-.list-value {
-    color: var(--dorado);
-    font-weight: 700;
-    white-space: nowrap;
+.statusPending{
+    color:#e3b76c;
 }
 
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 30;
-    background: rgba(13,22,15,.96);
-    backdrop-filter: blur(15px);
-    border-top: 1px solid rgba(203,178,106,.18);
-    display: flex;
-    justify-content: space-around;
+.statusPaid{
+    color:var(--ok);
+}
+
+.statusNoShow{
+    color:var(--red);
+}
+
+.primary{
+    width:100%;
+    border:0;
+    border-radius:12px;
+    padding:14px;
+    background:var(--gold);
+    color:#142319;
+    font-weight:700;
+    margin-bottom:10px;
+}
+
+.secondary{
+    width:100%;
+    border:1px solid rgba(203,178,106,.3);
+    border-radius:12px;
+    padding:13px;
+    background:transparent;
+    color:var(--gold);
+    font-weight:600;
+}
+
+.bottomNav{
+    position:fixed;
+    z-index:30;
+    left:0;
+    right:0;
+    bottom:0;
+    display:flex;
+    justify-content:space-around;
+    background:rgba(9,17,11,.96);
+    backdrop-filter:blur(15px);
+    border-top:1px solid rgba(203,178,106,.17);
     padding:
-        8px
-        5px
-        calc(env(safe-area-inset-bottom) + 8px);
+        7px 5px
+        calc(env(safe-area-inset-bottom) + 7px);
 }
 
-.nav-button {
-    background: none;
-    border: 0;
-    color: var(--muted);
-    font-size: 10px;
-    padding: 5px;
+.navButton{
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    font-size:10px;
+    padding:4px 9px;
 }
 
-.nav-button.active {
-    color: var(--dorado);
+.navButton.active{
+    color:var(--gold);
 }
 
-.nav-icon {
-    display: block;
-    font-size: 19px;
-    margin-bottom: 2px;
-}
-
-/* LOADING */
-
-.loading {
-    text-align: center;
-    padding: 50px 20px;
-    color: var(--muted);
-}
-
-.spinner {
-    width: 30px;
-    height: 30px;
-    border: 3px solid rgba(203,178,106,.2);
-    border-top-color: var(--dorado);
-    border-radius: 50%;
-    animation: spin .8s linear infinite;
-    margin: 0 auto 15px;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.navIcon{
+    display:block;
+    font-size:19px;
+    margin-bottom:2px;
 }
 
 /* MODAL */
 
-.modal {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    background: rgba(0,0,0,.72);
-    display: flex;
-    align-items: flex-end;
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    display:flex;
+    align-items:flex-end;
+    background:rgba(0,0,0,.72);
 }
 
-.modal-box {
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    background: #142319;
-    border-radius: 22px 22px 0 0;
-    padding: 20px;
+.modalBox{
+    width:100%;
+    max-height:90vh;
+    overflow-y:auto;
+    background:#142319;
+    border-radius:22px 22px 0 0;
+    padding:20px;
 }
 
-.modal-title {
-    color: var(--dorado);
-    font-family: Georgia, serif;
-    font-size: 22px;
-    margin-bottom: 18px;
+.modalTitle{
+    color:var(--gold);
+    font-family:Georgia,serif;
+    font-size:22px;
+    margin-bottom:18px;
 }
 
-.close {
-    float: right;
-    border: 0;
-    background: transparent;
-    color: var(--muted);
-    font-size: 22px;
+.close{
+    float:right;
+    border:0;
+    background:transparent;
+    color:var(--muted);
+    font-size:25px;
 }
 
-.primary {
-    background: var(--dorado);
-    border: 0;
-    color: #172319;
-    width: 100%;
-    border-radius: 12px;
-    padding: 13px;
-    font-weight: 700;
+/* LOADING */
+
+.loading{
+    text-align:center;
+    color:var(--muted);
+    padding:45px 20px;
 }
 
-/* DESKTOP */
+.spinner{
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    border:3px solid rgba(203,178,106,.2);
+    border-top-color:var(--gold);
+    animation:spin .8s linear infinite;
+    margin:0 auto 15px;
+}
 
-@media (min-width: 700px) {
-    .content {
-        padding-top: 30px;
+@keyframes spin{
+    to{transform:rotate(360deg)}
+}
+
+@media(min-width:700px){
+
+    .content{
+        padding-top:30px;
     }
 
-    .cards {
-        grid-template-columns: repeat(4, 1fr);
+    .cards{
+        grid-template-columns:repeat(4,1fr);
     }
 
-    .card.full {
-        grid-column: auto;
+    .card.full{
+        grid-column:auto;
     }
 
-    .bottom-nav {
-        max-width: 700px;
-        left: 50%;
-        transform: translateX(-50%);
-        border-radius: 18px 18px 0 0;
+    .bottomNav{
+        max-width:720px;
+        left:50%;
+        right:auto;
+        width:720px;
+        transform:translateX(-50%);
+        border-radius:18px 18px 0 0;
     }
 }
 </style>
@@ -468,19 +497,31 @@ select {
 
 <body>
 
-<!-- LOGIN -->
+<!-- =====================================================
+     LOGIN
+===================================================== -->
+
 <section id="loginScreen">
 
-    <div class="login-box">
+    <div class="loginBox">
 
-        <div class="logo-mono">
-            <div class="m">M</div>
-            <div class="name">Mono's</div>
-            <div class="sub">ADMINISTRADOR</div>
+        <div class="logo">
+
+            <div class="logoM">M</div>
+
+            <div class="logoName">
+                Mono's
+            </div>
+
+            <div class="logoSub">
+                ADMINISTRADOR
+            </div>
+
         </div>
 
         <div class="field">
             <label>Email</label>
+
             <input
                 id="email"
                 type="email"
@@ -490,6 +531,7 @@ select {
 
         <div class="field">
             <label>Contraseña</label>
+
             <input
                 id="password"
                 type="password"
@@ -499,7 +541,7 @@ select {
 
         <button
             id="loginButton"
-            class="gold-button">
+            class="goldButton">
             Entrar
         </button>
 
@@ -510,436 +552,603 @@ select {
 </section>
 
 
-<!-- APP -->
+<!-- =====================================================
+     APP
+===================================================== -->
+
 <section id="app" class="hidden">
 
-    <header class="topbar">
+<header class="topbar">
 
-        <div class="topbar-row">
+    <div class="topbarRow">
 
-            <div>
-                <div class="brand-small">Mono's</div>
-                <div id="userEmail" class="user-name"></div>
-            </div>
-
-            <button
-                id="logoutButton"
-                class="logout">
-                Salir
-            </button>
-
-        </div>
-
-    </header>
-
-
-    <main class="content">
-
-        <!-- RESUMEN -->
-        <section id="pageDashboard">
-
-            <h1 class="section-title">Resumen</h1>
-
-            <div class="section-sub">
-                Administrador de Mono's Barbería
-            </div>
-
-            <div class="periods">
-
-                <button
-                    data-period="today"
-                    class="period active">
-                    Hoy
-                </button>
-
-                <button
-                    data-period="week"
-                    class="period">
-                    Semana
-                </button>
-
-                <button
-                    data-period="month"
-                    class="period">
-                    Mes
-                </button>
-
-            </div>
-
-
-            <div class="cards">
-
-                <div class="card gold">
-                    <div class="card-label">
-                        Clientes atendidos
-                    </div>
-                    <div
-                        id="clientsValue"
-                        class="card-value">
-                        0
-                    </div>
-                </div>
-
-
-                <div class="card gold">
-                    <div class="card-label">
-                        Ingresos
-                    </div>
-                    <div
-                        id="revenueValue"
-                        class="card-value">
-                        $0
-                    </div>
-                    <div class="card-small">
-                        sin propinas
-                    </div>
-                </div>
-
-
-                <div class="card">
-                    <div class="card-label">
-                        Propinas
-                    </div>
-                    <div
-                        id="tipsValue"
-                        class="card-value">
-                        $0
-                    </div>
-                </div>
-
-
-                <div class="card">
-                    <div class="card-label">
-                        Gastos
-                    </div>
-                    <div
-                        id="expensesValue"
-                        class="card-value">
-                        $0
-                    </div>
-                </div>
-
-
-                <div class="card full gold">
-                    <div class="card-label">
-                        Ganancia neta
-                    </div>
-                    <div
-                        id="profitValue"
-                        class="card-value">
-                        $0
-                    </div>
-                    <div
-                        id="profitSmall"
-                        class="card-small">
-                    </div>
-                </div>
-
-
-                <div class="card">
-                    <div class="card-label">
-                        Ticket promedio
-                    </div>
-                    <div
-                        id="ticketValue"
-                        class="card-value">
-                        $0
-                    </div>
-                </div>
-
-
-                <div class="card">
-                    <div class="card-label">
-                        No-shows
-                    </div>
-                    <div
-                        id="noshowValue"
-                        class="card-value">
-                        0
-                    </div>
-                </div>
-
-
-                <div class="card">
-                    <div class="card-label">
-                        Descuentos
-                    </div>
-                    <div
-                        id="discountValue"
-                        class="card-value">
-                        $0
-                    </div>
-                </div>
-
-            </div>
-
-
-            <div class="chart-card">
-
-                <div class="chart-title">
-                    Ingresos por día
-                </div>
-
-                <div class="chart-container">
-                    <canvas id="revenueChart"></canvas>
-                </div>
-
-            </div>
-
-
-            <div class="chart-card">
-
-                <div class="chart-title">
-                    Servicios
-                </div>
-
-                <div class="chart-container">
-                    <canvas id="servicesChart"></canvas>
-                </div>
-
-            </div>
-
-
-            <div class="chart-card">
-
-                <div class="chart-title">
-                    Clientes
-                </div>
-
-                <div class="list">
-
-                    <div class="list-item">
-                        <div class="list-main">
-                            <div class="list-title">
-                                Clientes nuevos
-                            </div>
-                        </div>
-
-                        <div
-                            id="newClientsValue"
-                            class="list-value">
-                            0
-                        </div>
-                    </div>
-
-
-                    <div class="list-item">
-                        <div class="list-main">
-                            <div class="list-title">
-                                Clientes recurrentes
-                            </div>
-                        </div>
-
-                        <div
-                            id="repeatClientsValue"
-                            class="list-value">
-                            0
-                        </div>
-                    </div>
-
-
-                    <div class="list-item">
-                        <div class="list-main">
-                            <div class="list-title">
-                                Clientes desaparecidos
-                            </div>
-
-                            <div class="list-sub">
-                                30 días o más sin volver
-                            </div>
-                        </div>
-
-                        <div
-                            id="lostClientsValue"
-                            class="list-value">
-                            0
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- CLIENTES -->
-        <section
-            id="pageClients"
-            class="hidden">
-
-            <h1 class="section-title">
-                Clientes
-            </h1>
-
-            <div class="section-sub">
-                Información desde el 8 de octubre de 2026
+        <div>
+            <div class="brand">
+                Mono's
             </div>
 
             <div
-                id="clientsList"
-                class="chart-card">
+                id="userEmail"
+                class="userEmail">
             </div>
-
-        </section>
-
-
-        <!-- FINANZAS -->
-        <section
-            id="pageFinance"
-            class="hidden">
-
-            <h1 class="section-title">
-                Finanzas
-            </h1>
-
-            <div class="section-sub">
-                Control económico del negocio
-            </div>
-
-            <div class="cards">
-
-                <div class="card gold">
-                    <div class="card-label">
-                        Ingresos
-                    </div>
-                    <div
-                        id="financeRevenue"
-                        class="card-value">
-                        $0
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-label">
-                        Propinas
-                    </div>
-                    <div
-                        id="financeTips"
-                        class="card-value">
-                        $0
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-label">
-                        Gastos
-                    </div>
-                    <div
-                        id="financeExpenses"
-                        class="card-value">
-                        $0
-                    </div>
-                </div>
-
-                <div class="card gold">
-                    <div class="card-label">
-                        Ganancia
-                    </div>
-                    <div
-                        id="financeProfit"
-                        class="card-value">
-                        $0
-                    </div>
-                </div>
-
-            </div>
-
-
-            <div class="chart-card">
-
-                <div class="chart-title">
-                    Gastos por categoría
-                </div>
-
-                <div class="chart-container">
-                    <canvas id="expensesChart"></canvas>
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- MÁS -->
-        <section
-            id="pageMore"
-            class="hidden">
-
-            <h1 class="section-title">
-                Administración
-            </h1>
-
-            <div class="section-sub">
-                Herramientas del negocio
-            </div>
-
-            <button
-                id="addExpenseButton"
-                class="primary"
-                style="margin-bottom:12px;">
-                + Añadir gasto
-            </button>
-
-            <button
-                id="addGoalButton"
-                class="primary">
-                + Configurar meta mensual
-            </button>
-
-        </section>
-
-
-        <div
-            id="globalError"
-            class="error hidden">
         </div>
 
-    </main>
+        <button
+            id="logoutButton"
+            class="logout">
+            Salir
+        </button>
+
+    </div>
+
+</header>
 
 
-    <!-- NAVEGACIÓN -->
-    <nav class="bottom-nav">
+<main class="content">
+
+
+<!-- =====================================================
+     INICIO
+===================================================== -->
+
+<section id="pageDashboard">
+
+    <h1 class="title">
+        Resumen
+    </h1>
+
+    <div class="subtitle">
+        Administrador de Mono's Barbería
+    </div>
+
+
+    <div class="periods">
 
         <button
-            class="nav-button active"
-            data-page="Dashboard">
-            <span class="nav-icon">⌂</span>
-            Inicio
+            class="period active"
+            data-period="today">
+            Hoy
         </button>
 
         <button
-            class="nav-button"
-            data-page="Clients">
-            <span class="nav-icon">♙</span>
+            class="period"
+            data-period="week">
+            Semana
+        </button>
+
+        <button
+            class="period"
+            data-period="month">
+            Mes
+        </button>
+
+    </div>
+
+
+    <div class="cards">
+
+        <div class="card gold">
+            <div class="label">
+                Clientes atendidos
+            </div>
+
+            <div
+                id="clientsValue"
+                class="value">
+                0
+            </div>
+
+            <div class="small">
+                Reservas/clientes únicos
+            </div>
+        </div>
+
+
+        <div class="card gold">
+            <div class="label">
+                Cobrado
+            </div>
+
+            <div
+                id="revenueValue"
+                class="value">
+                0 CUP
+            </div>
+
+            <div class="small">
+                Solo cobros registrados
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="label">
+                Pendiente de cobro
+            </div>
+
+            <div
+                id="pendingValue"
+                class="value">
+                0 CUP
+            </div>
+
+            <div class="small">
+                Clientes atendidos sin cobro
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="label">
+                Turnos utilizados
+            </div>
+
+            <div
+                id="slotsValue"
+                class="value">
+                0
+            </div>
+
+            <div class="small">
+                Bloques de 30 minutos
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="label">
+                Servicios realizados
+            </div>
+
+            <div
+                id="servicesValue"
+                class="value">
+                0
+            </div>
+
+            <div class="small">
+                Se cuentan individualmente
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="label">
+                Propinas
+            </div>
+
+            <div
+                id="tipsValue"
+                class="value">
+                0 CUP
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="label">
+                Gastos
+            </div>
+
+            <div
+                id="expensesValue"
+                class="value">
+                0 CUP
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="label">
+                No-shows
+            </div>
+
+            <div
+                id="noshowValue"
+                class="value">
+                0
+            </div>
+        </div>
+
+
+        <div class="card gold full">
+            <div class="label">
+                Ganancia neta
+            </div>
+
+            <div
+                id="profitValue"
+                class="value">
+                0 CUP
+            </div>
+
+            <div
+                id="profitSmall"
+                class="small">
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="label">
+                Ticket promedio
+            </div>
+
+            <div
+                id="ticketValue"
+                class="value">
+                0 CUP
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="label">
+                Descuentos
+            </div>
+
+            <div
+                id="discountValue"
+                class="value">
+                0 CUP
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- CLIENTES -->
+
+    <div class="chartCard">
+
+        <div class="chartTitle">
             Clientes
-        </button>
+        </div>
 
-        <button
-            class="nav-button"
-            data-page="Finance">
-            <span class="nav-icon">₡</span>
-            Finanzas
-        </button>
+        <div class="listItem">
 
-        <button
-            class="nav-button"
-            data-page="More">
-            <span class="nav-icon">☰</span>
-            Más
-        </button>
+            <div class="listMain">
+                <div class="listTitle">
+                    Clientes nuevos
+                </div>
+            </div>
 
-    </nav>
+            <div
+                id="newClientsValue"
+                class="listValue">
+                0
+            </div>
+
+        </div>
+
+
+        <div class="listItem">
+
+            <div class="listMain">
+                <div class="listTitle">
+                    Clientes recurrentes
+                </div>
+            </div>
+
+            <div
+                id="repeatClientsValue"
+                class="listValue">
+                0
+            </div>
+
+        </div>
+
+
+        <div class="listItem">
+
+            <div class="listMain">
+                <div class="listTitle">
+                    Clientes desaparecidos
+                </div>
+
+                <div class="listSub">
+                    30 días o más sin volver
+                </div>
+            </div>
+
+            <div
+                id="lostClientsValue"
+                class="listValue">
+                0
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- GRÁFICO INGRESOS -->
+
+    <div class="chartCard">
+
+        <div class="chartTitle">
+            Cobros por día
+        </div>
+
+        <div class="chartBox">
+            <canvas id="revenueChart"></canvas>
+        </div>
+
+    </div>
+
+
+    <!-- GRÁFICO SERVICIOS -->
+
+    <div class="chartCard">
+
+        <div class="chartTitle">
+            Servicios realizados
+        </div>
+
+        <div class="chartBox">
+            <canvas id="servicesChart"></canvas>
+        </div>
+
+    </div>
+
+
+    <!-- PENDIENTES -->
+
+    <div class="chartCard">
+
+        <div class="chartTitle">
+            Pendientes de cobro
+        </div>
+
+        <div id="pendingList"></div>
+
+    </div>
 
 </section>
 
 
-<!-- MODAL GASTO -->
+<!-- =====================================================
+     CLIENTES
+===================================================== -->
+
+<section
+    id="pageClients"
+    class="hidden">
+
+    <h1 class="title">
+        Clientes
+    </h1>
+
+    <div class="subtitle">
+        Desde el 8 de octubre de 2026
+    </div>
+
+    <div
+        id="clientsList"
+        class="chartCard">
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     FINANZAS
+===================================================== -->
+
+<section
+    id="pageFinance"
+    class="hidden">
+
+    <h1 class="title">
+        Finanzas
+    </h1>
+
+    <div class="subtitle">
+        Ingresos, gastos y rentabilidad
+    </div>
+
+
+    <div class="cards">
+
+        <div class="card gold">
+            <div class="label">
+                Cobrado
+            </div>
+
+            <div
+                id="financeRevenue"
+                class="value">
+                0 CUP
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="label">
+                Propinas
+            </div>
+
+            <div
+                id="financeTips"
+                class="value">
+                0 CUP
+            </div>
+        </div>
+
+
+        <div class="card">
+            <div class="label">
+                Gastos
+            </div>
+
+            <div
+                id="financeExpenses"
+                class="value">
+                0 CUP
+            </div>
+        </div>
+
+
+        <div class="card gold">
+            <div class="label">
+                Ganancia neta
+            </div>
+
+            <div
+                id="financeProfit"
+                class="value">
+                0 CUP
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="chartCard">
+
+        <div class="chartTitle">
+            Gastos por categoría
+        </div>
+
+        <div class="chartBox">
+            <canvas id="expensesChart"></canvas>
+        </div>
+
+    </div>
+
+
+    <div class="chartCard">
+
+        <div class="chartTitle">
+            Comparación esperada vs cobrada
+        </div>
+
+        <div id="discountStats"></div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     MÁS
+===================================================== -->
+
+<section
+    id="pageMore"
+    class="hidden">
+
+    <h1 class="title">
+        Administración
+    </h1>
+
+    <div class="subtitle">
+        Herramientas del negocio
+    </div>
+
+
+    <button
+        id="addExpenseButton"
+        class="primary">
+        + Añadir gasto
+    </button>
+
+
+    <button
+        id="addGoalButton"
+        class="secondary">
+        + Configurar meta mensual
+    </button>
+
+
+    <div
+        id="goalDisplay"
+        class="chartCard"
+        style="margin-top:15px;">
+    </div>
+
+</section>
+
+
+<div
+    id="globalError"
+    class="error hidden">
+</div>
+
+</main>
+
+
+<!-- =====================================================
+     NAVEGACIÓN
+===================================================== -->
+
+<nav class="bottomNav">
+
+    <button
+        class="navButton active"
+        data-page="Dashboard">
+
+        <span class="navIcon">
+            ⌂
+        </span>
+
+        Inicio
+
+    </button>
+
+
+    <button
+        class="navButton"
+        data-page="Clients">
+
+        <span class="navIcon">
+            ♙
+        </span>
+
+        Clientes
+
+    </button>
+
+
+    <button
+        class="navButton"
+        data-page="Finance">
+
+        <span class="navIcon">
+            ₡
+        </span>
+
+        Finanzas
+
+    </button>
+
+
+    <button
+        class="navButton"
+        data-page="More">
+
+        <span class="navIcon">
+            ☰
+        </span>
+
+        Más
+
+    </button>
+
+</nav>
+
+</section>
+
+
+<!-- =====================================================
+     MODAL GASTOS
+===================================================== -->
+
 <div
     id="expenseModal"
     class="modal hidden">
 
-    <div class="modal-box">
+    <div class="modalBox">
 
         <button
             class="close"
@@ -947,19 +1156,29 @@ select {
             ×
         </button>
 
-        <div class="modal-title">
+        <div class="modalTitle">
             Añadir gasto
         </div>
 
+
         <div class="field">
-            <label>Fecha</label>
+
+            <label>
+                Fecha
+            </label>
+
             <input
                 id="expenseDate"
                 type="date">
+
         </div>
 
+
         <div class="field">
-            <label>Categoría</label>
+
+            <label>
+                Categoría
+            </label>
 
             <select id="expenseCategory">
 
@@ -983,30 +1202,42 @@ select {
 
         </div>
 
+
         <div class="field">
-            <label>Descripción</label>
+
+            <label>
+                Descripción
+            </label>
 
             <input
                 id="expenseDescription"
                 type="text"
                 placeholder="Ej. Talco">
+
         </div>
 
+
         <div class="field">
-            <label>Monto CUP</label>
+
+            <label>
+                Monto CUP
+            </label>
 
             <input
                 id="expenseAmount"
                 type="number"
                 inputmode="decimal"
                 placeholder="0">
+
         </div>
+
 
         <button
             id="saveExpense"
             class="primary">
             Guardar gasto
         </button>
+
 
         <div id="expenseMessage"></div>
 
@@ -1015,12 +1246,15 @@ select {
 </div>
 
 
-<!-- MODAL META -->
+<!-- =====================================================
+     MODAL METAS
+===================================================== -->
+
 <div
     id="goalModal"
     class="modal hidden">
 
-    <div class="modal-box">
+    <div class="modalBox">
 
         <button
             class="close"
@@ -1028,43 +1262,60 @@ select {
             ×
         </button>
 
-        <div class="modal-title">
+        <div class="modalTitle">
             Meta mensual
         </div>
 
+
         <div class="field">
-            <label>Mes</label>
+
+            <label>
+                Mes
+            </label>
 
             <input
                 id="goalMonth"
                 type="month">
+
         </div>
 
+
         <div class="field">
-            <label>Objetivo de ingresos</label>
+
+            <label>
+                Objetivo de ingresos
+            </label>
 
             <input
                 id="goalRevenue"
                 type="number"
                 inputmode="decimal"
                 placeholder="120000">
+
         </div>
 
+
         <div class="field">
-            <label>Objetivo de ganancia</label>
+
+            <label>
+                Objetivo de ganancia
+            </label>
 
             <input
                 id="goalProfit"
                 type="number"
                 inputmode="decimal"
                 placeholder="90000">
+
         </div>
+
 
         <button
             id="saveGoal"
             class="primary">
             Guardar meta
         </button>
+
 
         <div id="goalMessage"></div>
 
@@ -1076,8 +1327,8 @@ select {
 <script>
 
 /* =========================================================
-   CONFIGURACIÓN SUPABASE
-   ========================================================= */
+   SUPABASE
+========================================================= */
 
 const SUPABASE_URL =
     "https://ldxxflhwpyzldisydhmd.supabase.co";
@@ -1085,44 +1336,12 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
     "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
 
-
-/* =========================================================
-   INICIALIZAR SUPABASE
-   ========================================================= */
-
-let supabaseClient;
-
-try {
-
-    if (
-        !window.supabase ||
-        !window.supabase.createClient
-    ) {
-        throw new Error(
-            "No se pudo cargar la biblioteca de Supabase."
-        );
-    }
-
-    supabaseClient =
-        window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY
-        );
-
-} catch (error) {
-
-    document.getElementById("loginMessage").innerHTML =
-        `<div class="error">
-            Error iniciando Supabase:<br>
-            ${escapeHtml(error.message)}
-        </div>`;
-
-}
+let supabaseClient = null;
 
 
 /* =========================================================
    CONFIGURACIÓN
-   ========================================================= */
+========================================================= */
 
 const START_DATE = "2026-10-08";
 
@@ -1138,322 +1357,784 @@ let expensesChart = null;
 
 
 /* =========================================================
-   FUNCIONES GENERALES
-   ========================================================= */
+   INICIAR SUPABASE
+========================================================= */
 
-function escapeHtml(value) {
+try{
+
+    if(
+        !window.supabase ||
+        !window.supabase.createClient
+    ){
+        throw new Error(
+            "No se pudo cargar Supabase."
+        );
+    }
+
+    supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+}catch(error){
+
+    document.getElementById(
+        "loginMessage"
+    ).innerHTML =
+        `<div class="error">
+            ${escapeHtml(error.message)}
+        </div>`;
+
+}
+
+
+/* =========================================================
+   UTILIDADES
+========================================================= */
+
+function escapeHtml(value){
 
     return String(value ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
 }
 
 
-function money(value) {
+function money(value){
 
-    const number =
-        Number(value || 0);
-
-    return number.toLocaleString(
-        "es-CU",
-        {
-            maximumFractionDigits: 0
-        }
-    ) + " CUP";
+    return Number(value || 0)
+        .toLocaleString(
+            "es-CU",
+            {
+                maximumFractionDigits:0
+            }
+        ) + " CUP";
 }
 
 
-function normalizeText(value) {
+function number(value){
+
+    if(
+        value === null ||
+        value === undefined ||
+        value === ""
+    ){
+        return 0;
+    }
+
+    const n =
+        Number(
+            String(value)
+                .replace(",",".")
+        );
+
+    return Number.isFinite(n)
+        ? n
+        : 0;
+}
+
+
+function normalizeText(value){
 
     return String(value ?? "")
         .trim()
         .toLowerCase()
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
+        .replace(
+            /[\u0300-\u036f]/g,
+            ""
+        );
 }
 
 
-function normalizePhone(value) {
+function normalizePhone(value){
 
     return String(value ?? "")
-        .replace(/\D/g, "");
+        .replace(/\D/g,"");
 }
 
 
-function clientKey(row) {
+function todayString(){
 
-    const phone =
-        normalizePhone(row.telefono);
+    const d = new Date();
 
-    if (phone) {
-        return "phone:" + phone;
+    return formatDate(d);
+}
+
+
+function formatDate(date){
+
+    return (
+        date.getFullYear() +
+        "-" +
+        String(
+            date.getMonth()+1
+        ).padStart(2,"0") +
+        "-" +
+        String(
+            date.getDate()
+        ).padStart(2,"0")
+    );
+}
+
+
+function dateObject(value){
+
+    const p =
+        String(value).split("-");
+
+    if(p.length !== 3){
+        return null;
     }
 
-    return "name:" +
-        normalizeText(row.nombre);
+    return new Date(
+        Number(p[0]),
+        Number(p[1])-1,
+        Number(p[2])
+    );
 }
 
 
-function parseNumber(value) {
+function daysBetween(a,b){
 
-    if (
-        value === null ||
-        value === undefined ||
-        value === ""
-    ) {
+    const d1 =
+        dateObject(a);
+
+    const d2 =
+        dateObject(b);
+
+    if(!d1 || !d2){
         return 0;
     }
 
-    const number =
-        Number(
-            String(value)
-                .replace(",", ".")
-        );
-
-    return Number.isFinite(number)
-        ? number
-        : 0;
+    return Math.floor(
+        Math.abs(
+            d2-d1
+        ) / 86400000
+    );
 }
 
 
 /* =========================================================
    SERVICIOS
-   ========================================================= */
+========================================================= */
 
-function parseServices(value) {
+/*
+   IMPORTANTE:
 
-    if (!value) {
+   Supabase guarda:
+
+   degradado, barba
+
+   y NO:
+
+   {degradado, barba}
+
+   Esta función acepta ambos formatos
+   por seguridad.
+*/
+
+function parseServices(value){
+
+    if(!value){
         return [];
     }
 
     return String(value)
-        .replace(/[{}]/g, "")
+        .replace(/[{}]/g,"")
         .split(",")
-        .map(service =>
-            normalizeText(service)
+        .map(
+            x =>
+                normalizeText(x)
         )
         .filter(Boolean);
 }
 
 
-/* =========================================================
-   CAMPOS DE TURNOS
-   ========================================================= */
+/*
+   Elimina servicios duplicados dentro
+   de una misma reserva.
 
-function getPhone(row) {
+   Esto es importante porque los dos
+   turnos de un combo pueden tener:
 
-    return row["teléfono"]
-        ?? row.telefono
-        ?? "";
+   degradado, barba
+
+   en ambas filas.
+*/
+
+function uniqueServices(values){
+
+    const result = [];
+
+    values.forEach(service => {
+
+        if(
+            service &&
+            !result.includes(service)
+        ){
+            result.push(service);
+        }
+
+    });
+
+    return result;
 }
 
 
-function getExpected(row) {
+/* =========================================================
+   CAMPOS
+========================================================= */
 
-    return parseNumber(
+function getPhone(row){
+
+    return (
+        row["teléfono"] ??
+        row["telefono"] ??
+        ""
+    );
+}
+
+
+function getExpected(row){
+
+    return number(
         row.precio_esperado
     );
 }
 
 
-function getCharged(row) {
+function getCharged(row){
 
-    const precio =
-        parseNumber(row.precio_cobrado);
-
-    if (precio > 0) {
-        return precio;
-    }
-
-    return parseNumber(row.total);
+    return number(
+        row.precio_cobrado
+    );
 }
 
 
-function getNoShowCharge(row) {
+function getTotalFallback(row){
 
-    return parseNumber(
+    return number(
+        row.total
+    );
+}
+
+
+function getNoShowCharge(row){
+
+    return number(
         row.cobro_no_show
     );
 }
 
 
-function getTip(row) {
+function getTip(row){
 
-    return parseNumber(
+    return number(
         row.propina
     );
 }
 
 
-function getDiscount(row) {
-
-    const expected =
-        getExpected(row);
-
-    const charged =
-        getCharged(row);
-
-    const noShow =
-        getNoShowCharge(row);
-
-    /*
-       precio_cobrado puede incluir el cobro
-       del no-show anterior.
-
-       Para calcular el descuento real
-       quitamos primero ese cobro.
-    */
-
-    const serviceCharged =
-        Math.max(
-            0,
-            charged - noShow
-        );
-
-    return Math.max(
-        0,
-        expected - serviceCharged
-    );
-}
-
-
-function isNoShow(row) {
+function isNoShow(row){
 
     return row.no_show === true;
 }
 
 
-function isCancelled(row) {
+function isCancelled(row){
 
-    if (row.cancelado === true) {
+    if(
+        row.cancelado === true
+    ){
         return true;
     }
 
     const estado =
-        normalizeText(row.estado);
+        normalizeText(
+            row.estado
+        );
 
-    return (
-        estado.includes("cancel")
-    );
-}
-
-
-function isFuture(row) {
-
-    const date =
-        String(row.fecha ?? "");
-
-    return date > todayString();
-}
-
-
-function isAttended(row) {
-
-    if (isNoShow(row)) {
-        return false;
-    }
-
-    if (isCancelled(row)) {
-        return false;
-    }
-
-    /*
-       Las reservas futuras NO son clientes atendidos.
-    */
-
-    if (isFuture(row)) {
-        return false;
-    }
-
-    return (
-        getCharged(row) > 0 ||
-        getExpected(row) > 0
+    return estado.includes(
+        "cancel"
     );
 }
 
 
 /* =========================================================
-   FECHAS
-   ========================================================= */
+   HORA DEL TURNO
+========================================================= */
 
-function todayString() {
+function parseTurnTime(value){
 
-    const date =
-        new Date();
-
-    const y =
-        date.getFullYear();
-
-    const m =
-        String(
-            date.getMonth() + 1
-        ).padStart(2, "0");
-
-    const d =
-        String(
-            date.getDate()
-        ).padStart(2, "0");
-
-    return `${y}-${m}-${d}`;
-}
-
-
-function dateFromString(value) {
-
-    const parts =
-        String(value).split("-");
-
-    if (parts.length !== 3) {
+    if(!value){
         return null;
     }
 
-    return new Date(
-        Number(parts[0]),
-        Number(parts[1]) - 1,
-        Number(parts[2])
+    let text =
+        String(value)
+            .trim()
+            .toUpperCase();
+
+    /*
+       Acepta:
+
+       4:00 PM
+       4 PM
+       16:00
+       09:30 AM
+    */
+
+    const match12 =
+        text.match(
+            /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/
+        );
+
+    if(match12){
+
+        let hour =
+            Number(match12[1]);
+
+        const minute =
+            Number(
+                match12[2] || 0
+            );
+
+        const period =
+            match12[3];
+
+        if(
+            period === "PM" &&
+            hour !== 12
+        ){
+            hour += 12;
+        }
+
+        if(
+            period === "AM" &&
+            hour === 12
+        ){
+            hour = 0;
+        }
+
+        return {
+            hour,
+            minute
+        };
+    }
+
+
+    const match24 =
+        text.match(
+            /^(\d{1,2}):(\d{2})$/
+        );
+
+    if(match24){
+
+        return {
+            hour:Number(match24[1]),
+            minute:Number(match24[2])
+        };
+
+    }
+
+    return null;
+}
+
+
+/*
+   Determina si el turno ya pasó.
+
+   Para fechas anteriores:
+   sí.
+
+   Para fechas futuras:
+   no.
+
+   Para hoy:
+   compara hora del turno con la hora actual.
+*/
+
+function appointmentHasPassed(row){
+
+    const date =
+        String(row.fecha || "");
+
+    const today =
+        todayString();
+
+    if(date < today){
+        return true;
+    }
+
+    if(date > today){
+        return false;
+    }
+
+    const time =
+        parseTurnTime(
+            row.turno
+        );
+
+    if(!time){
+
+        /*
+           Si hoy no podemos interpretar
+           la hora, NO lo marcamos como
+           atendido automáticamente.
+        */
+
+        return false;
+    }
+
+    const now =
+        new Date();
+
+    const currentMinutes =
+        now.getHours()*60 +
+        now.getMinutes();
+
+    const appointmentMinutes =
+        time.hour*60 +
+        time.minute;
+
+    return (
+        appointmentMinutes <=
+        currentMinutes
     );
 }
 
 
-function getPeriodDates() {
+/* =========================================================
+   RESERVA / CLIENTE
+========================================================= */
+
+/*
+   Esta es la corrección principal.
+
+   Varias filas con el mismo reserva_id
+   = UNA SOLA RESERVA.
+
+   Ejemplo:
+
+   fila 1:
+   reserva_id = ABC
+   turno = 4:00 PM
+
+   fila 2:
+   reserva_id = ABC
+   turno = 4:30 PM
+
+   Resultado:
+
+   1 cliente
+   1 reserva
+   2 turnos
+*/
+
+function reservationKey(row,index){
+
+    const reservation =
+        String(
+            row.reserva_id ?? ""
+        ).trim();
+
+    if(reservation){
+
+        return "reservation:" +
+            reservation;
+    }
+
+    /*
+       Si por alguna razón falta
+       reserva_id, usamos una combinación
+       de cliente + fecha + hora.
+
+       Es un respaldo, no el método principal.
+    */
+
+    const phone =
+        normalizePhone(
+            getPhone(row)
+        );
+
+    const name =
+        normalizeText(
+            row.nombre
+        );
+
+    return (
+        "fallback:" +
+        (phone || name) +
+        ":" +
+        String(row.fecha || "") +
+        ":" +
+        String(row.turno || "") +
+        ":" +
+        index
+    );
+}
+
+
+/*
+   Agrupa las filas de turnos en reservas.
+*/
+
+function buildReservations(){
+
+    const map =
+        new Map();
+
+    turnos.forEach(
+        (row,index) => {
+
+            const key =
+                reservationKey(
+                    row,
+                    index
+                );
+
+            if(!map.has(key)){
+
+                map.set(
+                    key,
+                    {
+                        key,
+                        reservaId:
+                            row.reserva_id ||
+                            "",
+                        rows:[],
+                        fecha:
+                            row.fecha || "",
+                        turno:
+                            row.turno || "",
+                        nombre:
+                            row.nombre ||
+                            "Sin nombre",
+                        telefono:
+                            getPhone(row),
+                        services:[],
+                        slots:0,
+                        expected:0,
+                        charged:0,
+                        noShowCharge:0,
+                        tip:0,
+                        noShow:false,
+                        cancelled:false
+                    }
+                );
+
+            }
+
+            const reservation =
+                map.get(key);
+
+            reservation.rows.push(row);
+
+            reservation.slots++;
+
+            /*
+               Guardamos el máximo.
+
+               Esto evita duplicar:
+
+               800
+               800
+
+               en las dos filas de un combo.
+
+               Si solo una fila tiene 800
+               y la otra 0, también obtenemos 800.
+            */
+
+            reservation.expected =
+                Math.max(
+                    reservation.expected,
+                    getExpected(row)
+                );
+
+            reservation.charged =
+                Math.max(
+                    reservation.charged,
+                    getCharged(row)
+                );
+
+            reservation.noShowCharge =
+                Math.max(
+                    reservation.noShowCharge,
+                    getNoShowCharge(row)
+                );
+
+            reservation.tip =
+                Math.max(
+                    reservation.tip,
+                    getTip(row)
+                );
+
+            if(
+                isNoShow(row)
+            ){
+                reservation.noShow =
+                    true;
+            }
+
+            if(
+                isCancelled(row)
+            ){
+                reservation.cancelled =
+                    true;
+            }
+
+            reservation.services.push(
+                ...parseServices(
+                    row.servicios
+                )
+            );
+
+        }
+    );
+
+
+    /*
+       El mismo combo puede aparecer
+       repetido en las dos filas.
+
+       Lo convertimos en:
+
+       degradado
+       barba
+
+       una sola vez.
+    */
+
+    [...map.values()]
+        .forEach(
+            reservation => {
+
+                reservation.services =
+                    uniqueServices(
+                        reservation.services
+                    );
+
+            }
+        );
+
+
+    return [...map.values()];
+}
+
+
+/* =========================================================
+   ESTADO DE RESERVA
+========================================================= */
+
+function isAttendedReservation(
+    reservation
+){
+
+    if(
+        reservation.noShow ||
+        reservation.cancelled
+    ){
+        return false;
+    }
+
+    /*
+       Solo consideramos atendido
+       un turno que ya haya pasado.
+    */
+
+    return reservation.rows.some(
+        row =>
+            appointmentHasPassed(row)
+    );
+}
+
+
+function isPendingPayment(
+    reservation
+){
+
+    if(
+        !isAttendedReservation(
+            reservation
+        )
+    ){
+        return false;
+    }
+
+    /*
+       Si el atajo todavía no registró
+       precio_cobrado, está pendiente.
+
+       No usamos precio_esperado como
+       ingreso.
+    */
+
+    return (
+        reservation.charged <= 0
+    );
+}
+
+
+/* =========================================================
+   PERIODOS
+========================================================= */
+
+function getPeriod(){
 
     const today =
-        dateFromString(todayString());
+        dateObject(
+            todayString()
+        );
 
-    if (selectedPeriod === "today") {
+    if(
+        selectedPeriod === "today"
+    ){
 
-        const value =
+        const t =
             todayString();
 
         return {
-            start: value,
-            end: value
+            start:t,
+            end:t
         };
+
     }
 
-    if (selectedPeriod === "week") {
+
+    if(
+        selectedPeriod === "week"
+    ){
 
         const day =
             today.getDay();
 
         const diff =
-            day === 0 ? 6 : day - 1;
+            day === 0
+                ? 6
+                : day - 1;
 
         const monday =
             new Date(today);
 
         monday.setDate(
-            today.getDate() - diff
+            today.getDate()-diff
         );
 
         return {
-            start: formatDate(monday),
-            end: todayString()
+            start:
+                formatDate(monday),
+            end:
+                todayString()
         };
+
     }
+
 
     const first =
         new Date(
@@ -1463,271 +2144,289 @@ function getPeriodDates() {
         );
 
     return {
-        start: formatDate(first),
-        end: todayString()
+        start:
+            formatDate(first),
+        end:
+            todayString()
     };
 }
 
 
-function formatDate(date) {
+function inPeriod(
+    reservation
+){
 
-    const y =
-        date.getFullYear();
-
-    const m =
-        String(
-            date.getMonth() + 1
-        ).padStart(2, "0");
-
-    const d =
-        String(
-            date.getDate()
-        ).padStart(2, "0");
-
-    return `${y}-${m}-${d}`;
-}
-
-
-function inRange(date, start, end) {
+    const period =
+        getPeriod();
 
     return (
-        date >= start &&
-        date <= end
+        reservation.fecha >=
+        period.start &&
+        reservation.fecha <=
+        period.end
     );
 }
 
 
 /* =========================================================
-   CARGAR DATOS
-   ========================================================= */
+   RESERVAS DEL PERIODO
+========================================================= */
 
-async function loadData() {
+function getPeriodReservations(){
 
-    showGlobalError("");
-
-    try {
-
-        const today =
-            todayString();
-
-        const [
-            turnosResult,
-            gastosResult,
-            metasResult
-        ] = await Promise.all([
-
-            supabaseClient
-                .from("turnos")
-                .select("*")
-                .gte("fecha", START_DATE)
-                .order("fecha", {
-                    ascending: true
-                }),
-
-            supabaseClient
-                .from("gastos")
-                .select("*")
-                .gte("fecha", START_DATE)
-                .order("fecha", {
-                    ascending: true
-                }),
-
-            supabaseClient
-                .from("metas")
-                .select("*")
-                .order("mes", {
-                    ascending: false
-                })
-
-        ]);
+    return buildReservations()
+        .filter(inPeriod);
+}
 
 
-        if (turnosResult.error) {
-            throw new Error(
-                "Error leyendo turnos: " +
-                turnosResult.error.message
-            );
-        }
+function getAttendedReservations(){
 
-
-        if (gastosResult.error) {
-            throw new Error(
-                "Error leyendo gastos: " +
-                gastosResult.error.message
-            );
-        }
-
-
-        if (metasResult.error) {
-            throw new Error(
-                "Error leyendo metas: " +
-                metasResult.error.message
-            );
-        }
-
-
-        turnos =
-            turnosResult.data || [];
-
-        gastos =
-            gastosResult.data || [];
-
-        metas =
-            metasResult.data || [];
-
-
-        renderDashboard();
-        renderClients();
-        renderFinance();
-
-    } catch (error) {
-
-        console.error(error);
-
-        showGlobalError(
-            error.message ||
-            "No se pudieron cargar los datos."
+    return getPeriodReservations()
+        .filter(
+            isAttendedReservation
         );
-
-    }
 }
 
 
 /* =========================================================
-   ESTADÍSTICAS
-   ========================================================= */
+   INGRESOS
+========================================================= */
 
-function getPeriodRows() {
+function getRevenue(
+    reservations
+){
 
-    const {
-        start,
-        end
-    } = getPeriodDates();
+    return reservations.reduce(
+        (sum,reservation) =>
+            sum +
+            reservation.charged,
+        0
+    );
+}
 
-    return turnos.filter(row => {
 
-        const date =
-            String(row.fecha ?? "");
+function getTips(
+    reservations
+){
 
-        return inRange(
-            date,
-            start,
-            end
+    return reservations.reduce(
+        (sum,reservation) =>
+            sum +
+            reservation.tip,
+        0
+    );
+}
+
+
+function getExpected(
+    reservations
+){
+
+    return reservations.reduce(
+        (sum,reservation) =>
+            sum +
+            reservation.expected,
+        0
+    );
+}
+
+
+function getDiscount(
+    reservation
+){
+
+    /*
+       Descuento:
+
+       precio esperado
+       -
+       servicio realmente cobrado
+
+       El cobro de no-show no se considera
+       parte del precio del servicio.
+
+       Las propinas tampoco.
+    */
+
+    const serviceCharged =
+        Math.max(
+            0,
+            reservation.charged -
+            reservation.noShowCharge
         );
 
-    });
+    return Math.max(
+        0,
+        reservation.expected -
+        serviceCharged
+    );
 }
 
 
-function getAttendedRows() {
+function getDiscountTotal(
+    reservations
+){
 
-    return getPeriodRows()
-        .filter(isAttended);
-}
-
-
-function getRevenue(rows) {
-
-    return rows.reduce(
-        (sum, row) =>
-            sum + getCharged(row),
+    return reservations.reduce(
+        (sum,reservation) =>
+            sum +
+            getDiscount(
+                reservation
+            ),
         0
     );
 }
 
 
-function getTips(rows) {
+/* =========================================================
+   GASTOS
+========================================================= */
 
-    return rows.reduce(
-        (sum, row) =>
-            sum + getTip(row),
-        0
-    );
-}
+function getPeriodExpenses(){
 
-
-function getDiscounts(rows) {
-
-    return rows.reduce(
-        (sum, row) =>
-            sum + getDiscount(row),
-        0
-    );
-}
-
-
-function getNoShows(rows) {
-
-    return rows.filter(
-        isNoShow
-    ).length;
-}
-
-
-function getExpenses() {
-
-    const {
-        start,
-        end
-    } = getPeriodDates();
+    const period =
+        getPeriod();
 
     return gastos.filter(
         gasto =>
-            inRange(
-                String(gasto.fecha),
-                start,
-                end
-            )
+            String(gasto.fecha) >=
+            period.start &&
+            String(gasto.fecha) <=
+            period.end
     );
 }
 
 
-function getExpenseTotal() {
+function getExpenseTotal(){
 
-    return getExpenses().reduce(
-        (sum, gasto) =>
-            sum + parseNumber(gasto.monto),
-        0
+    return getPeriodExpenses()
+        .reduce(
+            (sum,gasto) =>
+                sum +
+                number(gasto.monto),
+            0
+        );
+}
+
+
+/* =========================================================
+   SERVICIOS
+========================================================= */
+
+function countServices(
+    reservations
+){
+
+    let total = 0;
+
+    reservations.forEach(
+        reservation => {
+
+            total +=
+                reservation.services.length;
+
+        }
     );
+
+    return total;
+}
+
+
+function serviceCounts(
+    reservations
+){
+
+    const counts = {};
+
+    reservations.forEach(
+        reservation => {
+
+            reservation.services
+                .forEach(
+                    service => {
+
+                        counts[service] =
+                            (
+                                counts[service] ||
+                                0
+                            ) + 1;
+
+                    }
+                );
+
+        }
+    );
+
+    return counts;
 }
 
 
 /* =========================================================
    CLIENTES
-   ========================================================= */
+========================================================= */
 
-function buildClients() {
+function clientIdentity(
+    reservation
+){
+
+    const phone =
+        normalizePhone(
+            reservation.telefono
+        );
+
+    if(phone){
+        return "phone:" + phone;
+    }
+
+    return "name:" +
+        normalizeText(
+            reservation.nombre
+        );
+}
+
+
+/*
+   Una reserva = una visita del cliente.
+
+   Dos filas por combo NO = dos visitas.
+*/
+
+function buildClients(){
+
+    const reservations =
+        buildReservations()
+            .filter(
+                isAttendedReservation
+            );
 
     const map =
         new Map();
 
-    turnos
-        .filter(isAttended)
-        .forEach(row => {
+    reservations.forEach(
+        reservation => {
 
             const key =
-                clientKey(row);
+                clientIdentity(
+                    reservation
+                );
 
-            if (!key) {
-                return;
-            }
-
-            if (!map.has(key)) {
+            if(!map.has(key)){
 
                 map.set(
                     key,
                     {
                         key,
                         nombre:
-                            row.nombre || "Sin nombre",
+                            reservation.nombre,
                         telefono:
-                            getPhone(row),
-                        visitas: 0,
-                        ingresos: 0,
+                            reservation.telefono,
+                        visitas:0,
+                        ingresos:0,
                         primeraVisita:
-                            row.fecha,
+                            reservation.fecha,
                         ultimaVisita:
-                            row.fecha
+                            reservation.fecha,
+                        servicios:0
                     }
                 );
 
@@ -1739,157 +2438,118 @@ function buildClients() {
             client.visitas++;
 
             client.ingresos +=
-                getCharged(row);
+                reservation.charged;
 
-            if (
-                row.fecha <
+            client.servicios +=
+                reservation.services.length;
+
+            if(
+                reservation.fecha <
                 client.primeraVisita
-            ) {
+            ){
+
                 client.primeraVisita =
-                    row.fecha;
+                    reservation.fecha;
+
             }
 
-            if (
-                row.fecha >
+            if(
+                reservation.fecha >
                 client.ultimaVisita
-            ) {
+            ){
+
                 client.ultimaVisita =
-                    row.fecha;
+                    reservation.fecha;
+
             }
 
-        });
+        }
+    );
 
     return [...map.values()];
 }
 
 
-function renderClients() {
-
-    const container =
-        document.getElementById(
-            "clientsList"
-        );
-
-    const clients =
-        buildClients();
-
-    const sorted =
-        [...clients]
-            .sort(
-                (a,b) =>
-                    b.ingresos -
-                    a.ingresos
-            )
-            .slice(0, 20);
-
-
-    if (!sorted.length) {
-
-        container.innerHTML =
-            `<div class="list-sub">
-                Todavía no hay clientes atendidos
-                desde el ${START_DATE}.
-            </div>`;
-
-        return;
-    }
-
-
-    container.innerHTML = `
-
-        <div class="chart-title">
-            Clientes principales
-        </div>
-
-        ${sorted.map(client => `
-
-            <div class="list-item">
-
-                <div class="list-main">
-
-                    <div class="list-title">
-                        ${escapeHtml(
-                            client.nombre
-                        )}
-                    </div>
-
-                    <div class="list-sub">
-                        ${client.visitas}
-                        visita(s)
-                        · Última:
-                        ${client.ultimaVisita}
-                    </div>
-
-                </div>
-
-                <div class="list-value">
-                    ${money(client.ingresos)}
-                </div>
-
-            </div>
-
-        `).join("")}
-
-    `;
-}
-
-
 /* =========================================================
-   CLIENTES NUEVOS / RECURRENTES / DESAPARECIDOS
-   ========================================================= */
+   CLIENTES NUEVOS / RECURRENTES
+========================================================= */
 
-function getClientStats() {
+function clientStatistics(){
 
-    const clients =
+    const allClients =
         buildClients();
 
-    const {
-        start,
-        end
-    } = getPeriodDates();
+    const periodClients =
+        getAttendedReservations();
+
+    const periodKeys =
+        new Set();
+
+    periodClients.forEach(
+        reservation => {
+
+            periodKeys.add(
+                clientIdentity(
+                    reservation
+                )
+            );
+
+        }
+    );
+
 
     let newClients = 0;
     let repeatClients = 0;
     let lostClients = 0;
 
 
-    clients.forEach(client => {
+    allClients.forEach(
+        client => {
 
-        if (
-            client.primeraVisita >=
-            start &&
-            client.primeraVisita <=
-            end
-        ) {
-            newClients++;
+            if(
+                periodKeys.has(
+                    client.key
+                )
+            ){
+
+                if(
+                    client.primeraVisita >=
+                    getPeriod().start &&
+                    client.primeraVisita <=
+                    getPeriod().end
+                ){
+
+                    newClients++;
+
+                }
+
+                if(
+                    client.visitas >= 2
+                ){
+
+                    repeatClients++;
+
+                }
+
+            }
+
+
+            const days =
+                daysBetween(
+                    client.ultimaVisita,
+                    todayString()
+                );
+
+            if(
+                days >= 30
+            ){
+
+                lostClients++;
+
+            }
+
         }
-
-        if (client.visitas >= 2) {
-            repeatClients++;
-        }
-
-        const last =
-            dateFromString(
-                client.ultimaVisita
-            );
-
-        const today =
-            dateFromString(
-                todayString()
-            );
-
-        const days =
-            Math.floor(
-                (
-                    today - last
-                ) / 86400000
-            );
-
-        if (days >= 30) {
-            lostClients++;
-        }
-
-    });
+    );
 
 
     return {
@@ -1902,18 +2562,29 @@ function getClientStats() {
 
 /* =========================================================
    DASHBOARD
-   ========================================================= */
+========================================================= */
 
-function renderDashboard() {
+function renderDashboard(){
 
-    const rows =
-        getAttendedRows();
+    const reservations =
+        getPeriodReservations();
+
+    const attended =
+        reservations.filter(
+            isAttendedReservation
+        );
+
+    const pending =
+        attended.filter(
+            isPendingPayment
+        );
+
 
     const revenue =
-        getRevenue(rows);
+        getRevenue(attended);
 
     const tips =
-        getTips(rows);
+        getTips(attended);
 
     const expenses =
         getExpenseTotal();
@@ -1921,35 +2592,88 @@ function renderDashboard() {
     const profit =
         revenue - expenses;
 
+    const discount =
+        getDiscountTotal(attended);
+
+    const services =
+        countServices(attended);
+
+    const slots =
+        attended.reduce(
+            (sum,reservation) =>
+                sum +
+                reservation.slots,
+            0
+        );
+
+
+    /*
+       El valor pendiente se basa
+       en precio_esperado.
+
+       No lo contamos como ingreso.
+    */
+
+    const pendingAmount =
+        pending.reduce(
+            (sum,reservation) =>
+                sum +
+                reservation.expected,
+            0
+        );
+
+
     const ticket =
-        rows.length
-            ? revenue / rows.length
+        attended.length
+            ? revenue / attended.length
             : 0;
 
-    const discounts =
-        getDiscounts(
-            getPeriodRows()
-        );
+
+    const margin =
+        revenue > 0
+            ? (
+                profit /
+                revenue *
+                100
+            )
+            : 0;
+
 
     const noShows =
-        getNoShows(
-            getPeriodRows()
-        );
-
-    const clientStats =
-        getClientStats();
+        reservations.filter(
+            reservation =>
+                reservation.noShow
+        ).length;
 
 
     document.getElementById(
         "clientsValue"
     ).textContent =
-        rows.length;
+        attended.length;
 
 
     document.getElementById(
         "revenueValue"
     ).textContent =
         money(revenue);
+
+
+    document.getElementById(
+        "pendingValue"
+    ).textContent =
+        money(pendingAmount);
+
+
+    document.getElementById(
+        "slotsValue"
+    ).textContent =
+        slots;
+
+
+    document.getElementById(
+        "servicesValue"
+    ).textContent =
+        services;
 
 
     document.getElementById(
@@ -1965,6 +2689,12 @@ function renderDashboard() {
 
 
     document.getElementById(
+        "noshowValue"
+    ).textContent =
+        noShows;
+
+
+    document.getElementById(
         "profitValue"
     ).textContent =
         money(profit);
@@ -1977,43 +2707,9 @@ function renderDashboard() {
 
 
     document.getElementById(
-        "noshowValue"
-    ).textContent =
-        noShows;
-
-
-    document.getElementById(
         "discountValue"
     ).textContent =
-        money(discounts);
-
-
-    document.getElementById(
-        "newClientsValue"
-    ).textContent =
-        clientStats.newClients;
-
-
-    document.getElementById(
-        "repeatClientsValue"
-    ).textContent =
-        clientStats.repeatClients;
-
-
-    document.getElementById(
-        "lostClientsValue"
-    ).textContent =
-        clientStats.lostClients;
-
-
-    const margin =
-        revenue > 0
-            ? (
-                profit /
-                revenue *
-                100
-            )
-            : 0;
+        money(discount);
 
 
     document.getElementById(
@@ -2022,32 +2718,179 @@ function renderDashboard() {
         `Margen: ${margin.toFixed(1)}%`;
 
 
-    renderRevenueChart(rows);
-    renderServicesChart(rows);
+    const clients =
+        clientStatistics();
+
+
+    document.getElementById(
+        "newClientsValue"
+    ).textContent =
+        clients.newClients;
+
+
+    document.getElementById(
+        "repeatClientsValue"
+    ).textContent =
+        clients.repeatClients;
+
+
+    document.getElementById(
+        "lostClientsValue"
+    ).textContent =
+        clients.lostClients;
+
+
+    renderRevenueChart(
+        attended
+    );
+
+    renderServicesChart(
+        attended
+    );
+
+    renderPending(
+        pending
+    );
+
+    renderGoal();
+}
+
+
+/* =========================================================
+   PENDIENTES DE COBRO
+========================================================= */
+
+function renderPending(
+    pending
+){
+
+    const container =
+        document.getElementById(
+            "pendingList"
+        );
+
+
+    if(!pending.length){
+
+        container.innerHTML =
+            `<div class="listSub">
+                No hay clientes pendientes de cobro.
+            </div>`;
+
+        return;
+    }
+
+
+    container.innerHTML =
+        pending
+            .map(
+                reservation => `
+
+                <div class="listItem">
+
+                    <div class="listMain">
+
+                        <div class="listTitle">
+                            ${escapeHtml(
+                                reservation.nombre
+                            )}
+                        </div>
+
+                        <div class="listSub">
+                            ${reservation.fecha}
+                            · ${escapeHtml(
+                                reservation.turno
+                            )}
+                            · ${
+                                reservation.services
+                                    .map(
+                                        formatServiceName
+                                    )
+                                    .join(", ")
+                            }
+                        </div>
+
+                    </div>
+
+                    <div class="listValue statusPending">
+                        ${money(
+                            reservation.expected
+                        )}
+                    </div>
+
+                </div>
+
+            `
+            )
+            .join("");
+}
+
+
+/* =========================================================
+   SERVICIOS: NOMBRES
+========================================================= */
+
+function formatServiceName(
+    service
+){
+
+    const names = {
+
+        "degradado":
+            "Degradado",
+
+        "corte sencillo":
+            "Corte sencillo",
+
+        "barba":
+            "Barba",
+
+        "diseno personalizado":
+            "Diseño personalizado",
+
+        "peinado":
+            "Peinado"
+
+    };
+
+    return (
+        names[service] ||
+        service
+    );
 }
 
 
 /* =========================================================
    GRÁFICO INGRESOS
-   ========================================================= */
+========================================================= */
 
-function renderRevenueChart(rows) {
+function renderRevenueChart(
+    reservations
+){
 
-    const grouped =
-        {};
+    const grouped = {};
 
-    rows.forEach(row => {
+    reservations.forEach(
+        reservation => {
 
-        const date =
-            row.fecha;
+            if(
+                reservation.charged <= 0
+            ){
+                return;
+            }
 
-        grouped[date] =
-            (
-                grouped[date] || 0
-            ) +
-            getCharged(row);
+            grouped[
+                reservation.fecha
+            ] =
+                (
+                    grouped[
+                        reservation.fecha
+                    ] || 0
+                ) +
+                reservation.charged;
 
-    });
+        }
+    );
 
 
     const labels =
@@ -2057,7 +2900,7 @@ function renderRevenueChart(rows) {
         Object.values(grouped);
 
 
-    if (revenueChart) {
+    if(revenueChart){
         revenueChart.destroy();
     }
 
@@ -2074,36 +2917,38 @@ function renderRevenueChart(rows) {
         new Chart(
             ctx,
             {
-                type: "line",
+                type:"line",
 
-                data: {
+                data:{
                     labels,
 
-                    datasets: [{
-                        label: "Ingresos",
+                    datasets:[{
 
-                        data: values,
+                        label:"Cobrado",
 
-                        borderWidth: 2,
+                        data:values,
 
-                        tension: .35
+                        borderWidth:2,
+
+                        tension:.35
+
                     }]
                 },
 
-                options: {
-                    responsive: true,
+                options:{
+                    responsive:true,
 
-                    maintainAspectRatio: false,
+                    maintainAspectRatio:false,
 
-                    plugins: {
-                        legend: {
-                            display: false
+                    plugins:{
+                        legend:{
+                            display:false
                         }
                     },
 
-                    scales: {
-                        y: {
-                            beginAtZero: true
+                    scales:{
+                        y:{
+                            beginAtZero:true
                         }
                     }
                 }
@@ -2114,28 +2959,16 @@ function renderRevenueChart(rows) {
 
 /* =========================================================
    GRÁFICO SERVICIOS
-   ========================================================= */
+========================================================= */
 
-function renderServicesChart(rows) {
+function renderServicesChart(
+    reservations
+){
 
     const counts =
-        {};
-
-    rows.forEach(row => {
-
-        parseServices(
-            row.servicios
-        ).forEach(service => {
-
-            counts[service] =
-                (
-                    counts[service] ||
-                    0
-                ) + 1;
-
-        });
-
-    });
+        serviceCounts(
+            reservations
+        );
 
 
     const labels =
@@ -2145,7 +2978,7 @@ function renderServicesChart(rows) {
         Object.values(counts);
 
 
-    if (servicesChart) {
+    if(servicesChart){
         servicesChart.destroy();
     }
 
@@ -2162,19 +2995,27 @@ function renderServicesChart(rows) {
         new Chart(
             ctx,
             {
-                type: "doughnut",
+                type:"doughnut",
 
-                data: {
-                    labels,
-                    datasets: [{
-                        data: values,
-                        borderWidth: 0
+                data:{
+                    labels:
+                        labels.map(
+                            formatServiceName
+                        ),
+
+                    datasets:[{
+
+                        data:values,
+
+                        borderWidth:0
+
                     }]
                 },
 
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
+                options:{
+                    responsive:true,
+
+                    maintainAspectRatio:false
                 }
             }
         );
@@ -2182,19 +3023,112 @@ function renderServicesChart(rows) {
 
 
 /* =========================================================
+   CLIENTES
+========================================================= */
+
+function renderClients(){
+
+    const container =
+        document.getElementById(
+            "clientsList"
+        );
+
+    const clients =
+        buildClients()
+            .sort(
+                (a,b) =>
+                    b.ingresos -
+                    a.ingresos
+            );
+
+
+    if(!clients.length){
+
+        container.innerHTML =
+            `<div class="listSub">
+                Todavía no hay clientes atendidos
+                desde el ${START_DATE}.
+            </div>`;
+
+        return;
+    }
+
+
+    container.innerHTML = `
+
+        <div class="chartTitle">
+            Clientes
+        </div>
+
+        ${clients
+            .slice(0,30)
+            .map(
+                client => `
+
+                <div class="listItem">
+
+                    <div class="listMain">
+
+                        <div class="listTitle">
+                            ${escapeHtml(
+                                client.nombre
+                            )}
+                        </div>
+
+                        <div class="listSub">
+                            ${client.visitas}
+                            visita(s)
+                            · Última:
+                            ${client.ultimaVisita}
+
+                            ${
+                                client.telefono
+                                    ? "<br>" +
+                                      escapeHtml(
+                                          client.telefono
+                                      )
+                                    : ""
+                            }
+                        </div>
+
+                    </div>
+
+                    <div class="listValue">
+                        ${money(
+                            client.ingresos
+                        )}
+                    </div>
+
+                </div>
+
+            `
+            )
+            .join("")}
+
+    `;
+}
+
+
+/* =========================================================
    FINANZAS
-   ========================================================= */
+========================================================= */
 
-function renderFinance() {
+function renderFinance(){
 
-    const rows =
-        getAttendedRows();
+    const reservations =
+        getPeriodReservations();
+
+    const attended =
+        reservations.filter(
+            isAttendedReservation
+        );
+
 
     const revenue =
-        getRevenue(rows);
+        getRevenue(attended);
 
     const tips =
-        getTips(rows);
+        getTips(attended);
 
     const expenses =
         getExpenseTotal();
@@ -2202,21 +3136,30 @@ function renderFinance() {
     const profit =
         revenue - expenses;
 
+    const expected =
+        getExpected(attended);
+
+    const discounts =
+        getDiscountTotal(attended);
+
 
     document.getElementById(
         "financeRevenue"
     ).textContent =
         money(revenue);
 
+
     document.getElementById(
         "financeTips"
     ).textContent =
         money(tips);
 
+
     document.getElementById(
         "financeExpenses"
     ).textContent =
         money(expenses);
+
 
     document.getElementById(
         "financeProfit"
@@ -2224,38 +3167,91 @@ function renderFinance() {
         money(profit);
 
 
+    document.getElementById(
+        "discountStats"
+    ).innerHTML = `
+
+        <div class="listItem">
+
+            <div class="listMain">
+                <div class="listTitle">
+                    Precio esperado
+                </div>
+            </div>
+
+            <div class="listValue">
+                ${money(expected)}
+            </div>
+
+        </div>
+
+
+        <div class="listItem">
+
+            <div class="listMain">
+                <div class="listTitle">
+                    Descuentos
+                </div>
+            </div>
+
+            <div class="listValue">
+                ${money(discounts)}
+            </div>
+
+        </div>
+
+
+        <div class="listItem">
+
+            <div class="listMain">
+                <div class="listTitle">
+                    Cobrado
+                </div>
+            </div>
+
+            <div class="listValue">
+                ${money(revenue)}
+            </div>
+
+        </div>
+
+    `;
+
+
     renderExpensesChart();
 }
 
 
 /* =========================================================
-   GRÁFICO GASTOS
-   ========================================================= */
+   GASTOS
+========================================================= */
 
-function renderExpensesChart() {
+function renderExpensesChart(){
 
-    const grouped =
-        {};
+    const grouped = {};
 
-    getExpenses().forEach(gasto => {
+    getPeriodExpenses()
+        .forEach(
+            gasto => {
 
-        const category =
-            gasto.categoria ||
-            "otros";
+                const category =
+                    gasto.categoria ||
+                    "otros";
 
-        grouped[category] =
-            (
-                grouped[category] ||
-                0
-            ) +
-            parseNumber(
-                gasto.monto
-            );
+                grouped[category] =
+                    (
+                        grouped[category] ||
+                        0
+                    ) +
+                    number(
+                        gasto.monto
+                    );
 
-    });
+            }
+        );
 
 
-    if (expensesChart) {
+    if(expensesChart){
         expensesChart.destroy();
     }
 
@@ -2272,28 +3268,30 @@ function renderExpensesChart() {
         new Chart(
             ctx,
             {
-                type: "doughnut",
+                type:"doughnut",
 
-                data: {
+                data:{
                     labels:
                         Object.keys(
                             grouped
                         ),
 
-                    datasets: [{
+                    datasets:[{
+
                         data:
                             Object.values(
                                 grouped
                             ),
 
-                        borderWidth: 0
+                        borderWidth:0
+
                     }]
                 },
 
-                options: {
-                    responsive: true,
+                options:{
+                    responsive:true,
 
-                    maintainAspectRatio: false
+                    maintainAspectRatio:false
                 }
             }
         );
@@ -2301,76 +3299,221 @@ function renderExpensesChart() {
 
 
 /* =========================================================
-   NAVEGACIÓN
-   ========================================================= */
+   METAS
+========================================================= */
 
-function showPage(page) {
+function renderGoal(){
 
-    const pages = [
-        "Dashboard",
-        "Clients",
-        "Finance",
-        "More"
-    ];
+    const container =
+        document.getElementById(
+            "goalDisplay"
+        );
 
-    pages.forEach(name => {
 
-        const section =
-            document.getElementById(
-                "page" + name
+    const now =
+        new Date();
+
+    const month =
+        now.getFullYear() +
+        "-" +
+        String(
+            now.getMonth()+1
+        ).padStart(2,"0") +
+        "-01";
+
+
+    const goal =
+        metas.find(
+            x =>
+                String(x.mes)
+                    .substring(0,7)
+                ===
+                month.substring(0,7)
+        );
+
+
+    if(!goal){
+
+        container.innerHTML = `
+
+            <div class="chartTitle">
+                Meta del mes
+            </div>
+
+            <div class="listSub">
+                No has configurado una meta
+                para este mes.
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    const period =
+        getPeriod();
+
+    const monthlyReservations =
+        buildReservations()
+            .filter(
+                reservation =>
+                    reservation.fecha >=
+                    month &&
+                    reservation.fecha <=
+                    todayString() &&
+                    isAttendedReservation(
+                        reservation
+                    )
             );
 
-        if (section) {
-            section.classList.toggle(
-                "hidden",
-                name !== page
+
+    const revenue =
+        getRevenue(
+            monthlyReservations
+        );
+
+
+    const expenses =
+        gastos
+            .filter(
+                gasto =>
+                    String(gasto.fecha)
+                        .substring(0,7)
+                    ===
+                    month.substring(0,7)
+            )
+            .reduce(
+                (sum,gasto) =>
+                    sum +
+                    number(gasto.monto),
+                0
             );
-        }
-
-    });
 
 
-    document
-        .querySelectorAll(".nav-button")
-        .forEach(button => {
+    const profit =
+        revenue -
+        expenses;
 
-            button.classList.toggle(
-                "active",
-                button.dataset.page === page
-            );
 
-        });
+    const goalRevenue =
+        number(
+            goal.objetivo_ingresos
+        );
 
+    const goalProfit =
+        number(
+            goal.objetivo_ganancia
+        );
+
+
+    const revenuePercent =
+        goalRevenue > 0
+            ? Math.min(
+                100,
+                revenue /
+                goalRevenue *
+                100
+            )
+            : 0;
+
+
+    const profitPercent =
+        goalProfit > 0
+            ? Math.min(
+                100,
+                profit /
+                goalProfit *
+                100
+            )
+            : 0;
+
+
+    container.innerHTML = `
+
+        <div class="chartTitle">
+            Meta del mes
+        </div>
+
+
+        <div class="listItem">
+
+            <div class="listMain">
+
+                <div class="listTitle">
+                    Ingresos
+                </div>
+
+                <div class="listSub">
+                    ${money(revenue)}
+                    de
+                    ${money(goalRevenue)}
+                </div>
+
+            </div>
+
+            <div class="listValue">
+                ${revenuePercent.toFixed(0)}%
+            </div>
+
+        </div>
+
+
+        <div class="listItem">
+
+            <div class="listMain">
+
+                <div class="listTitle">
+                    Ganancia
+                </div>
+
+                <div class="listSub">
+                    ${money(profit)}
+                    de
+                    ${money(goalProfit)}
+                </div>
+
+            </div>
+
+            <div class="listValue">
+                ${profitPercent.toFixed(0)}%
+            </div>
+
+        </div>
+
+    `;
 }
 
 
 /* =========================================================
    MODALES
-   ========================================================= */
+========================================================= */
 
-function closeModal(id) {
+function openModal(id){
 
     document
         .getElementById(id)
-        .classList.add("hidden");
-
+        .classList.remove(
+            "hidden"
+        );
 }
 
 
-function openModal(id) {
+function closeModal(id){
 
     document
         .getElementById(id)
-        .classList.remove("hidden");
-
+        .classList.add(
+            "hidden"
+        );
 }
 
 
 /* =========================================================
    GUARDAR GASTO
-   ========================================================= */
+========================================================= */
 
-async function saveExpense() {
+async function saveExpense(){
 
     const fecha =
         document.getElementById(
@@ -2388,14 +3531,17 @@ async function saveExpense() {
         ).value.trim();
 
     const monto =
-        parseNumber(
+        number(
             document.getElementById(
                 "expenseAmount"
             ).value
         );
 
 
-    if (!fecha || monto <= 0) {
+    if(
+        !fecha ||
+        monto <= 0
+    ){
 
         document.getElementById(
             "expenseMessage"
@@ -2419,7 +3565,7 @@ async function saveExpense() {
             });
 
 
-    if (result.error) {
+    if(result.error){
 
         document.getElementById(
             "expenseMessage"
@@ -2453,19 +3599,22 @@ async function saveExpense() {
 
     await loadData();
 
+
     setTimeout(
         () =>
-            closeModal("expenseModal"),
-        600
+            closeModal(
+                "expenseModal"
+            ),
+        700
     );
 }
 
 
 /* =========================================================
    GUARDAR META
-   ========================================================= */
+========================================================= */
 
-async function saveGoal() {
+async function saveGoal(){
 
     const month =
         document.getElementById(
@@ -2473,21 +3622,21 @@ async function saveGoal() {
         ).value;
 
     const revenue =
-        parseNumber(
+        number(
             document.getElementById(
                 "goalRevenue"
             ).value
         );
 
     const profit =
-        parseNumber(
+        number(
             document.getElementById(
                 "goalProfit"
             ).value
         );
 
 
-    if (!month) {
+    if(!month){
 
         document.getElementById(
             "goalMessage"
@@ -2500,28 +3649,27 @@ async function saveGoal() {
     }
 
 
-    const mes =
-        month + "-01";
-
-
     const result =
         await supabaseClient
             .from("metas")
             .upsert(
                 {
-                    mes,
+                    mes:
+                        month + "-01",
+
                     objetivo_ingresos:
                         revenue,
+
                     objetivo_ganancia:
                         profit
                 },
                 {
-                    onConflict: "mes"
+                    onConflict:"mes"
                 }
             );
 
 
-    if (result.error) {
+    if(result.error){
 
         document.getElementById(
             "goalMessage"
@@ -2546,26 +3694,161 @@ async function saveGoal() {
 
     await loadData();
 
+
     setTimeout(
         () =>
-            closeModal("goalModal"),
-        600
+            closeModal(
+                "goalModal"
+            ),
+        700
     );
 }
 
 
 /* =========================================================
-   ERRORES
-   ========================================================= */
+   CARGAR DATOS
+========================================================= */
 
-function showGlobalError(message) {
+async function loadData(){
+
+    showGlobalError("");
+
+    try{
+
+        const results =
+            await Promise.all([
+
+                supabaseClient
+                    .from("turnos")
+                    .select("*")
+                    .gte(
+                        "fecha",
+                        START_DATE
+                    )
+                    .order(
+                        "fecha",
+                        {
+                            ascending:true
+                        }
+                    ),
+
+                supabaseClient
+                    .from("gastos")
+                    .select("*")
+                    .gte(
+                        "fecha",
+                        START_DATE
+                    )
+                    .order(
+                        "fecha",
+                        {
+                            ascending:true
+                        }
+                    ),
+
+                supabaseClient
+                    .from("metas")
+                    .select("*")
+                    .order(
+                        "mes",
+                        {
+                            ascending:false
+                        }
+                    )
+
+            ]);
+
+
+        const turnosResult =
+            results[0];
+
+        const gastosResult =
+            results[1];
+
+        const metasResult =
+            results[2];
+
+
+        if(
+            turnosResult.error
+        ){
+
+            throw new Error(
+                "Error leyendo turnos: " +
+                turnosResult.error.message
+            );
+
+        }
+
+
+        if(
+            gastosResult.error
+        ){
+
+            throw new Error(
+                "Error leyendo gastos: " +
+                gastosResult.error.message
+            );
+
+        }
+
+
+        if(
+            metasResult.error
+        ){
+
+            throw new Error(
+                "Error leyendo metas: " +
+                metasResult.error.message
+            );
+
+        }
+
+
+        turnos =
+            turnosResult.data || [];
+
+        gastos =
+            gastosResult.data || [];
+
+        metas =
+            metasResult.data || [];
+
+
+        renderDashboard();
+
+        renderClients();
+
+        renderFinance();
+
+    }catch(error){
+
+        console.error(error);
+
+        showGlobalError(
+            error.message ||
+            "No se pudieron cargar los datos."
+        );
+
+    }
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+function showGlobalError(
+    message
+){
 
     const element =
         document.getElementById(
             "globalError"
         );
 
-    if (!message) {
+
+    if(!message){
 
         element.classList.add(
             "hidden"
@@ -2573,6 +3856,7 @@ function showGlobalError(message) {
 
         return;
     }
+
 
     element.textContent =
         message;
@@ -2585,9 +3869,9 @@ function showGlobalError(message) {
 
 /* =========================================================
    LOGIN
-   ========================================================= */
+========================================================= */
 
-async function login() {
+async function login(){
 
     const email =
         document.getElementById(
@@ -2611,11 +3895,14 @@ async function login() {
         );
 
 
-    if (!email || !password) {
+    if(
+        !email ||
+        !password
+    ){
 
         message.innerHTML =
             `<div class="error">
-                Introduce tu email y contraseña.
+                Introduce email y contraseña.
             </div>`;
 
         return;
@@ -2630,51 +3917,43 @@ async function login() {
     message.innerHTML = "";
 
 
-    try {
+    try{
 
         const result =
-            await supabaseClient.auth.signInWithPassword({
-                email,
-                password
-            });
+            await supabaseClient
+                .auth
+                .signInWithPassword({
+                    email,
+                    password
+                });
 
 
-        if (result.error) {
+        if(result.error){
 
             throw result.error;
 
         }
 
 
-        /*
-           La sesión se ha creado.
-           onAuthStateChange también detectará
-           este cambio.
-        */
-
-        message.innerHTML =
-            `<div class="success">
-                Acceso correcto.
-            </div>`;
-
-
-    } catch (error) {
+    }catch(error){
 
         console.error(
-            "LOGIN ERROR:",
+            "LOGIN:",
             error
         );
 
         message.innerHTML =
             `<div class="error">
-                <strong>No se pudo iniciar sesión.</strong><br><br>
+                <strong>
+                    No se pudo iniciar sesión.
+                </strong>
+                <br><br>
                 ${escapeHtml(
-                    error.message ||
-                    "Error desconocido"
+                    error.message
                 )}
             </div>`;
 
-    } finally {
+    }finally{
 
         button.disabled = false;
 
@@ -2682,15 +3961,16 @@ async function login() {
             "Entrar";
 
     }
-
 }
 
 
 /* =========================================================
-   MOSTRAR / OCULTAR APP
-   ========================================================= */
+   MOSTRAR APP
+========================================================= */
 
-async function showApp(session) {
+async function showApp(
+    session
+){
 
     document
         .getElementById(
@@ -2699,6 +3979,7 @@ async function showApp(session) {
         .classList.add(
             "hidden"
         );
+
 
     document
         .getElementById(
@@ -2716,11 +3997,10 @@ async function showApp(session) {
 
 
     await loadData();
-
 }
 
 
-function showLogin() {
+function showLogin(){
 
     document
         .getElementById(
@@ -2730,6 +4010,7 @@ function showLogin() {
             "hidden"
         );
 
+
     document
         .getElementById(
             "loginScreen"
@@ -2737,22 +4018,21 @@ function showLogin() {
         .classList.remove(
             "hidden"
         );
-
 }
 
 
 /* =========================================================
-   INICIALIZACIÓN DE SESIÓN
-   ========================================================= */
+   INICIALIZACIÓN
+========================================================= */
 
-async function initialize() {
+async function initialize(){
 
-    if (!supabaseClient) {
+    if(!supabaseClient){
         return;
     }
 
 
-    try {
+    try{
 
         const result =
             await supabaseClient
@@ -2760,18 +4040,20 @@ async function initialize() {
                 .getSession();
 
 
-        if (result.error) {
+        if(result.error){
             throw result.error;
         }
 
 
-        if (result.data.session) {
+        if(
+            result.data.session
+        ){
 
             await showApp(
                 result.data.session
             );
 
-        } else {
+        }else{
 
             showLogin();
 
@@ -2787,18 +4069,18 @@ async function initialize() {
                 ) => {
 
                     console.log(
-                        "AUTH EVENT:",
+                        "AUTH:",
                         event
                     );
 
 
-                    if (session) {
+                    if(session){
 
                         await showApp(
                             session
                         );
 
-                    } else {
+                    }else{
 
                         showLogin();
 
@@ -2808,10 +4090,10 @@ async function initialize() {
             );
 
 
-    } catch (error) {
+    }catch(error){
 
         console.error(
-            "INITIALIZATION ERROR:",
+            "INIT:",
             error
         );
 
@@ -2822,26 +4104,77 @@ async function initialize() {
             `<div class="error">
 
                 <strong>
-                    No se pudo conectar con Supabase.
+                    Error conectando con Supabase.
                 </strong>
 
                 <br><br>
 
                 ${escapeHtml(
-                    error.message ||
-                    "Error desconocido"
+                    error.message
                 )}
 
             </div>`;
 
     }
+}
 
+
+/* =========================================================
+   NAVEGACIÓN
+========================================================= */
+
+function showPage(page){
+
+    const pages = [
+        "Dashboard",
+        "Clients",
+        "Finance",
+        "More"
+    ];
+
+
+    pages.forEach(
+        name => {
+
+            const section =
+                document.getElementById(
+                    "page" + name
+                );
+
+            if(section){
+
+                section.classList.toggle(
+                    "hidden",
+                    name !== page
+                );
+
+            }
+
+        }
+    );
+
+
+    document
+        .querySelectorAll(
+            ".navButton"
+        )
+        .forEach(
+            button => {
+
+                button.classList.toggle(
+                    "active",
+                    button.dataset.page ===
+                    page
+                );
+
+            }
+        );
 }
 
 
 /* =========================================================
    EVENTOS
-   ========================================================= */
+========================================================= */
 
 document
     .getElementById(
@@ -2861,10 +4194,12 @@ document
         "keydown",
         event => {
 
-            if (
+            if(
                 event.key === "Enter"
-            ) {
+            ){
+
                 login();
+
             }
 
         }
@@ -2889,59 +4224,67 @@ document
 
 document
     .querySelectorAll(
-        ".nav-button"
+        ".navButton"
     )
-    .forEach(button => {
+    .forEach(
+        button => {
 
-        button.addEventListener(
-            "click",
-            () => {
+            button.addEventListener(
+                "click",
+                () => {
 
-                showPage(
-                    button.dataset.page
-                );
+                    showPage(
+                        button.dataset.page
+                    );
 
-            }
-        );
+                }
+            );
 
-    });
+        }
+    );
 
 
 document
     .querySelectorAll(
         ".period"
     )
-    .forEach(button => {
+    .forEach(
+        button => {
 
-        button.addEventListener(
-            "click",
-            () => {
+            button.addEventListener(
+                "click",
+                () => {
 
-                document
-                    .querySelectorAll(
-                        ".period"
-                    )
-                    .forEach(
-                        b =>
-                            b.classList.remove(
-                                "active"
-                            )
+                    document
+                        .querySelectorAll(
+                            ".period"
+                        )
+                        .forEach(
+                            b =>
+                                b.classList.remove(
+                                    "active"
+                                )
+                        );
+
+
+                    button.classList.add(
+                        "active"
                     );
 
-                button.classList.add(
-                    "active"
-                );
 
-                selectedPeriod =
-                    button.dataset.period;
+                    selectedPeriod =
+                        button.dataset.period;
 
-                renderDashboard();
-                renderFinance();
 
-            }
-        );
+                    renderDashboard();
 
-    });
+                    renderFinance();
+
+                }
+            );
+
+        }
+    );
 
 
 document
@@ -2983,15 +4326,18 @@ document
         "click",
         () => {
 
-            const today =
+            const d =
                 new Date();
 
             document.getElementById(
                 "goalMonth"
             ).value =
-                `${today.getFullYear()}-${String(
-                    today.getMonth() + 1
-                ).padStart(2,"0")}`;
+                d.getFullYear() +
+                "-" +
+                String(
+                    d.getMonth()+1
+                ).padStart(2,"0");
+
 
             openModal(
                 "goalModal"
@@ -3013,7 +4359,7 @@ document
 
 /* =========================================================
    ARRANCAR
-   ========================================================= */
+========================================================= */
 
 initialize();
 
