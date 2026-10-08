@@ -2,4368 +2,1029 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-
-<title>Mono's — Administrador</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Mono's Barbería | Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
 
 <style>
 :root{
-    --green:#1c3823;
-    --green2:#233925;
-    --green3:#0d180f;
-    --gold:#cbb26a;
-    --gold2:#e3cf8c;
-    --bg:#09110b;
-    --card:#142319;
-    --text:#f5f1e5;
-    --muted:#a9ad9f;
-    --red:#d96c6c;
-    --ok:#78bd83;
-}
-
-*{
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
-}
-
-html,body{
-    margin:0;
-    padding:0;
-    min-height:100%;
-    background:var(--bg);
-    color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-}
-
-button,input,select{
-    font:inherit;
-}
-
-button{
-    cursor:pointer;
-}
-
-.hidden{
-    display:none!important;
-}
-
-/* LOGIN */
-
-#loginScreen{
-    min-height:100vh;
-    min-height:100dvh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:22px;
-    background:
-        radial-gradient(circle at 50% 0%,#28472d 0%,#09110b 52%);
-}
-
-.loginBox{
-    width:100%;
-    max-width:390px;
-    background:rgba(20,35,25,.97);
-    border:1px solid rgba(203,178,106,.3);
-    border-radius:24px;
-    padding:30px 22px;
-    box-shadow:0 25px 70px rgba(0,0,0,.5);
-}
-
-.logo{
-    text-align:center;
-    margin-bottom:28px;
-}
-
-.logoM{
-    color:var(--gold);
-    font-family:Georgia,serif;
-    font-size:65px;
-    font-weight:bold;
-    line-height:.85;
-}
-
-.logoName{
-    color:var(--gold);
-    font-family:Georgia,serif;
-    font-size:35px;
-    margin-top:5px;
-}
-
-.logoSub{
-    color:#d8d0b2;
-    font-size:10px;
-    letter-spacing:4px;
-    margin-top:7px;
-}
-
-.field{
-    margin-bottom:15px;
-}
-
-.field label{
-    display:block;
-    color:var(--muted);
-    font-size:12px;
-    margin-bottom:7px;
-}
-
-.field input,
-.field select{
-    width:100%;
-    background:#0c170e;
-    color:white;
-    border:1px solid rgba(203,178,106,.25);
-    border-radius:12px;
-    padding:14px;
-    outline:none;
-}
-
-.field input:focus,
-.field select:focus{
-    border-color:var(--gold);
-}
-
-.goldButton{
-    width:100%;
-    border:0;
-    border-radius:13px;
-    padding:15px;
-    background:var(--gold);
-    color:#142319;
-    font-weight:700;
-}
-
-.error{
-    margin-top:14px;
-    padding:12px;
-    border-radius:12px;
-    background:rgba(217,108,108,.12);
-    border:1px solid rgba(217,108,108,.35);
-    color:#ffb8b8;
-    font-size:13px;
-    line-height:1.45;
-}
-
-.success{
-    margin-top:14px;
-    padding:12px;
-    border-radius:12px;
-    background:rgba(120,189,131,.12);
-    border:1px solid rgba(120,189,131,.35);
-    color:#bce8c2;
-    font-size:13px;
-}
-
-/* APP */
-
-#app{
-    padding-bottom:92px;
-    min-height:100vh;
-    background:
-        radial-gradient(circle at 50% -10%,#213b27 0%,#09110b 45%);
-}
-
-.topbar{
-    position:sticky;
-    top:0;
-    z-index:20;
-    padding:
-        calc(env(safe-area-inset-top) + 11px)
-        16px
-        11px;
-    background:rgba(9,17,11,.91);
-    backdrop-filter:blur(16px);
-    border-bottom:1px solid rgba(203,178,106,.13);
-}
-
-.topbarRow{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-
-.brand{
-    color:var(--gold);
-    font-family:Georgia,serif;
-    font-size:23px;
-}
-
-.userEmail{
-    color:var(--muted);
-    font-size:10px;
-    margin-top:2px;
-}
-
-.logout{
-    border:1px solid rgba(203,178,106,.3);
-    background:transparent;
-    color:var(--gold);
-    border-radius:9px;
-    padding:7px 10px;
-    font-size:11px;
-}
-
-.content{
-    width:100%;
-    max-width:720px;
-    margin:auto;
-    padding:18px 15px 25px;
-}
-
-.title{
-    color:var(--gold);
-    font-family:Georgia,serif;
-    font-size:26px;
-    margin:6px 0 4px;
-}
-
-.subtitle{
-    color:var(--muted);
-    font-size:12px;
-    margin-bottom:18px;
-}
-
-.periods{
-    display:flex;
-    gap:7px;
-    overflow-x:auto;
-    margin-bottom:15px;
-}
-
-.period{
-    white-space:nowrap;
-    padding:8px 13px;
-    border-radius:10px;
-    border:1px solid rgba(203,178,106,.25);
-    background:var(--card);
-    color:#dddacf;
-    font-size:12px;
-}
-
-.period.active{
-    background:var(--gold);
-    color:#142319;
-    border-color:var(--gold);
-}
-
-.cards{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-}
-
-.card{
-    background:rgba(20,35,25,.94);
-    border:1px solid rgba(203,178,106,.13);
-    border-radius:16px;
-    padding:15px;
-    min-height:105px;
-}
-
-.card.full{
-    grid-column:1/-1;
-}
-
-.card.gold .value{
-    color:var(--gold);
-}
-
-.label{
-    color:var(--muted);
-    font-size:11px;
-    margin-bottom:8px;
-}
-
-.value{
-    color:white;
-    font-size:22px;
-    font-weight:700;
-}
-
-.small{
-    color:var(--muted);
-    font-size:10px;
-    margin-top:6px;
-    line-height:1.4;
-}
-
-.chartCard{
-    background:rgba(20,35,25,.94);
-    border:1px solid rgba(203,178,106,.13);
-    border-radius:17px;
-    padding:15px;
-    margin-top:12px;
-}
-
-.chartTitle{
-    color:var(--gold);
-    font-family:Georgia,serif;
-    font-size:17px;
-    margin-bottom:14px;
-}
-
-.chartBox{
-    height:230px;
-}
-
-.listItem{
-    display:flex;
-    justify-content:space-between;
-    gap:12px;
-    padding:12px 0;
-    border-bottom:1px solid rgba(255,255,255,.07);
-}
-
-.listItem:last-child{
-    border-bottom:0;
-}
-
-.listMain{
-    min-width:0;
-}
-
-.listTitle{
-    color:white;
-    font-size:13px;
-    font-weight:600;
-}
-
-.listSub{
-    color:var(--muted);
-    font-size:11px;
-    margin-top:4px;
-    line-height:1.4;
-}
-
-.listValue{
-    color:var(--gold);
-    font-weight:700;
-    white-space:nowrap;
-}
-
-.statusPending{
-    color:#e3b76c;
-}
-
-.statusPaid{
-    color:var(--ok);
-}
-
-.statusNoShow{
-    color:var(--red);
-}
-
-.primary{
-    width:100%;
-    border:0;
-    border-radius:12px;
-    padding:14px;
-    background:var(--gold);
-    color:#142319;
-    font-weight:700;
-    margin-bottom:10px;
-}
-
-.secondary{
-    width:100%;
-    border:1px solid rgba(203,178,106,.3);
-    border-radius:12px;
-    padding:13px;
-    background:transparent;
-    color:var(--gold);
-    font-weight:600;
-}
-
-.bottomNav{
-    position:fixed;
-    z-index:30;
-    left:0;
-    right:0;
-    bottom:0;
-    display:flex;
-    justify-content:space-around;
-    background:rgba(9,17,11,.96);
-    backdrop-filter:blur(15px);
-    border-top:1px solid rgba(203,178,106,.17);
-    padding:
-        7px 5px
-        calc(env(safe-area-inset-bottom) + 7px);
-}
-
-.navButton{
-    border:0;
-    background:transparent;
-    color:var(--muted);
-    font-size:10px;
-    padding:4px 9px;
-}
-
-.navButton.active{
-    color:var(--gold);
-}
-
-.navIcon{
-    display:block;
-    font-size:19px;
-    margin-bottom:2px;
-}
-
-/* MODAL */
-
-.modal{
-    position:fixed;
-    inset:0;
-    z-index:100;
-    display:flex;
-    align-items:flex-end;
-    background:rgba(0,0,0,.72);
-}
-
-.modalBox{
-    width:100%;
-    max-height:90vh;
-    overflow-y:auto;
-    background:#142319;
-    border-radius:22px 22px 0 0;
-    padding:20px;
-}
-
-.modalTitle{
-    color:var(--gold);
-    font-family:Georgia,serif;
-    font-size:22px;
-    margin-bottom:18px;
-}
-
-.close{
-    float:right;
-    border:0;
-    background:transparent;
-    color:var(--muted);
-    font-size:25px;
-}
-
-/* LOADING */
-
-.loading{
-    text-align:center;
-    color:var(--muted);
-    padding:45px 20px;
-}
-
-.spinner{
-    width:30px;
-    height:30px;
-    border-radius:50%;
-    border:3px solid rgba(203,178,106,.2);
-    border-top-color:var(--gold);
-    animation:spin .8s linear infinite;
-    margin:0 auto 15px;
-}
-
-@keyframes spin{
-    to{transform:rotate(360deg)}
-}
-
-@media(min-width:700px){
-
-    .content{
-        padding-top:30px;
-    }
-
-    .cards{
-        grid-template-columns:repeat(4,1fr);
-    }
-
-    .card.full{
-        grid-column:auto;
-    }
-
-    .bottomNav{
-        max-width:720px;
-        left:50%;
-        right:auto;
-        width:720px;
-        transform:translateX(-50%);
-        border-radius:18px 18px 0 0;
-    }
-}
+  --forest:#1c3823;
+  --deep:#0f1d13;
+  --night:#0a130c;
+  --gold:#cbb26a;
+  --gold-soft:#e3cf8c;
+  --cream:#f2ecd9;
+  --muted:#9fa594;
+  --line:rgba(203,178,106,.16);
+  --bad:#dc7b71;
+  --ok:#86c595;
+  --warn:#e3b76c;
+  --serif:"Cormorant Garamond",Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--night);color:var(--cream);font-family:var(--sans);font-size:15px;line-height:1.45}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* ---------- Entrada ---------- */
+#login{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:radial-gradient(ellipse at 50% 0%,#24432b 0%,var(--night) 60%)}
+.loginBox{width:100%;max-width:380px}
+.loginBrand{font-family:var(--serif);font-weight:700;font-size:44px;color:var(--gold);line-height:1;margin:0 0 4px}
+.loginSub{color:var(--muted);margin:0 0 28px}
+.field{margin-bottom:14px}
+.field label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
+.field input,.field select{width:100%;background:var(--deep);border:1px solid var(--line);border-radius:10px;padding:13px 14px;outline:none}
+.field input:focus,.field select:focus{border-color:var(--gold)}
+.btn{width:100%;border:0;border-radius:10px;padding:14px;background:var(--gold);color:var(--forest);font-weight:700}
+.btn:disabled{opacity:.55}
+.btnGhost{width:100%;border:1px solid var(--line);border-radius:10px;padding:13px;background:transparent;color:var(--gold);font-weight:600;margin-top:10px}
+.msg{margin-top:14px;padding:12px;border-radius:10px;font-size:13px}
+.msg.err{background:rgba(220,123,113,.12);border:1px solid rgba(220,123,113,.35);color:#ffc2bb}
+
+/* ---------- Estructura ---------- */
+#app{min-height:100dvh;padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+.top{position:sticky;top:0;z-index:20;background:rgba(10,19,12,.93);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top) + 10px) 16px 10px}
+.topRow{display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:760px;margin:0 auto}
+.brand{font-family:var(--serif);font-weight:700;font-size:24px;color:var(--gold);line-height:1}
+.topBtns{display:flex;gap:8px}
+.chip{border:1px solid var(--line);background:transparent;color:var(--gold);border-radius:9px;padding:7px 11px;font-size:13px}
+.periods{display:flex;gap:6px;max-width:760px;margin:10px auto 0;overflow-x:auto}
+.period{white-space:nowrap;border:1px solid var(--line);background:var(--deep);color:var(--cream);border-radius:9px;padding:7px 14px;font-size:13px}
+.period.on{background:var(--gold);color:var(--forest);border-color:var(--gold);font-weight:700}
+main{max-width:760px;margin:0 auto;padding:18px 16px 30px}
+h1{font-family:var(--serif);font-weight:700;font-size:30px;color:var(--gold);margin:4px 0 2px;line-height:1.1}
+.lead{color:var(--muted);margin:0 0 18px;font-size:14px}
+.note{color:var(--muted);font-size:12px;margin:6px 0 0}
+
+/* ---------- Tarjetas ---------- */
+.hero{padding:6px 0 18px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.hero .big{font-family:var(--serif);font-weight:700;font-size:56px;line-height:1;color:var(--cream);font-variant-numeric:lining-nums}
+.hero .cap{color:var(--muted);font-size:13px;margin-bottom:6px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:var(--deep);border:1px solid var(--line);border-radius:12px;padding:14px;position:relative}
+.card.gold .value{color:var(--gold-soft)}
+.card .label{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.card .value{font-family:var(--serif);font-weight:700;font-size:28px;line-height:1.05;font-variant-numeric:lining-nums}
+.card .sub{color:var(--muted);font-size:12px;margin-top:5px}
+.info{width:18px;height:18px;border-radius:50%;border:1px solid var(--muted);background:transparent;color:var(--muted);font-size:11px;line-height:1;padding:0;flex-shrink:0}
+.help{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);color:#c9cdbf;font-size:12.5px;line-height:1.5}
+.block{background:var(--deep);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:12px}
+.blockHead{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.blockTitle{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--gold)}
+.chartBox{height:220px;position:relative}
+.row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.row:last-child{border-bottom:0}
+.rowMain{min-width:0}
+.rowTitle{font-weight:600;font-size:14px}
+.rowSub{color:var(--muted);font-size:12px;margin-top:2px}
+.rowVal{font-weight:700;white-space:nowrap;color:var(--gold-soft);text-align:right}
+.rowVal.bad{color:var(--bad)}.rowVal.warn{color:var(--warn)}.rowVal.ok{color:var(--ok)}
+.empty{color:var(--muted);font-size:13px;padding:6px 0}
+.bar{height:8px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;background:var(--gold);border-radius:6px}
+.del{border:0;background:transparent;color:var(--bad);font-size:18px;padding:0 4px}
+
+/* ---------- Navegación ---------- */
+nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;background:rgba(10,19,12,.97);
+  backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px 4px calc(env(safe-area-inset-bottom) + 6px)}
+nav.bottom button{flex:1;border:0;background:transparent;color:var(--muted);font-size:11px;padding:6px 2px}
+nav.bottom button.on{color:var(--gold)}
+nav.bottom span{display:block;font-size:18px;margin-bottom:1px}
+
+/* ---------- Ventanas ---------- */
+.modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:560px;max-height:90dvh;overflow-y:auto;background:var(--forest);border-radius:18px 18px 0 0;padding:20px 18px calc(24px + env(safe-area-inset-bottom))}
+.sheet h2{font-family:var(--serif);font-size:24px;color:var(--gold);margin:0 0 16px}
+.sheet .field input,.sheet .field select{background:var(--night)}
+.spin{width:28px;height:28px;border:3px solid rgba(203,178,106,.2);border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite;margin:40px auto 12px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
 </style>
 </head>
-
 <body>
 
-<!-- =====================================================
-     LOGIN
-===================================================== -->
-
-<section id="loginScreen">
-
-    <div class="loginBox">
-
-        <div class="logo">
-
-            <div class="logoM">M</div>
-
-            <div class="logoName">
-                Mono's
-            </div>
-
-            <div class="logoSub">
-                ADMINISTRADOR
-            </div>
-
-        </div>
-
-        <div class="field">
-            <label>Email</label>
-
-            <input
-                id="email"
-                type="email"
-                autocomplete="username"
-                placeholder="Tu correo">
-        </div>
-
-        <div class="field">
-            <label>Contraseña</label>
-
-            <input
-                id="password"
-                type="password"
-                autocomplete="current-password"
-                placeholder="Tu contraseña">
-        </div>
-
-        <button
-            id="loginButton"
-            class="goldButton">
-            Entrar
-        </button>
-
-        <div id="loginMessage"></div>
-
-    </div>
-
+<!-- ===================== ENTRADA ===================== -->
+<section id="login">
+  <div class="loginBox">
+    <h1 class="loginBrand">Mono's</h1>
+    <p class="loginSub">Panel de la barbería</p>
+    <div class="field"><label for="email">Correo</label>
+      <input id="email" type="email" autocomplete="username" placeholder="tu@correo.com"></div>
+    <div class="field"><label for="password">Contraseña</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="Tu contraseña"></div>
+    <button id="loginBtn" class="btn">Entrar</button>
+    <div id="loginMsg"></div>
+  </div>
 </section>
 
-
-<!-- =====================================================
-     APP
-===================================================== -->
-
+<!-- ===================== APP ===================== -->
 <section id="app" class="hidden">
-
-<header class="topbar">
-
-    <div class="topbarRow">
-
-        <div>
-            <div class="brand">
-                Mono's
-            </div>
-
-            <div
-                id="userEmail"
-                class="userEmail">
-            </div>
-        </div>
-
-        <button
-            id="logoutButton"
-            class="logout">
-            Salir
-        </button>
-
+  <header class="top">
+    <div class="topRow">
+      <div class="brand">Mono's</div>
+      <div class="topBtns">
+        <button class="chip" id="refreshBtn" aria-label="Actualizar datos">Actualizar</button>
+        <button class="chip" id="logoutBtn">Salir</button>
+      </div>
     </div>
-
-</header>
-
-
-<main class="content">
-
-
-<!-- =====================================================
-     INICIO
-===================================================== -->
-
-<section id="pageDashboard">
-
-    <h1 class="title">
-        Resumen
-    </h1>
-
-    <div class="subtitle">
-        Administrador de Mono's Barbería
+    <div class="periods" id="periods">
+      <button class="period on" data-p="today">Hoy</button>
+      <button class="period" data-p="week">Esta semana</button>
+      <button class="period" data-p="month">Este mes</button>
+      <button class="period" data-p="all">Todo</button>
     </div>
-
-
-    <div class="periods">
-
-        <button
-            class="period active"
-            data-period="today">
-            Hoy
-        </button>
-
-        <button
-            class="period"
-            data-period="week">
-            Semana
-        </button>
-
-        <button
-            class="period"
-            data-period="month">
-            Mes
-        </button>
-
-    </div>
-
-
-    <div class="cards">
-
-        <div class="card gold">
-            <div class="label">
-                Clientes atendidos
-            </div>
-
-            <div
-                id="clientsValue"
-                class="value">
-                0
-            </div>
-
-            <div class="small">
-                Reservas/clientes únicos
-            </div>
-        </div>
-
-
-        <div class="card gold">
-            <div class="label">
-                Cobrado
-            </div>
-
-            <div
-                id="revenueValue"
-                class="value">
-                0 CUP
-            </div>
-
-            <div class="small">
-                Solo cobros registrados
-            </div>
-        </div>
-
-
-        <div class="card">
-            <div class="label">
-                Pendiente de cobro
-            </div>
-
-            <div
-                id="pendingValue"
-                class="value">
-                0 CUP
-            </div>
-
-            <div class="small">
-                Clientes atendidos sin cobro
-            </div>
-        </div>
-
-
-        <div class="card">
-            <div class="label">
-                Turnos utilizados
-            </div>
-
-            <div
-                id="slotsValue"
-                class="value">
-                0
-            </div>
-
-            <div class="small">
-                Bloques de 30 minutos
-            </div>
-        </div>
-
-
-        <div class="card">
-            <div class="label">
-                Servicios realizados
-            </div>
-
-            <div
-                id="servicesValue"
-                class="value">
-                0
-            </div>
-
-            <div class="small">
-                Se cuentan individualmente
-            </div>
-        </div>
-
-
-        <div class="card">
-            <div class="label">
-                Propinas
-            </div>
-
-            <div
-                id="tipsValue"
-                class="value">
-                0 CUP
-            </div>
-        </div>
-
-
-        <div class="card">
-            <div class="label">
-                Gastos
-            </div>
-
-            <div
-                id="expensesValue"
-                class="value">
-                0 CUP
-            </div>
-        </div>
-
-
-        <div class="card">
-            <div class="label">
-                No-shows
-            </div>
-
-            <div
-                id="noshowValue"
-                class="value">
-                0
-            </div>
-        </div>
-
-
-        <div class="card gold full">
-            <div class="label">
-                Ganancia neta
-            </div>
-
-            <div
-                id="profitValue"
-                class="value">
-                0 CUP
-            </div>
-
-            <div
-                id="profitSmall"
-                class="small">
-            </div>
-        </div>
-
-
-        <div class="card">
-            <div class="label">
-                Ticket promedio
-            </div>
-
-            <div
-                id="ticketValue"
-                class="value">
-                0 CUP
-            </div>
-        </div>
-
-
-        <div class="card">
-            <div class="label">
-                Descuentos
-            </div>
-
-            <div
-                id="discountValue"
-                class="value">
-                0 CUP
-            </div>
-        </div>
-
-    </div>
-
-
-    <!-- CLIENTES -->
-
-    <div class="chartCard">
-
-        <div class="chartTitle">
-            Clientes
-        </div>
-
-        <div class="listItem">
-
-            <div class="listMain">
-                <div class="listTitle">
-                    Clientes nuevos
-                </div>
-            </div>
-
-            <div
-                id="newClientsValue"
-                class="listValue">
-                0
-            </div>
-
-        </div>
-
-
-        <div class="listItem">
-
-            <div class="listMain">
-                <div class="listTitle">
-                    Clientes recurrentes
-                </div>
-            </div>
-
-            <div
-                id="repeatClientsValue"
-                class="listValue">
-                0
-            </div>
-
-        </div>
-
-
-        <div class="listItem">
-
-            <div class="listMain">
-                <div class="listTitle">
-                    Clientes desaparecidos
-                </div>
-
-                <div class="listSub">
-                    30 días o más sin volver
-                </div>
-            </div>
-
-            <div
-                id="lostClientsValue"
-                class="listValue">
-                0
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- GRÁFICO INGRESOS -->
-
-    <div class="chartCard">
-
-        <div class="chartTitle">
-            Cobros por día
-        </div>
-
-        <div class="chartBox">
-            <canvas id="revenueChart"></canvas>
-        </div>
-
-    </div>
-
-
-    <!-- GRÁFICO SERVICIOS -->
-
-    <div class="chartCard">
-
-        <div class="chartTitle">
-            Servicios realizados
-        </div>
-
-        <div class="chartBox">
-            <canvas id="servicesChart"></canvas>
-        </div>
-
-    </div>
-
-
-    <!-- PENDIENTES -->
-
-    <div class="chartCard">
-
-        <div class="chartTitle">
-            Pendientes de cobro
-        </div>
-
-        <div id="pendingList"></div>
-
-    </div>
-
+  </header>
+
+  <main>
+    <div id="globalMsg"></div>
+    <section id="pg-resumen"></section>
+    <section id="pg-dinero" class="hidden"></section>
+    <section id="pg-clientes" class="hidden"></section>
+    <section id="pg-agenda" class="hidden"></section>
+    <section id="pg-noshows" class="hidden"></section>
+  </main>
+
+  <nav class="bottom">
+    <button class="on" data-pg="resumen"><span>⌂</span>Resumen</button>
+    <button data-pg="dinero"><span>$</span>Dinero</button>
+    <button data-pg="clientes"><span>♙</span>Clientes</button>
+    <button data-pg="agenda"><span>▦</span>Agenda</button>
+    <button data-pg="noshows"><span>!</span>No-shows</button>
+  </nav>
 </section>
 
-
-<!-- =====================================================
-     CLIENTES
-===================================================== -->
-
-<section
-    id="pageClients"
-    class="hidden">
-
-    <h1 class="title">
-        Clientes
-    </h1>
-
-    <div class="subtitle">
-        Desde el 8 de octubre de 2026
-    </div>
-
-    <div
-        id="clientsList"
-        class="chartCard">
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     FINANZAS
-===================================================== -->
-
-<section
-    id="pageFinance"
-    class="hidden">
-
-    <h1 class="title">
-        Finanzas
-    </h1>
-
-    <div class="subtitle">
-        Ingresos, gastos y rentabilidad
-    </div>
-
-
-    <div class="cards">
-
-        <div class="card gold">
-            <div class="label">
-                Cobrado
-            </div>
-
-            <div
-                id="financeRevenue"
-                class="value">
-                0 CUP
-            </div>
-        </div>
-
-
-        <div class="card">
-            <div class="label">
-                Propinas
-            </div>
-
-            <div
-                id="financeTips"
-                class="value">
-                0 CUP
-            </div>
-        </div>
-
-
-        <div class="card">
-            <div class="label">
-                Gastos
-            </div>
-
-            <div
-                id="financeExpenses"
-                class="value">
-                0 CUP
-            </div>
-        </div>
-
-
-        <div class="card gold">
-            <div class="label">
-                Ganancia neta
-            </div>
-
-            <div
-                id="financeProfit"
-                class="value">
-                0 CUP
-            </div>
-        </div>
-
-    </div>
-
-
-    <div class="chartCard">
-
-        <div class="chartTitle">
-            Gastos por categoría
-        </div>
-
-        <div class="chartBox">
-            <canvas id="expensesChart"></canvas>
-        </div>
-
-    </div>
-
-
-    <div class="chartCard">
-
-        <div class="chartTitle">
-            Comparación esperada vs cobrada
-        </div>
-
-        <div id="discountStats"></div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     MÁS
-===================================================== -->
-
-<section
-    id="pageMore"
-    class="hidden">
-
-    <h1 class="title">
-        Administración
-    </h1>
-
-    <div class="subtitle">
-        Herramientas del negocio
-    </div>
-
-
-    <button
-        id="addExpenseButton"
-        class="primary">
-        + Añadir gasto
-    </button>
-
-
-    <button
-        id="addGoalButton"
-        class="secondary">
-        + Configurar meta mensual
-    </button>
-
-
-    <div
-        id="goalDisplay"
-        class="chartCard"
-        style="margin-top:15px;">
-    </div>
-
-</section>
-
-
-<div
-    id="globalError"
-    class="error hidden">
-</div>
-
-</main>
-
-
-<!-- =====================================================
-     NAVEGACIÓN
-===================================================== -->
-
-<nav class="bottomNav">
-
-    <button
-        class="navButton active"
-        data-page="Dashboard">
-
-        <span class="navIcon">
-            ⌂
-        </span>
-
-        Inicio
-
-    </button>
-
-
-    <button
-        class="navButton"
-        data-page="Clients">
-
-        <span class="navIcon">
-            ♙
-        </span>
-
-        Clientes
-
-    </button>
-
-
-    <button
-        class="navButton"
-        data-page="Finance">
-
-        <span class="navIcon">
-            ₡
-        </span>
-
-        Finanzas
-
-    </button>
-
-
-    <button
-        class="navButton"
-        data-page="More">
-
-        <span class="navIcon">
-            ☰
-        </span>
-
-        Más
-
-    </button>
-
-</nav>
-
-</section>
-
-
-<!-- =====================================================
-     MODAL GASTOS
-===================================================== -->
-
-<div
-    id="expenseModal"
-    class="modal hidden">
-
-    <div class="modalBox">
-
-        <button
-            class="close"
-            onclick="closeModal('expenseModal')">
-            ×
-        </button>
-
-        <div class="modalTitle">
-            Añadir gasto
-        </div>
-
-
-        <div class="field">
-
-            <label>
-                Fecha
-            </label>
-
-            <input
-                id="expenseDate"
-                type="date">
-
-        </div>
-
-
-        <div class="field">
-
-            <label>
-                Categoría
-            </label>
-
-            <select id="expenseCategory">
-
-                <option value="productos">
-                    Productos
-                </option>
-
-                <option value="mantenimiento de máquinas">
-                    Mantenimiento de máquinas
-                </option>
-
-                <option value="navajas">
-                    Navajas
-                </option>
-
-                <option value="otros">
-                    Otros
-                </option>
-
-            </select>
-
-        </div>
-
-
-        <div class="field">
-
-            <label>
-                Descripción
-            </label>
-
-            <input
-                id="expenseDescription"
-                type="text"
-                placeholder="Ej. Talco">
-
-        </div>
-
-
-        <div class="field">
-
-            <label>
-                Monto CUP
-            </label>
-
-            <input
-                id="expenseAmount"
-                type="number"
-                inputmode="decimal"
-                placeholder="0">
-
-        </div>
-
-
-        <button
-            id="saveExpense"
-            class="primary">
-            Guardar gasto
-        </button>
-
-
-        <div id="expenseMessage"></div>
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     MODAL METAS
-===================================================== -->
-
-<div
-    id="goalModal"
-    class="modal hidden">
-
-    <div class="modalBox">
-
-        <button
-            class="close"
-            onclick="closeModal('goalModal')">
-            ×
-        </button>
-
-        <div class="modalTitle">
-            Meta mensual
-        </div>
-
-
-        <div class="field">
-
-            <label>
-                Mes
-            </label>
-
-            <input
-                id="goalMonth"
-                type="month">
-
-        </div>
-
-
-        <div class="field">
-
-            <label>
-                Objetivo de ingresos
-            </label>
-
-            <input
-                id="goalRevenue"
-                type="number"
-                inputmode="decimal"
-                placeholder="120000">
-
-        </div>
-
-
-        <div class="field">
-
-            <label>
-                Objetivo de ganancia
-            </label>
-
-            <input
-                id="goalProfit"
-                type="number"
-                inputmode="decimal"
-                placeholder="90000">
-
-        </div>
-
-
-        <button
-            id="saveGoal"
-            class="primary">
-            Guardar meta
-        </button>
-
-
-        <div id="goalMessage"></div>
-
-    </div>
-
-</div>
-
+<!-- ===================== VENTANA: GASTO ===================== -->
+<div id="expenseModal" class="modal hidden"><div class="sheet">
+  <h2>Añadir gasto</h2>
+  <div class="field"><label for="exDate">Fecha</label><input id="exDate" type="date"></div>
+  <div class="field"><label for="exCat">Categoría</label>
+    <select id="exCat">
+      <option value="productos">Productos</option>
+      <option value="mantenimiento de máquinas">Mantenimiento de máquinas</option>
+      <option value="navajas">Navajas</option>
+      <option value="otros">Otros</option>
+    </select></div>
+  <div class="field"><label for="exDesc">Descripción</label><input id="exDesc" type="text" placeholder="Ej. Talco"></div>
+  <div class="field"><label for="exAmount">Monto</label><input id="exAmount" type="number" inputmode="decimal" placeholder="0"></div>
+  <button class="btn" id="saveExpense">Guardar gasto</button>
+  <button class="btnGhost" data-close="expenseModal">Cancelar</button>
+  <div id="exMsg"></div>
+</div></div>
+
+<!-- ===================== VENTANA: META ===================== -->
+<div id="goalModal" class="modal hidden"><div class="sheet">
+  <h2>Meta del mes</h2>
+  <div class="field"><label for="gMonth">Mes</label><input id="gMonth" type="month"></div>
+  <div class="field"><label for="gRev">Meta de dinero cobrado</label><input id="gRev" type="number" inputmode="decimal" placeholder="120000"></div>
+  <div class="field"><label for="gProfit">Meta de ganancia neta</label><input id="gProfit" type="number" inputmode="decimal" placeholder="90000"></div>
+  <button class="btn" id="saveGoal">Guardar meta</button>
+  <button class="btnGhost" data-close="goalModal">Cancelar</button>
+  <div id="gMsg"></div>
+</div></div>
 
 <script>
-
-/* =========================================================
-   SUPABASE
-========================================================= */
-
-const SUPABASE_URL =
-    "https://ldxxflhwpyzldisydhmd.supabase.co";
-
-const SUPABASE_KEY =
-    "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
-
-let supabaseClient = null;
-
-
 /* =========================================================
    CONFIGURACIÓN
+   - START_DATE: el panel solo cuenta desde esta fecha.
+     Cámbiala si quieres que cuente desde otro día.
 ========================================================= */
-
+const SB_URL = "https://ldxxflhwpyzldisydhmd.supabase.co";
+const SB_KEY = "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
 const START_DATE = "2026-10-08";
 
-let turnos = [];
-let gastos = [];
-let metas = [];
+const SLOTS = ["9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM",
+               "2:00 PM","2:30 PM","3:00 PM","3:30 PM","4:00 PM"];
+const DAYS = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
-let selectedPeriod = "today";
-
-let revenueChart = null;
-let servicesChart = null;
-let expensesChart = null;
-
-
-/* =========================================================
-   INICIAR SUPABASE
-========================================================= */
+let sb = null;
+let turnos = [], gastos = [], metas = [];
+let reservas = [], bloqueos = [];
+let period = "today";
+let appShown = false;
+let lastLoad = 0;
+const charts = {};
+let helpN = 0;
 
 try{
-
-    if(
-        !window.supabase ||
-        !window.supabase.createClient
-    ){
-        throw new Error(
-            "No se pudo cargar Supabase."
-        );
-    }
-
-    supabaseClient =
-        window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY
-        );
-
-}catch(error){
-
-    document.getElementById(
-        "loginMessage"
-    ).innerHTML =
-        `<div class="error">
-            ${escapeHtml(error.message)}
-        </div>`;
-
+  sb = window.supabase.createClient(SB_URL, SB_KEY);
+}catch(e){
+  document.getElementById("loginMsg").innerHTML =
+    '<div class="msg err">No se pudo cargar Supabase. Revisa tu conexión y recarga la página.</div>';
 }
-
+if(window.Chart){
+  Chart.defaults.color = "#9fa594";
+  Chart.defaults.font.family = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif';
+}
 
 /* =========================================================
    UTILIDADES
 ========================================================= */
+const $ = id => document.getElementById(id);
 
-function escapeHtml(value){
-
-    return String(value ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+function esc(v){
+  return String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
 }
-
-
-function money(value){
-
-    return Number(value || 0)
-        .toLocaleString(
-            "es-CU",
-            {
-                maximumFractionDigits:0
-            }
-        ) + " CUP";
+function num(v){
+  if(v === null || v === undefined || v === "") return 0;
+  const n = Number(String(v).replace(",","."));
+  return Number.isFinite(n) ? n : 0;
 }
-
-
-function number(value){
-
-    if(
-        value === null ||
-        value === undefined ||
-        value === ""
-    ){
-        return 0;
-    }
-
-    const n =
-        Number(
-            String(value)
-                .replace(",",".")
-        );
-
-    return Number.isFinite(n)
-        ? n
-        : 0;
+function money(v){
+  const n = Math.round(num(v));
+  return (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US");
 }
-
-
-function normalizeText(value){
-
-    return String(value ?? "")
-        .trim()
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(
-            /[\u0300-\u036f]/g,
-            ""
-        );
+function pct(v){ return (Number.isFinite(v) ? v : 0).toFixed(0) + "%"; }
+function norm(s){
+  return String(s ?? "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
 }
+function digits(s){ return String(s ?? "").replace(/\D/g,""); }
 
-
-function normalizePhone(value){
-
-    return String(value ?? "")
-        .replace(/\D/g,"");
+function fmt(d){
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
 }
-
-
-function todayString(){
-
-    const d = new Date();
-
-    return formatDate(d);
+function parseD(s){
+  const p = String(s).split("-");
+  return new Date(Number(p[0]), Number(p[1])-1, Number(p[2]));
 }
-
-
-function formatDate(date){
-
-    return (
-        date.getFullYear() +
-        "-" +
-        String(
-            date.getMonth()+1
-        ).padStart(2,"0") +
-        "-" +
-        String(
-            date.getDate()
-        ).padStart(2,"0")
-    );
+function todayStr(){ return fmt(new Date()); }
+function niceDate(s){
+  if(!ISO.test(s)) return s;
+  const p = s.split("-");
+  return p[2] + "-" + p[1] + "-" + p[0];
 }
-
-
-function dateObject(value){
-
-    const p =
-        String(value).split("-");
-
-    if(p.length !== 3){
-        return null;
-    }
-
-    return new Date(
-        Number(p[0]),
-        Number(p[1])-1,
-        Number(p[2])
-    );
+function shortDate(s){
+  const p = s.split("-");
+  return p[2] + "/" + p[1];
 }
-
-
 function daysBetween(a,b){
-
-    const d1 =
-        dateObject(a);
-
-    const d2 =
-        dateObject(b);
-
-    if(!d1 || !d2){
-        return 0;
-    }
-
-    return Math.floor(
-        Math.abs(
-            d2-d1
-        ) / 86400000
-    );
+  return Math.round((parseD(b) - parseD(a)) / 86400000);
 }
-
+function slotMin(t){
+  const m = String(t || "").trim().toUpperCase().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+  if(!m) return null;
+  let h = Number(m[1]) % 12;
+  if(m[3] === "PM") h += 12;
+  return h * 60 + Number(m[2]);
+}
+function slotPassed(fecha, turno){
+  const t = todayStr();
+  if(fecha < t) return true;
+  if(fecha > t) return false;
+  const m = slotMin(turno);
+  if(m === null) return false;
+  const n = new Date();
+  return m <= n.getHours() * 60 + n.getMinutes();
+}
+function eachDay(start, end, fn){
+  const d = parseD(start), e = parseD(end);
+  while(d <= e){ fn(fmt(d), d.getDay()); d.setDate(d.getDate() + 1); }
+}
 
 /* =========================================================
-   SERVICIOS
+   PERIODO
 ========================================================= */
-
-/*
-   IMPORTANTE:
-
-   Supabase guarda:
-
-   degradado, barba
-
-   y NO:
-
-   {degradado, barba}
-
-   Esta función acepta ambos formatos
-   por seguridad.
-*/
-
-function parseServices(value){
-
-    if(!value){
-        return [];
-    }
-
-    return String(value)
-        .replace(/[{}]/g,"")
-        .split(",")
-        .map(
-            x =>
-                normalizeText(x)
-        )
-        .filter(Boolean);
-}
-
-
-/*
-   Elimina servicios duplicados dentro
-   de una misma reserva.
-
-   Esto es importante porque los dos
-   turnos de un combo pueden tener:
-
-   degradado, barba
-
-   en ambas filas.
-*/
-
-function uniqueServices(values){
-
-    const result = [];
-
-    values.forEach(service => {
-
-        if(
-            service &&
-            !result.includes(service)
-        ){
-            result.push(service);
-        }
-
-    });
-
-    return result;
-}
-
-
-/* =========================================================
-   CAMPOS
-========================================================= */
-
-function getPhone(row){
-
-    return (
-        row["teléfono"] ??
-        row["telefono"] ??
-        ""
-    );
-}
-
-
-function getExpected(row){
-
-    return number(
-        row.precio_esperado
-    );
-}
-
-
-function getCharged(row){
-
-    return number(
-        row.precio_cobrado
-    );
-}
-
-
-function getTotalFallback(row){
-
-    return number(
-        row.total
-    );
-}
-
-
-function getNoShowCharge(row){
-
-    return number(
-        row.cobro_no_show
-    );
-}
-
-
-function getTip(row){
-
-    return number(
-        row.propina
-    );
-}
-
-
-function isNoShow(row){
-
-    return row.no_show === true;
-}
-
-
-function isCancelled(row){
-
-    if(
-        row.cancelado === true
-    ){
-        return true;
-    }
-
-    const estado =
-        normalizeText(
-            row.estado
-        );
-
-    return estado.includes(
-        "cancel"
-    );
-}
-
-
-/* =========================================================
-   HORA DEL TURNO
-========================================================= */
-
-function parseTurnTime(value){
-
-    if(!value){
-        return null;
-    }
-
-    let text =
-        String(value)
-            .trim()
-            .toUpperCase();
-
-    /*
-       Acepta:
-
-       4:00 PM
-       4 PM
-       16:00
-       09:30 AM
-    */
-
-    const match12 =
-        text.match(
-            /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/
-        );
-
-    if(match12){
-
-        let hour =
-            Number(match12[1]);
-
-        const minute =
-            Number(
-                match12[2] || 0
-            );
-
-        const period =
-            match12[3];
-
-        if(
-            period === "PM" &&
-            hour !== 12
-        ){
-            hour += 12;
-        }
-
-        if(
-            period === "AM" &&
-            hour === 12
-        ){
-            hour = 0;
-        }
-
-        return {
-            hour,
-            minute
-        };
-    }
-
-
-    const match24 =
-        text.match(
-            /^(\d{1,2}):(\d{2})$/
-        );
-
-    if(match24){
-
-        return {
-            hour:Number(match24[1]),
-            minute:Number(match24[2])
-        };
-
-    }
-
-    return null;
-}
-
-
-/*
-   Determina si el turno ya pasó.
-
-   Para fechas anteriores:
-   sí.
-
-   Para fechas futuras:
-   no.
-
-   Para hoy:
-   compara hora del turno con la hora actual.
-*/
-
-function appointmentHasPassed(row){
-
-    const date =
-        String(row.fecha || "");
-
-    const today =
-        todayString();
-
-    if(date < today){
-        return true;
-    }
-
-    if(date > today){
-        return false;
-    }
-
-    const time =
-        parseTurnTime(
-            row.turno
-        );
-
-    if(!time){
-
-        /*
-           Si hoy no podemos interpretar
-           la hora, NO lo marcamos como
-           atendido automáticamente.
-        */
-
-        return false;
-    }
-
-    const now =
-        new Date();
-
-    const currentMinutes =
-        now.getHours()*60 +
-        now.getMinutes();
-
-    const appointmentMinutes =
-        time.hour*60 +
-        time.minute;
-
-    return (
-        appointmentMinutes <=
-        currentMinutes
-    );
-}
-
-
-/* =========================================================
-   RESERVA / CLIENTE
-========================================================= */
-
-/*
-   Esta es la corrección principal.
-
-   Varias filas con el mismo reserva_id
-   = UNA SOLA RESERVA.
-
-   Ejemplo:
-
-   fila 1:
-   reserva_id = ABC
-   turno = 4:00 PM
-
-   fila 2:
-   reserva_id = ABC
-   turno = 4:30 PM
-
-   Resultado:
-
-   1 cliente
-   1 reserva
-   2 turnos
-*/
-
-function reservationKey(row,index){
-
-    const reservation =
-        String(
-            row.reserva_id ?? ""
-        ).trim();
-
-    if(reservation){
-
-        return "reservation:" +
-            reservation;
-    }
-
-    /*
-       Si por alguna razón falta
-       reserva_id, usamos una combinación
-       de cliente + fecha + hora.
-
-       Es un respaldo, no el método principal.
-    */
-
-    const phone =
-        normalizePhone(
-            getPhone(row)
-        );
-
-    const name =
-        normalizeText(
-            row.nombre
-        );
-
-    return (
-        "fallback:" +
-        (phone || name) +
-        ":" +
-        String(row.fecha || "") +
-        ":" +
-        String(row.turno || "") +
-        ":" +
-        index
-    );
-}
-
-
-/*
-   Agrupa las filas de turnos en reservas.
-*/
-
-function buildReservations(){
-
-    const map =
-        new Map();
-
-    turnos.forEach(
-        (row,index) => {
-
-            const key =
-                reservationKey(
-                    row,
-                    index
-                );
-
-            if(!map.has(key)){
-
-                map.set(
-                    key,
-                    {
-                        key,
-                        reservaId:
-                            row.reserva_id ||
-                            "",
-                        rows:[],
-                        fecha:
-                            row.fecha || "",
-                        turno:
-                            row.turno || "",
-                        nombre:
-                            row.nombre ||
-                            "Sin nombre",
-                        telefono:
-                            getPhone(row),
-                        services:[],
-                        slots:0,
-                        expected:0,
-                        charged:0,
-                        noShowCharge:0,
-                        tip:0,
-                        noShow:false,
-                        cancelled:false
-                    }
-                );
-
-            }
-
-            const reservation =
-                map.get(key);
-
-            reservation.rows.push(row);
-
-            reservation.slots++;
-
-            /*
-               Guardamos el máximo.
-
-               Esto evita duplicar:
-
-               800
-               800
-
-               en las dos filas de un combo.
-
-               Si solo una fila tiene 800
-               y la otra 0, también obtenemos 800.
-            */
-
-            reservation.expected =
-                Math.max(
-                    reservation.expected,
-                    getExpected(row)
-                );
-
-            reservation.charged =
-                Math.max(
-                    reservation.charged,
-                    getCharged(row)
-                );
-
-            reservation.noShowCharge =
-                Math.max(
-                    reservation.noShowCharge,
-                    getNoShowCharge(row)
-                );
-
-            reservation.tip =
-                Math.max(
-                    reservation.tip,
-                    getTip(row)
-                );
-
-            if(
-                isNoShow(row)
-            ){
-                reservation.noShow =
-                    true;
-            }
-
-            if(
-                isCancelled(row)
-            ){
-                reservation.cancelled =
-                    true;
-            }
-
-            reservation.services.push(
-                ...parseServices(
-                    row.servicios
-                )
-            );
-
-        }
-    );
-
-
-    /*
-       El mismo combo puede aparecer
-       repetido en las dos filas.
-
-       Lo convertimos en:
-
-       degradado
-       barba
-
-       una sola vez.
-    */
-
-    [...map.values()]
-        .forEach(
-            reservation => {
-
-                reservation.services =
-                    uniqueServices(
-                        reservation.services
-                    );
-
-            }
-        );
-
-
-    return [...map.values()];
-}
-
-
-/* =========================================================
-   ESTADO DE RESERVA
-========================================================= */
-
-function isAttendedReservation(
-    reservation
-){
-
-    if(
-        reservation.noShow ||
-        reservation.cancelled
-    ){
-        return false;
-    }
-
-    /*
-       Solo consideramos atendido
-       un turno que ya haya pasado.
-    */
-
-    return reservation.rows.some(
-        row =>
-            appointmentHasPassed(row)
-    );
-}
-
-
-function isPendingPayment(
-    reservation
-){
-
-    if(
-        !isAttendedReservation(
-            reservation
-        )
-    ){
-        return false;
-    }
-
-    /*
-       Si el atajo todavía no registró
-       precio_cobrado, está pendiente.
-
-       No usamos precio_esperado como
-       ingreso.
-    */
-
-    return (
-        reservation.charged <= 0
-    );
-}
-
-
-/* =========================================================
-   PERIODOS
-========================================================= */
-
 function getPeriod(){
+  const t = todayStr();
+  if(period === "today") return {start:t, end:t, label:"hoy"};
+  if(period === "week"){
+    const d = parseD(t);
+    const back = d.getDay() === 0 ? 6 : d.getDay() - 1;
+    d.setDate(d.getDate() - back);
+    return {start:fmt(d), end:t, label:"esta semana"};
+  }
+  if(period === "month"){
+    const d = parseD(t);
+    return {start:fmt(new Date(d.getFullYear(), d.getMonth(), 1)), end:t, label:"este mes"};
+  }
+  return {start:START_DATE, end:t, label:"desde el " + niceDate(START_DATE)};
+}
+function inPeriod(r){
+  const p = getPeriod();
+  return r.fecha >= p.start && r.fecha <= p.end;
+}
 
-    const today =
-        dateObject(
-            todayString()
-        );
+/* =========================================================
+   RESERVAS
+   Varias filas con el mismo reserva_id son UNA reserva
+   (una hora de turno = 2 filas de 30 minutos).
+========================================================= */
+function splitServices(text){
+  const out = [], seen = new Set();
+  String(text || "").replace(/[{}]/g,"").split(",").forEach(x => {
+    const label = x.trim();
+    const key = norm(label);
+    if(key && !seen.has(key)){ seen.add(key); out.push(label); }
+  });
+  return out;
+}
+function hasCharge(row){
+  return row.precio_cobrado !== null && row.precio_cobrado !== undefined;
+}
 
-    if(
-        selectedPeriod === "today"
-    ){
+function buildReservas(){
+  const map = new Map();
+  bloqueos = [];
 
-        const t =
-            todayString();
+  turnos.forEach(row => {
+    if(!row.fecha || !ISO.test(row.fecha)) return;
+    if(row.estado && row.estado !== "ocupado") return;
+    if(row.cancelado === true) return;
 
-        return {
-            start:t,
-            end:t
-        };
+    const phone = digits(row.telefono);
+    const financial = hasCharge(row) || row.no_show === true || num(row.total) > 0 || !!row.servicios;
+    // Sin teléfono y sin datos de cobro = bloqueo de horario (ej. Playa)
+    if(!phone && !financial){ bloqueos.push(row); return; }
 
+    const key = row.reserva_id ? "r:" + row.reserva_id : "i:" + row.id;
+    if(!map.has(key)){
+      map.set(key, {
+        key, rows:[], fecha:row.fecha, nombre:row.nombre || "Sin nombre",
+        telefono:row.telefono || "", client: phone ? "p:" + phone : "n:" + norm(row.nombre),
+        services:[], total:0, expected:0, charged:0, charge:false, noShow:false, noShowPaid:false
+      });
     }
+    const r = map.get(key);
+    r.rows.push(row);
+    if(row.fecha < r.fecha) r.fecha = row.fecha;
+    r.total = Math.max(r.total, num(row.total));
+    r.expected += num(row.precio_esperado);
+    r.charged += num(row.precio_cobrado);
+    if(hasCharge(row)) r.charge = true;
+    if(row.no_show === true) r.noShow = true;
+    if(row.no_show_cobrado === true) r.noShowPaid = true;
+    splitServices(row.servicios).forEach(s => {
+      if(!r.services.some(x => norm(x) === norm(s))) r.services.push(s);
+    });
+  });
 
+  reservas = [...map.values()];
+  reservas.forEach(r => {
+    r.rows.sort((a,b) => (slotMin(a.turno) ?? 0) - (slotMin(b.turno) ?? 0));
+    r.turno = r.rows[0].turno;
+    r.passed = slotPassed(r.fecha, r.turno);
+    if(r.noShow) r.status = "noshow";
+    else if(r.charge) r.status = "cobrada";
+    else if(r.passed) r.status = "pendiente";
+    else r.status = "futura";
+  });
+}
 
-    if(
-        selectedPeriod === "week"
-    ){
+function resumen(list){
+  const cobradas = list.filter(r => r.status === "cobrada");
+  const pend = list.filter(r => r.status === "pendiente");
+  const noshows = list.filter(r => r.status === "noshow");
+  const attended = cobradas.concat(pend);
 
-        const day =
-            today.getDay();
-
-        const diff =
-            day === 0
-                ? 6
-                : day - 1;
-
-        const monday =
-            new Date(today);
-
-        monday.setDate(
-            today.getDate()-diff
-        );
-
-        return {
-            start:
-                formatDate(monday),
-            end:
-                todayString()
-        };
-
+  let revenue = 0, expected = 0, disc = 0, extra = 0;
+  cobradas.forEach(r => {
+    revenue += r.charged;
+    if(r.expected > 0){
+      expected += r.expected;
+      const d = r.charged - r.expected;
+      if(d < 0) disc += -d; else extra += d;
+    }else{
+      expected += r.charged;
     }
+  });
 
+  const svc = {};
+  let svcTotal = 0;
+  attended.forEach(r => {
+    r.services.forEach(s => {
+      const k = norm(s);
+      if(!svc[k]) svc[k] = {label:s, n:0};
+      svc[k].n++;
+      svcTotal++;
+    });
+  });
 
-    const first =
-        new Date(
-            today.getFullYear(),
-            today.getMonth(),
-            1
-        );
+  let pendAmount = 0, pendUnknown = 0;
+  pend.forEach(r => {
+    const a = r.total || r.expected || 0;
+    if(a > 0) pendAmount += a; else pendUnknown++;
+  });
 
-    return {
-        start:
-            formatDate(first),
-        end:
-            todayString()
-    };
+  return {cobradas, pend, noshows, attended, revenue, expected, disc, extra,
+          svc, svcTotal, pendAmount, pendUnknown,
+          ticket: cobradas.length ? revenue / cobradas.length : 0};
 }
 
-
-function inPeriod(
-    reservation
-){
-
-    const period =
-        getPeriod();
-
-    return (
-        reservation.fecha >=
-        period.start &&
-        reservation.fecha <=
-        period.end
-    );
+function gastosPeriodo(){
+  const p = getPeriod();
+  return gastos.filter(g => String(g.fecha) >= p.start && String(g.fecha) <= p.end);
 }
-
-
-/* =========================================================
-   RESERVAS DEL PERIODO
-========================================================= */
-
-function getPeriodReservations(){
-
-    return buildReservations()
-        .filter(inPeriod);
-}
-
-
-function getAttendedReservations(){
-
-    return getPeriodReservations()
-        .filter(
-            isAttendedReservation
-        );
-}
-
-
-/* =========================================================
-   INGRESOS
-========================================================= */
-
-function getRevenue(
-    reservations
-){
-
-    return reservations.reduce(
-        (sum,reservation) =>
-            sum +
-            reservation.charged,
-        0
-    );
-}
-
-
-function getTips(
-    reservations
-){
-
-    return reservations.reduce(
-        (sum,reservation) =>
-            sum +
-            reservation.tip,
-        0
-    );
-}
-
-
-function getExpected(
-    reservations
-){
-
-    return reservations.reduce(
-        (sum,reservation) =>
-            sum +
-            reservation.expected,
-        0
-    );
-}
-
-
-function getDiscount(
-    reservation
-){
-
-    /*
-       Descuento:
-
-       precio esperado
-       -
-       servicio realmente cobrado
-
-       El cobro de no-show no se considera
-       parte del precio del servicio.
-
-       Las propinas tampoco.
-    */
-
-    const serviceCharged =
-        Math.max(
-            0,
-            reservation.charged -
-            reservation.noShowCharge
-        );
-
-    return Math.max(
-        0,
-        reservation.expected -
-        serviceCharged
-    );
-}
-
-
-function getDiscountTotal(
-    reservations
-){
-
-    return reservations.reduce(
-        (sum,reservation) =>
-            sum +
-            getDiscount(
-                reservation
-            ),
-        0
-    );
-}
-
-
-/* =========================================================
-   GASTOS
-========================================================= */
-
-function getPeriodExpenses(){
-
-    const period =
-        getPeriod();
-
-    return gastos.filter(
-        gasto =>
-            String(gasto.fecha) >=
-            period.start &&
-            String(gasto.fecha) <=
-            period.end
-    );
-}
-
-
-function getExpenseTotal(){
-
-    return getPeriodExpenses()
-        .reduce(
-            (sum,gasto) =>
-                sum +
-                number(gasto.monto),
-            0
-        );
-}
-
-
-/* =========================================================
-   SERVICIOS
-========================================================= */
-
-function countServices(
-    reservations
-){
-
-    let total = 0;
-
-    reservations.forEach(
-        reservation => {
-
-            total +=
-                reservation.services.length;
-
-        }
-    );
-
-    return total;
-}
-
-
-function serviceCounts(
-    reservations
-){
-
-    const counts = {};
-
-    reservations.forEach(
-        reservation => {
-
-            reservation.services
-                .forEach(
-                    service => {
-
-                        counts[service] =
-                            (
-                                counts[service] ||
-                                0
-                            ) + 1;
-
-                    }
-                );
-
-        }
-    );
-
-    return counts;
-}
-
+function sumGastos(list){ return list.reduce((s,g) => s + num(g.monto), 0); }
 
 /* =========================================================
    CLIENTES
 ========================================================= */
-
-function clientIdentity(
-    reservation
-){
-
-    const phone =
-        normalizePhone(
-            reservation.telefono
-        );
-
-    if(phone){
-        return "phone:" + phone;
-    }
-
-    return "name:" +
-        normalizeText(
-            reservation.nombre
-        );
-}
-
-
-/*
-   Una reserva = una visita del cliente.
-
-   Dos filas por combo NO = dos visitas.
-*/
-
 function buildClients(){
-
-    const reservations =
-        buildReservations()
-            .filter(
-                isAttendedReservation
-            );
-
-    const map =
-        new Map();
-
-    reservations.forEach(
-        reservation => {
-
-            const key =
-                clientIdentity(
-                    reservation
-                );
-
-            if(!map.has(key)){
-
-                map.set(
-                    key,
-                    {
-                        key,
-                        nombre:
-                            reservation.nombre,
-                        telefono:
-                            reservation.telefono,
-                        visitas:0,
-                        ingresos:0,
-                        primeraVisita:
-                            reservation.fecha,
-                        ultimaVisita:
-                            reservation.fecha,
-                        servicios:0
-                    }
-                );
-
-            }
-
-            const client =
-                map.get(key);
-
-            client.visitas++;
-
-            client.ingresos +=
-                reservation.charged;
-
-            client.servicios +=
-                reservation.services.length;
-
-            if(
-                reservation.fecha <
-                client.primeraVisita
-            ){
-
-                client.primeraVisita =
-                    reservation.fecha;
-
-            }
-
-            if(
-                reservation.fecha >
-                client.ultimaVisita
-            ){
-
-                client.ultimaVisita =
-                    reservation.fecha;
-
-            }
-
-        }
-    );
-
-    return [...map.values()];
-}
-
-
-/* =========================================================
-   CLIENTES NUEVOS / RECURRENTES
-========================================================= */
-
-function clientStatistics(){
-
-    const allClients =
-        buildClients();
-
-    const periodClients =
-        getAttendedReservations();
-
-    const periodKeys =
-        new Set();
-
-    periodClients.forEach(
-        reservation => {
-
-            periodKeys.add(
-                clientIdentity(
-                    reservation
-                )
-            );
-
-        }
-    );
-
-
-    let newClients = 0;
-    let repeatClients = 0;
-    let lostClients = 0;
-
-
-    allClients.forEach(
-        client => {
-
-            if(
-                periodKeys.has(
-                    client.key
-                )
-            ){
-
-                if(
-                    client.primeraVisita >=
-                    getPeriod().start &&
-                    client.primeraVisita <=
-                    getPeriod().end
-                ){
-
-                    newClients++;
-
-                }
-
-                if(
-                    client.visitas >= 2
-                ){
-
-                    repeatClients++;
-
-                }
-
-            }
-
-
-            const days =
-                daysBetween(
-                    client.ultimaVisita,
-                    todayString()
-                );
-
-            if(
-                days >= 30
-            ){
-
-                lostClients++;
-
-            }
-
-        }
-    );
-
-
-    return {
-        newClients,
-        repeatClients,
-        lostClients
-    };
-}
-
-
-/* =========================================================
-   DASHBOARD
-========================================================= */
-
-function renderDashboard(){
-
-    const reservations =
-        getPeriodReservations();
-
-    const attended =
-        reservations.filter(
-            isAttendedReservation
-        );
-
-    const pending =
-        attended.filter(
-            isPendingPayment
-        );
-
-
-    const revenue =
-        getRevenue(attended);
-
-    const tips =
-        getTips(attended);
-
-    const expenses =
-        getExpenseTotal();
-
-    const profit =
-        revenue - expenses;
-
-    const discount =
-        getDiscountTotal(attended);
-
-    const services =
-        countServices(attended);
-
-    const slots =
-        attended.reduce(
-            (sum,reservation) =>
-                sum +
-                reservation.slots,
-            0
-        );
-
-
-    /*
-       El valor pendiente se basa
-       en precio_esperado.
-
-       No lo contamos como ingreso.
-    */
-
-    const pendingAmount =
-        pending.reduce(
-            (sum,reservation) =>
-                sum +
-                reservation.expected,
-            0
-        );
-
-
-    const ticket =
-        attended.length
-            ? revenue / attended.length
-            : 0;
-
-
-    const margin =
-        revenue > 0
-            ? (
-                profit /
-                revenue *
-                100
-            )
-            : 0;
-
-
-    const noShows =
-        reservations.filter(
-            reservation =>
-                reservation.noShow
-        ).length;
-
-
-    document.getElementById(
-        "clientsValue"
-    ).textContent =
-        attended.length;
-
-
-    document.getElementById(
-        "revenueValue"
-    ).textContent =
-        money(revenue);
-
-
-    document.getElementById(
-        "pendingValue"
-    ).textContent =
-        money(pendingAmount);
-
-
-    document.getElementById(
-        "slotsValue"
-    ).textContent =
-        slots;
-
-
-    document.getElementById(
-        "servicesValue"
-    ).textContent =
-        services;
-
-
-    document.getElementById(
-        "tipsValue"
-    ).textContent =
-        money(tips);
-
-
-    document.getElementById(
-        "expensesValue"
-    ).textContent =
-        money(expenses);
-
-
-    document.getElementById(
-        "noshowValue"
-    ).textContent =
-        noShows;
-
-
-    document.getElementById(
-        "profitValue"
-    ).textContent =
-        money(profit);
-
-
-    document.getElementById(
-        "ticketValue"
-    ).textContent =
-        money(ticket);
-
-
-    document.getElementById(
-        "discountValue"
-    ).textContent =
-        money(discount);
-
-
-    document.getElementById(
-        "profitSmall"
-    ).textContent =
-        `Margen: ${margin.toFixed(1)}%`;
-
-
-    const clients =
-        clientStatistics();
-
-
-    document.getElementById(
-        "newClientsValue"
-    ).textContent =
-        clients.newClients;
-
-
-    document.getElementById(
-        "repeatClientsValue"
-    ).textContent =
-        clients.repeatClients;
-
-
-    document.getElementById(
-        "lostClientsValue"
-    ).textContent =
-        clients.lostClients;
-
-
-    renderRevenueChart(
-        attended
-    );
-
-    renderServicesChart(
-        attended
-    );
-
-    renderPending(
-        pending
-    );
-
-    renderGoal();
-}
-
-
-/* =========================================================
-   PENDIENTES DE COBRO
-========================================================= */
-
-function renderPending(
-    pending
-){
-
-    const container =
-        document.getElementById(
-            "pendingList"
-        );
-
-
-    if(!pending.length){
-
-        container.innerHTML =
-            `<div class="listSub">
-                No hay clientes pendientes de cobro.
-            </div>`;
-
-        return;
+  const p = getPeriod();
+  const map = new Map();
+  reservas.forEach(r => {
+    let c = map.get(r.client);
+    if(!c){
+      c = {key:r.client, nombre:r.nombre, telefono:r.telefono, visits:0, revenue:0,
+           first:null, last:null, noshows:0, future:false, pVisits:0, pRevenue:0};
+      map.set(r.client, c);
     }
-
-
-    container.innerHTML =
-        pending
-            .map(
-                reservation => `
-
-                <div class="listItem">
-
-                    <div class="listMain">
-
-                        <div class="listTitle">
-                            ${escapeHtml(
-                                reservation.nombre
-                            )}
-                        </div>
-
-                        <div class="listSub">
-                            ${reservation.fecha}
-                            · ${escapeHtml(
-                                reservation.turno
-                            )}
-                            · ${
-                                reservation.services
-                                    .map(
-                                        formatServiceName
-                                    )
-                                    .join(", ")
-                            }
-                        </div>
-
-                    </div>
-
-                    <div class="listValue statusPending">
-                        ${money(
-                            reservation.expected
-                        )}
-                    </div>
-
-                </div>
-
-            `
-            )
-            .join("");
-}
-
-
-/* =========================================================
-   SERVICIOS: NOMBRES
-========================================================= */
-
-function formatServiceName(
-    service
-){
-
-    const names = {
-
-        "degradado":
-            "Degradado",
-
-        "corte sencillo":
-            "Corte sencillo",
-
-        "barba":
-            "Barba",
-
-        "diseno personalizado":
-            "Diseño personalizado",
-
-        "peinado":
-            "Peinado"
-
-    };
-
-    return (
-        names[service] ||
-        service
-    );
-}
-
-
-/* =========================================================
-   GRÁFICO INGRESOS
-========================================================= */
-
-function renderRevenueChart(
-    reservations
-){
-
-    const grouped = {};
-
-    reservations.forEach(
-        reservation => {
-
-            if(
-                reservation.charged <= 0
-            ){
-                return;
-            }
-
-            grouped[
-                reservation.fecha
-            ] =
-                (
-                    grouped[
-                        reservation.fecha
-                    ] || 0
-                ) +
-                reservation.charged;
-
-        }
-    );
-
-
-    const labels =
-        Object.keys(grouped);
-
-    const values =
-        Object.values(grouped);
-
-
-    if(revenueChart){
-        revenueChart.destroy();
+    if(r.nombre && r.nombre !== "Sin nombre") c.nombre = r.nombre;
+    if(r.telefono) c.telefono = r.telefono;
+    if(r.status === "noshow") c.noshows++;
+    if(r.status === "futura") c.future = true;
+    if(r.status === "cobrada" || r.status === "pendiente"){
+      c.visits++;
+      c.revenue += r.charged;
+      if(!c.first || r.fecha < c.first) c.first = r.fecha;
+      if(!c.last || r.fecha > c.last) c.last = r.fecha;
+      if(r.fecha >= p.start && r.fecha <= p.end){ c.pVisits++; c.pRevenue += r.charged; }
     }
-
-
-    const ctx =
-        document
-            .getElementById(
-                "revenueChart"
-            )
-            .getContext("2d");
-
-
-    revenueChart =
-        new Chart(
-            ctx,
-            {
-                type:"line",
-
-                data:{
-                    labels,
-
-                    datasets:[{
-
-                        label:"Cobrado",
-
-                        data:values,
-
-                        borderWidth:2,
-
-                        tension:.35
-
-                    }]
-                },
-
-                options:{
-                    responsive:true,
-
-                    maintainAspectRatio:false,
-
-                    plugins:{
-                        legend:{
-                            display:false
-                        }
-                    },
-
-                    scales:{
-                        y:{
-                            beginAtZero:true
-                        }
-                    }
-                }
-            }
-        );
+  });
+  return [...map.values()];
 }
 
-
 /* =========================================================
-   GRÁFICO SERVICIOS
+   COMPONENTES VISUALES
 ========================================================= */
+function toggleHelp(id){ $(id).classList.toggle("hidden"); }
 
-function renderServicesChart(
-    reservations
-){
+function card(label, value, sub, help, cls){
+  const id = "h" + (++helpN);
+  return '<div class="card ' + (cls || "") + '"><div class="label">' + label +
+    (help ? '<button class="info" onclick="toggleHelp(\'' + id + '\')" aria-label="Qué significa">?</button>' : "") +
+    '</div><div class="value">' + value + '</div>' +
+    (sub ? '<div class="sub">' + sub + '</div>' : "") +
+    (help ? '<div class="help hidden" id="' + id + '">' + help + '</div>' : "") + '</div>';
+}
+function block(title, body, help){
+  const id = "h" + (++helpN);
+  return '<div class="block"><div class="blockHead"><div class="blockTitle">' + title + '</div>' +
+    (help ? '<button class="info" onclick="toggleHelp(\'' + id + '\')" aria-label="Qué significa">?</button>' : "") +
+    '</div>' + (help ? '<div class="help hidden" id="' + id + '" style="margin:-4px 0 12px;border-top:0;padding-top:0">' + help + '</div>' : "") +
+    body + '</div>';
+}
+function row(title, sub, val, cls){
+  return '<div class="row"><div class="rowMain"><div class="rowTitle">' + title + '</div>' +
+    (sub ? '<div class="rowSub">' + sub + '</div>' : "") + '</div>' +
+    '<div class="rowVal ' + (cls || "") + '">' + val + '</div></div>';
+}
+function empty(text){ return '<div class="empty">' + text + '</div>'; }
+function canvas(id){ return '<div class="chartBox"><canvas id="' + id + '"></canvas></div>'; }
 
-    const counts =
-        serviceCounts(
-            reservations
-        );
+const PALETTE = ["#cbb26a","#86c595","#7fa6c9","#d98f6a","#b58fc7","#e3cf8c","#8fb8a8","#c9a0a0"];
 
-
-    const labels =
-        Object.keys(counts);
-
-    const values =
-        Object.values(counts);
-
-
-    if(servicesChart){
-        servicesChart.destroy();
+function drawChart(id, type, labels, data, opt){
+  opt = opt || {};
+  if(!window.Chart) return;
+  const el = $(id);
+  if(!el) return;
+  if(charts[id]) charts[id].destroy();
+  const round = type === "doughnut";
+  charts[id] = new Chart(el, {
+    type,
+    data:{
+      labels,
+      datasets:[{
+        data,
+        backgroundColor: round ? PALETTE : "#cbb26a",
+        borderColor: "#cbb26a",
+        borderWidth: 0,
+        borderRadius: type === "bar" ? 5 : 0
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      indexAxis: opt.horizontal ? "y" : "x",
+      plugins:{
+        legend:{display: round, position:"bottom", labels:{boxWidth:12}},
+        tooltip:{callbacks:{label: c => (opt.money ? money(c.raw) : String(c.raw))}}
+      },
+      scales: round ? {} : {
+        x:{grid:{color:"rgba(255,255,255,.05)"}, beginAtZero:true, ticks:{precision:0}},
+        y:{grid:{color:"rgba(255,255,255,.05)"}, beginAtZero:true, ticks:{precision:0}}
+      }
     }
-
-
-    const ctx =
-        document
-            .getElementById(
-                "servicesChart"
-            )
-            .getContext("2d");
-
-
-    servicesChart =
-        new Chart(
-            ctx,
-            {
-                type:"doughnut",
-
-                data:{
-                    labels:
-                        labels.map(
-                            formatServiceName
-                        ),
-
-                    datasets:[{
-
-                        data:values,
-
-                        borderWidth:0
-
-                    }]
-                },
-
-                options:{
-                    responsive:true,
-
-                    maintainAspectRatio:false
-                }
-            }
-        );
+  });
+}
+function killCharts(){
+  Object.keys(charts).forEach(k => { try{ charts[k].destroy(); }catch(e){} delete charts[k]; });
 }
 
-
 /* =========================================================
-   CLIENTES
+   PÁGINA: RESUMEN
 ========================================================= */
+function renderResumen(){
+  const p = getPeriod();
+  const list = reservas.filter(inPeriod);
+  const s = resumen(list);
+  const g = sumGastos(gastosPeriodo());
+  const profit = s.revenue - g;
 
-function renderClients(){
+  const dueSlots = s.attended.length + s.noshows.length;
+  const nsPct = dueSlots ? s.noshows.length / dueSlots * 100 : 0;
+  const occ = occupancy(list, p);
 
-    const container =
-        document.getElementById(
-            "clientsList"
-        );
+  const topSvc = Object.values(s.svc).sort((a,b) => b.n - a.n)[0];
 
-    const clients =
-        buildClients()
-            .sort(
-                (a,b) =>
-                    b.ingresos -
-                    a.ingresos
-            );
+  let html = '<h1>Resumen</h1><p class="lead">Cómo va la barbería ' + esc(p.label) + '.</p>';
 
+  html += '<div class="hero"><div class="cap">Dinero cobrado ' + esc(p.label) + '</div>' +
+    '<div class="big">' + money(s.revenue) + '</div>' +
+    '<div class="note">Solo cuenta lo que ya registraste al cobrar.</div></div>';
 
-    if(!clients.length){
+  html += '<div class="grid">' +
+    card("Ganancia neta", money(profit), "Cobrado menos gastos (" + money(g) + ")",
+      "Lo que realmente te queda: todo el dinero cobrado menos lo que gastaste en productos, navajas, mantenimiento u otros.", "gold") +
+    card("Clientes atendidos", s.attended.length, s.cobradas.length + " cobrados",
+      "Reservas cuya hora ya pasó y el cliente vino. Una hora de turno (2 bloques de 30 minutos) cuenta como un solo cliente.") +
+    card("Ticket promedio", money(s.ticket), "Lo que deja cada cliente",
+      "Dinero cobrado dividido entre los clientes cobrados. Si sube, cada cliente te deja más.") +
+    card("Servicios realizados", s.svcTotal, topSvc ? "Más pedido: " + esc(topSvc.label) : "Sin datos todavía",
+      "Cada servicio cuenta por separado: un degradado con barba son 2 servicios. Se toma de lo que el cliente reservó.") +
+    card("Por cobrar", money(s.pendAmount), s.pend.length + " cliente(s) sin cobro" + (s.pendUnknown ? " · " + s.pendUnknown + " sin monto" : ""),
+      "Clientes que ya vinieron pero todavía no tienen el cobro registrado en el atajo Cobrar servicio.") +
+    card("No-shows", s.noshows.length, pct(nsPct) + " de las citas",
+      "Clientes que reservaron y no vinieron. El porcentaje compara los que faltaron con todos los que debían venir.") +
+    card("Ocupación", pct(occ.pct), occ.used + " de " + occ.avail + " turnos",
+      "De los turnos de 30 minutos que tuviste disponibles, cuántos se usaron con clientes. Es un cálculo aproximado: cuenta como disponibles todos los días de lunes a sábado.") +
+    card("Gastos", money(g), "Registrados " + esc(p.label),
+      "Dinero que anotaste como gasto. Puedes añadirlos desde la pestaña Dinero.") +
+    '</div>';
 
-        container.innerHTML =
-            `<div class="listSub">
-                Todavía no hay clientes atendidos
-                desde el ${START_DATE}.
-            </div>`;
+  const byDay = {};
+  s.cobradas.forEach(r => { byDay[r.fecha] = (byDay[r.fecha] || 0) + r.charged; });
+  const dayKeys = Object.keys(byDay).sort();
+  html += block("Cobros por día",
+    dayKeys.length ? canvas("chDay") : empty("Todavía no hay cobros en este período."),
+    "Cuánto dinero cobraste cada día. Sirve para ver qué días te va mejor.");
 
-        return;
+  const allPend = reservas.filter(r => r.status === "pendiente")
+    .sort((a,b) => (a.fecha + a.turno).localeCompare(b.fecha + b.turno));
+  html += block("Cobros pendientes",
+    allPend.length ? allPend.map(r =>
+      row(esc(r.nombre), niceDate(r.fecha) + " · " + esc(r.turno) + (r.services.length ? " · " + esc(r.services.join(", ")) : ""),
+        (r.total || r.expected) ? money(r.total || r.expected) : "sin monto", "warn")).join("")
+      : empty("No hay clientes pendientes de cobro."),
+    "Clientes que ya vinieron y no tienen el cobro registrado. Cóbralos con el atajo Cobrar servicio y desaparecen de aquí.");
+
+  html += block("Meta del mes", goalHtml(),
+    "Compara lo cobrado este mes con la meta que configuraste. Toca el botón para cambiarla.");
+
+  $("pg-resumen").innerHTML = html;
+
+  if(dayKeys.length) drawChart("chDay", "bar", dayKeys.map(shortDate), dayKeys.map(k => byDay[k]), {money:true});
+}
+
+function occupancy(list, p){
+  let avail = 0;
+  eachDay(p.start, p.end, (d, wd) => {
+    if(wd === 0) return;
+    avail += SLOTS.filter(t => slotPassed(d, t)).length;
+  });
+  const blocked = bloqueos.filter(b => b.fecha >= p.start && b.fecha <= p.end && slotPassed(b.fecha, b.turno)).length;
+  avail = Math.max(0, avail - blocked);
+  let used = 0;
+  list.forEach(r => {
+    if(r.status === "cobrada" || r.status === "pendiente"){
+      r.rows.forEach(x => { if(slotPassed(x.fecha, x.turno)) used++; });
     }
-
-
-    container.innerHTML = `
-
-        <div class="chartTitle">
-            Clientes
-        </div>
-
-        ${clients
-            .slice(0,30)
-            .map(
-                client => `
-
-                <div class="listItem">
-
-                    <div class="listMain">
-
-                        <div class="listTitle">
-                            ${escapeHtml(
-                                client.nombre
-                            )}
-                        </div>
-
-                        <div class="listSub">
-                            ${client.visitas}
-                            visita(s)
-                            · Última:
-                            ${client.ultimaVisita}
-
-                            ${
-                                client.telefono
-                                    ? "<br>" +
-                                      escapeHtml(
-                                          client.telefono
-                                      )
-                                    : ""
-                            }
-                        </div>
-
-                    </div>
-
-                    <div class="listValue">
-                        ${money(
-                            client.ingresos
-                        )}
-                    </div>
-
-                </div>
-
-            `
-            )
-            .join("")}
-
-    `;
+  });
+  return {avail, used, pct: avail ? Math.min(100, used / avail * 100) : 0};
 }
 
+function goalHtml(){
+  const month = todayStr().slice(0,7);
+  const g = metas.find(m => String(m.mes).slice(0,7) === month);
+  let body;
+  if(!g){
+    body = empty("No has configurado una meta para este mes.");
+  }else{
+    const mr = reservas.filter(r => r.status === "cobrada" && r.fecha.slice(0,7) === month);
+    const rev = mr.reduce((s,r) => s + r.charged, 0);
+    const exp = sumGastos(gastos.filter(x => String(x.fecha).slice(0,7) === month));
+    const profit = rev - exp;
+    const gr = num(g.objetivo_ingresos), gp = num(g.objetivo_ganancia);
+    const pr = gr > 0 ? Math.min(100, rev / gr * 100) : 0;
+    const pp = gp > 0 ? Math.min(100, profit / gp * 100) : 0;
+    body = '<div class="row"><div class="rowMain"><div class="rowTitle">Dinero cobrado</div>' +
+      '<div class="rowSub">' + money(rev) + ' de ' + money(gr) + (gr > rev ? ' · faltan ' + money(gr - rev) : ' · ¡meta lograda!') + '</div>' +
+      '<div class="bar"><i style="width:' + pr + '%"></i></div></div><div class="rowVal">' + pct(pr) + '</div></div>' +
+      '<div class="row"><div class="rowMain"><div class="rowTitle">Ganancia neta</div>' +
+      '<div class="rowSub">' + money(profit) + ' de ' + money(gp) + (gp > profit ? ' · faltan ' + money(gp - profit) : ' · ¡meta lograda!') + '</div>' +
+      '<div class="bar"><i style="width:' + pp + '%"></i></div></div><div class="rowVal">' + pct(pp) + '</div></div>';
+  }
+  return body + '<button class="btnGhost" onclick="openGoal()">' + (g ? "Cambiar meta" : "Configurar meta") + '</button>';
+}
 
 /* =========================================================
-   FINANZAS
+   PÁGINA: DINERO
 ========================================================= */
+function renderDinero(){
+  const p = getPeriod();
+  const list = reservas.filter(inPeriod);
+  const s = resumen(list);
+  const gl = gastosPeriodo();
+  const g = sumGastos(gl);
+  const profit = s.revenue - g;
+  const margin = s.revenue > 0 ? profit / s.revenue * 100 : 0;
 
-function renderFinance(){
+  let html = '<h1>Dinero</h1><p class="lead">Ingresos, descuentos y gastos ' + esc(p.label) + '.</p>';
 
-    const reservations =
-        getPeriodReservations();
+  html += '<div class="grid">' +
+    card("Precio normal", money(s.expected), "Lo que costaban los servicios cobrados",
+      "Suma de los precios normales de los servicios que ya cobraste, sin descuentos ni extras.") +
+    card("Descuentos", money(s.disc), "Cobrado de menos",
+      "Dinero que dejaste de cobrar cuando le hiciste descuento a un cliente: precio normal menos lo que cobraste.") +
+    card("Extras cobrados", money(s.extra), "No-shows y propinas",
+      "Dinero cobrado por encima del precio normal. Casi siempre es un no-show que el cliente pagó junto con su corte de hoy, o una propina.") +
+    card("Dinero cobrado", money(s.revenue), "Lo que realmente entró",
+      "Precio normal, menos descuentos, más extras. Es el dinero que entró de verdad.", "gold") +
+    card("Gastos", money(g), gl.length + " registro(s)",
+      "Todo lo que anotaste como gasto en este período.") +
+    card("Ganancia neta", money(profit), "Margen: " + pct(margin),
+      "Dinero cobrado menos gastos. El margen es el porcentaje de lo cobrado que te queda como ganancia.", "gold") +
+    '</div>';
 
-    const attended =
-        reservations.filter(
-            isAttendedReservation
-        );
+  const byCat = {};
+  gl.forEach(x => { const k = x.categoria || "otros"; byCat[k] = (byCat[k] || 0) + num(x.monto); });
+  const cats = Object.keys(byCat);
+  html += block("Gastos por categoría",
+    cats.length ? canvas("chCat") : empty("No hay gastos registrados en este período."),
+    "En qué se va el dinero que gastas. Te ayuda a ver qué categoría pesa más.");
 
+  html += '<button class="btn" style="margin-top:12px" onclick="openExpense()">Añadir gasto</button>';
 
-    const revenue =
-        getRevenue(attended);
+  const recent = gl.slice().sort((a,b) => String(b.fecha).localeCompare(String(a.fecha)));
+  html += block("Gastos registrados",
+    recent.length ? recent.map(x =>
+      '<div class="row"><div class="rowMain"><div class="rowTitle">' + esc(x.descripcion || x.categoria || "Gasto") + '</div>' +
+      '<div class="rowSub">' + niceDate(String(x.fecha)) + ' · ' + esc(x.categoria || "otros") + '</div></div>' +
+      '<div class="rowVal bad">' + money(x.monto) + ' <button class="del" onclick="delExpense(' + Number(x.id) + ')" aria-label="Borrar gasto">×</button></div></div>').join("")
+      : empty("Todavía no hay gastos."),
+    "Lista de los gastos del período. Toca la × para borrar uno que anotaste por error.");
 
-    const tips =
-        getTips(attended);
-
-    const expenses =
-        getExpenseTotal();
-
-    const profit =
-        revenue - expenses;
-
-    const expected =
-        getExpected(attended);
-
-    const discounts =
-        getDiscountTotal(attended);
-
-
-    document.getElementById(
-        "financeRevenue"
-    ).textContent =
-        money(revenue);
-
-
-    document.getElementById(
-        "financeTips"
-    ).textContent =
-        money(tips);
-
-
-    document.getElementById(
-        "financeExpenses"
-    ).textContent =
-        money(expenses);
-
-
-    document.getElementById(
-        "financeProfit"
-    ).textContent =
-        money(profit);
-
-
-    document.getElementById(
-        "discountStats"
-    ).innerHTML = `
-
-        <div class="listItem">
-
-            <div class="listMain">
-                <div class="listTitle">
-                    Precio esperado
-                </div>
-            </div>
-
-            <div class="listValue">
-                ${money(expected)}
-            </div>
-
-        </div>
-
-
-        <div class="listItem">
-
-            <div class="listMain">
-                <div class="listTitle">
-                    Descuentos
-                </div>
-            </div>
-
-            <div class="listValue">
-                ${money(discounts)}
-            </div>
-
-        </div>
-
-
-        <div class="listItem">
-
-            <div class="listMain">
-                <div class="listTitle">
-                    Cobrado
-                </div>
-            </div>
-
-            <div class="listValue">
-                ${money(revenue)}
-            </div>
-
-        </div>
-
-    `;
-
-
-    renderExpensesChart();
+  $("pg-dinero").innerHTML = html;
+  if(cats.length) drawChart("chCat", "doughnut", cats, cats.map(k => byCat[k]));
 }
-
 
 /* =========================================================
-   GASTOS
+   PÁGINA: CLIENTES
 ========================================================= */
+function renderClientes(){
+  const p = getPeriod();
+  const clients = buildClients();
+  const t = todayStr();
 
-function renderExpensesChart(){
+  const active = clients.filter(c => c.pVisits > 0);
+  const nuevos = clients.filter(c => c.first && c.first >= p.start && c.first <= p.end);
+  const recurrentes = active.filter(c => c.visits >= 2);
+  const perdidos = clients.filter(c => c.last && !c.future && daysBetween(c.last, t) >= 30)
+    .sort((a,b) => a.last.localeCompare(b.last));
 
-    const grouped = {};
+  let html = '<h1>Clientes</h1><p class="lead">Quiénes vienen, quiénes vuelven y quiénes se fueron.</p>';
 
-    getPeriodExpenses()
-        .forEach(
-            gasto => {
+  html += '<div class="grid">' +
+    card("Clientes del período", active.length, "Vinieron " + esc(p.label),
+      "Personas distintas que vinieron en este período. Si alguien vino 2 veces, cuenta una sola vez.") +
+    card("Nuevos", nuevos.length, "Primera visita en el período",
+      "Clientes cuya primera visita registrada cae en este período. El panel cuenta desde el " + niceDate(START_DATE) + ", así que al inicio casi todos aparecen como nuevos.") +
+    card("Recurrentes", recurrentes.length, "Con 2 visitas o más",
+      "Clientes que vinieron en este período y ya tienen 2 o más visitas en total. Son los que te mantienen la agenda llena.") +
+    card("Desaparecidos", perdidos.length, "30 días o más sin venir",
+      "Clientes que llevan 30 días o más sin venir y no tienen ninguna cita reservada. Puedes escribirles para que vuelvan.") +
+    '</div>';
 
-                const category =
-                    gasto.categoria ||
-                    "otros";
+  const top = active.slice().sort((a,b) => b.pRevenue - a.pRevenue || b.pVisits - a.pVisits).slice(0, 10);
+  html += block("Quién te deja más dinero",
+    top.length ? top.map((c,i) => row((i + 1) + ". " + esc(c.nombre),
+      c.pVisits + " visita(s) en el período · " + c.visits + " en total", money(c.pRevenue))).join("")
+      : empty("Todavía no hay clientes en este período."),
+    "Los clientes que más dinero dejaron en el período, de mayor a menor.");
 
-                grouped[category] =
-                    (
-                        grouped[category] ||
-                        0
-                    ) +
-                    number(
-                        gasto.monto
-                    );
+  html += block("Clientes desaparecidos",
+    perdidos.length ? perdidos.slice(0, 20).map(c => row(esc(c.nombre),
+      "Última visita: " + niceDate(c.last) + " · " + c.visits + " visita(s)" + (c.telefono ? " · " + esc(c.telefono) : ""),
+      daysBetween(c.last, t) + " días", "warn")).join("")
+      : empty("Nadie lleva 30 días sin venir. Esto se llena con el tiempo."),
+    "Clientes que dejaron de venir. Escríbeles un mensaje: recuperar uno cuesta menos que conseguir uno nuevo.");
 
-            }
-        );
-
-
-    if(expensesChart){
-        expensesChart.destroy();
-    }
-
-
-    const ctx =
-        document
-            .getElementById(
-                "expensesChart"
-            )
-            .getContext("2d");
-
-
-    expensesChart =
-        new Chart(
-            ctx,
-            {
-                type:"doughnut",
-
-                data:{
-                    labels:
-                        Object.keys(
-                            grouped
-                        ),
-
-                    datasets:[{
-
-                        data:
-                            Object.values(
-                                grouped
-                            ),
-
-                        borderWidth:0
-
-                    }]
-                },
-
-                options:{
-                    responsive:true,
-
-                    maintainAspectRatio:false
-                }
-            }
-        );
+  $("pg-clientes").innerHTML = html;
 }
-
 
 /* =========================================================
-   METAS
+   PÁGINA: AGENDA
 ========================================================= */
+function renderAgenda(){
+  const p = getPeriod();
+  const list = reservas.filter(inPeriod);
+  const s = resumen(list);
+  const occ = occupancy(list, p);
+  const lostSlots = s.noshows.reduce((n,r) => n + r.rows.length, 0);
 
-function renderGoal(){
+  const hist = reservas.filter(r => r.status === "cobrada" || r.status === "pendiente");
+  const wdRev = [0,0,0,0,0,0,0], wdN = [0,0,0,0,0,0,0];
+  hist.forEach(r => { const d = parseD(r.fecha).getDay(); wdRev[d] += r.charged; wdN[d]++; });
+  const order = [1,2,3,4,5,6];
+  const bestDay = order.slice().sort((a,b) => wdRev[b] - wdRev[a] || wdN[b] - wdN[a])[0];
+  const hasHist = hist.length > 0;
 
-    const container =
-        document.getElementById(
-            "goalDisplay"
-        );
+  const hourN = {};
+  SLOTS.forEach(t => hourN[t] = 0);
+  hist.forEach(r => r.rows.forEach(x => { if(hourN[x.turno] !== undefined) hourN[x.turno]++; }));
+  const bestHour = SLOTS.slice().sort((a,b) => hourN[b] - hourN[a])[0];
 
+  const svc = Object.values(s.svc).sort((a,b) => b.n - a.n);
 
-    const now =
-        new Date();
+  let html = '<h1>Agenda</h1><p class="lead">Cuándo se llena la barbería y qué se pide más.</p>';
 
-    const month =
-        now.getFullYear() +
-        "-" +
-        String(
-            now.getMonth()+1
-        ).padStart(2,"0") +
-        "-01";
+  html += '<div class="grid">' +
+    card("Ocupación", pct(occ.pct), occ.used + " de " + occ.avail + " turnos (" + esc(p.label) + ")",
+      "De todos los turnos de 30 minutos disponibles, cuántos se usaron con clientes. Es aproximada: cuenta como disponibles todos los días de lunes a sábado.") +
+    card("Turnos perdidos", lostSlots, "Por no-shows (" + esc(p.label) + ")",
+      "Turnos de 30 minutos que se quedaron vacíos porque el cliente reservó y no vino.") +
+    card("Mejor día", hasHist && wdRev[bestDay] + wdN[bestDay] > 0 ? DAYS[bestDay] : "—",
+      hasHist ? "Según todo el historial" : "Sin datos todavía",
+      "El día de la semana en el que más dinero has cobrado, sumando todo el historial.") +
+    card("Hora más pedida", hasHist && hourN[bestHour] > 0 ? esc(bestHour) : "—",
+      hasHist ? "Según todo el historial" : "Sin datos todavía",
+      "El horario que más veces se ha usado, sumando todo el historial.") +
+    '</div>';
 
+  html += block("Servicios realizados (" + esc(p.label) + ")",
+    svc.length ? canvas("chSvc") : empty("Todavía no hay servicios en este período."),
+    "Cuántas veces se hizo cada servicio. Se toma de lo que el cliente reservó, no de lo que cambiaste al cobrar.");
 
-    const goal =
-        metas.find(
-            x =>
-                String(x.mes)
-                    .substring(0,7)
-                ===
-                month.substring(0,7)
-        );
+  html += block("Dinero por día de la semana",
+    hasHist ? canvas("chWd") : empty("Todavía no hay datos."),
+    "Dinero cobrado según el día de la semana, sumando todo el historial. Sirve para saber qué días rinden más.");
 
+  html += block("Horas más ocupadas",
+    hasHist ? canvas("chHr") : empty("Todavía no hay datos."),
+    "Cuántos turnos de 30 minutos se han usado en cada horario, sumando todo el historial.");
 
-    if(!goal){
+  $("pg-agenda").innerHTML = html;
 
-        container.innerHTML = `
-
-            <div class="chartTitle">
-                Meta del mes
-            </div>
-
-            <div class="listSub">
-                No has configurado una meta
-                para este mes.
-            </div>
-
-        `;
-
-        return;
-    }
-
-
-    const period =
-        getPeriod();
-
-    const monthlyReservations =
-        buildReservations()
-            .filter(
-                reservation =>
-                    reservation.fecha >=
-                    month &&
-                    reservation.fecha <=
-                    todayString() &&
-                    isAttendedReservation(
-                        reservation
-                    )
-            );
-
-
-    const revenue =
-        getRevenue(
-            monthlyReservations
-        );
-
-
-    const expenses =
-        gastos
-            .filter(
-                gasto =>
-                    String(gasto.fecha)
-                        .substring(0,7)
-                    ===
-                    month.substring(0,7)
-            )
-            .reduce(
-                (sum,gasto) =>
-                    sum +
-                    number(gasto.monto),
-                0
-            );
-
-
-    const profit =
-        revenue -
-        expenses;
-
-
-    const goalRevenue =
-        number(
-            goal.objetivo_ingresos
-        );
-
-    const goalProfit =
-        number(
-            goal.objetivo_ganancia
-        );
-
-
-    const revenuePercent =
-        goalRevenue > 0
-            ? Math.min(
-                100,
-                revenue /
-                goalRevenue *
-                100
-            )
-            : 0;
-
-
-    const profitPercent =
-        goalProfit > 0
-            ? Math.min(
-                100,
-                profit /
-                goalProfit *
-                100
-            )
-            : 0;
-
-
-    container.innerHTML = `
-
-        <div class="chartTitle">
-            Meta del mes
-        </div>
-
-
-        <div class="listItem">
-
-            <div class="listMain">
-
-                <div class="listTitle">
-                    Ingresos
-                </div>
-
-                <div class="listSub">
-                    ${money(revenue)}
-                    de
-                    ${money(goalRevenue)}
-                </div>
-
-            </div>
-
-            <div class="listValue">
-                ${revenuePercent.toFixed(0)}%
-            </div>
-
-        </div>
-
-
-        <div class="listItem">
-
-            <div class="listMain">
-
-                <div class="listTitle">
-                    Ganancia
-                </div>
-
-                <div class="listSub">
-                    ${money(profit)}
-                    de
-                    ${money(goalProfit)}
-                </div>
-
-            </div>
-
-            <div class="listValue">
-                ${profitPercent.toFixed(0)}%
-            </div>
-
-        </div>
-
-    `;
+  if(svc.length) drawChart("chSvc", "bar", svc.map(x => x.label), svc.map(x => x.n), {horizontal:true});
+  if(hasHist){
+    drawChart("chWd", "bar", order.map(d => DAYS[d].slice(0,3)), order.map(d => wdRev[d]), {money:true});
+    drawChart("chHr", "bar", SLOTS.map(t => t.replace(":00","").replace(" ","")), SLOTS.map(t => hourN[t]));
+  }
 }
-
 
 /* =========================================================
-   MODALES
+   PÁGINA: NO-SHOWS
 ========================================================= */
+function renderNoShows(){
+  const p = getPeriod();
+  const list = reservas.filter(inPeriod);
+  const s = resumen(list);
+  const due = s.attended.length + s.noshows.length;
+  const nsPct = due ? s.noshows.length / due * 100 : 0;
 
-function openModal(id){
+  const owed = reservas.filter(r => r.status === "noshow" && !r.noShowPaid)
+    .sort((a,b) => a.fecha.localeCompare(b.fecha));
+  let owedAmount = 0, owedUnknown = 0;
+  owed.forEach(r => { const a = r.total || r.expected || 0; if(a > 0) owedAmount += a; else owedUnknown++; });
 
-    document
-        .getElementById(id)
-        .classList.remove(
-            "hidden"
-        );
+  const clients = buildClients().filter(c => c.noshows > 0)
+    .sort((a,b) => b.noshows - a.noshows || a.nombre.localeCompare(b.nombre)).slice(0, 10);
+
+  let html = '<h1>No-shows</h1><p class="lead">Quién falta y cuánto dinero te deben por eso.</p>';
+
+  html += '<div class="grid">' +
+    card("No-shows", s.noshows.length, esc(p.label),
+      "Clientes que reservaron y no vinieron, en el período elegido.") +
+    card("Porcentaje", pct(nsPct), "De las citas que debían venir",
+      "No-shows divididos entre todas las citas que ya debieron cumplirse. Mientras más bajo, mejor.") +
+    card("Te deben", money(owedAmount), owed.length + " no-show(s) sin cobrar" + (owedUnknown ? " · " + owedUnknown + " sin monto" : ""),
+      "Dinero de los no-shows que todavía no marcaste como cobrados. Cuando el cliente venga, súmalo a su cobro en Cobrar servicio.", owed.length ? "gold" : "") +
+    card("Ya cobrados", reservas.filter(r => r.status === "noshow" && r.noShowPaid).length, "No-shows que ya te pagaron",
+      "No-shows que el cliente ya te pagó y marcaste como cobrados.") +
+    '</div>';
+
+  html += block("Debes cobrarles",
+    owed.length ? owed.map(r => row(esc(r.nombre),
+      "Faltó el " + niceDate(r.fecha) + " · " + esc(r.turno) + (r.services.length ? " · " + esc(r.services.join(", ")) : "") +
+      (r.telefono ? " · " + esc(r.telefono) : ""),
+      (r.total || r.expected) ? money(r.total || r.expected) : "sin monto", "bad")).join("")
+      : empty("Nadie te debe un no-show."),
+    "Clientes que faltaron y no te han pagado. Cuando vuelvan a reservar, el atajo Cobrar servicio te avisa que tienen un no-show pendiente.");
+
+  html += block("Los que más faltan",
+    clients.length ? clients.map(c => row(esc(c.nombre),
+      c.visits + " visita(s) · " + c.noshows + " falta(s)", c.noshows + "×", "bad")).join("")
+      : empty("Nadie ha faltado todavía."),
+    "Clientes con más no-shows. Sirve para decidir a quién pedirle confirmación o a quién ceder el turno si no avisa.");
+
+  $("pg-noshows").innerHTML = html;
 }
-
-
-function closeModal(id){
-
-    document
-        .getElementById(id)
-        .classList.add(
-            "hidden"
-        );
-}
-
 
 /* =========================================================
-   GUARDAR GASTO
+   RENDER GENERAL
 ========================================================= */
-
-async function saveExpense(){
-
-    const fecha =
-        document.getElementById(
-            "expenseDate"
-        ).value;
-
-    const categoria =
-        document.getElementById(
-            "expenseCategory"
-        ).value;
-
-    const descripcion =
-        document.getElementById(
-            "expenseDescription"
-        ).value.trim();
-
-    const monto =
-        number(
-            document.getElementById(
-                "expenseAmount"
-            ).value
-        );
-
-
-    if(
-        !fecha ||
-        monto <= 0
-    ){
-
-        document.getElementById(
-            "expenseMessage"
-        ).innerHTML =
-            `<div class="error">
-                Introduce una fecha y un monto válido.
-            </div>`;
-
-        return;
-    }
-
-
-    const result =
-        await supabaseClient
-            .from("gastos")
-            .insert({
-                fecha,
-                categoria,
-                descripcion,
-                monto
-            });
-
-
-    if(result.error){
-
-        document.getElementById(
-            "expenseMessage"
-        ).innerHTML =
-            `<div class="error">
-                ${escapeHtml(
-                    result.error.message
-                )}
-            </div>`;
-
-        return;
-    }
-
-
-    document.getElementById(
-        "expenseMessage"
-    ).innerHTML =
-        `<div class="success">
-            Gasto guardado correctamente.
-        </div>`;
-
-
-    document.getElementById(
-        "expenseDescription"
-    ).value = "";
-
-    document.getElementById(
-        "expenseAmount"
-    ).value = "";
-
-
-    await loadData();
-
-
-    setTimeout(
-        () =>
-            closeModal(
-                "expenseModal"
-            ),
-        700
-    );
+function renderAll(){
+  killCharts();
+  buildReservas();
+  renderResumen();
+  renderDinero();
+  renderClientes();
+  renderAgenda();
+  renderNoShows();
 }
 
-
 /* =========================================================
-   GUARDAR META
+   CARGA DE DATOS
 ========================================================= */
-
-async function saveGoal(){
-
-    const month =
-        document.getElementById(
-            "goalMonth"
-        ).value;
-
-    const revenue =
-        number(
-            document.getElementById(
-                "goalRevenue"
-            ).value
-        );
-
-    const profit =
-        number(
-            document.getElementById(
-                "goalProfit"
-            ).value
-        );
-
-
-    if(!month){
-
-        document.getElementById(
-            "goalMessage"
-        ).innerHTML =
-            `<div class="error">
-                Selecciona el mes.
-            </div>`;
-
-        return;
-    }
-
-
-    const result =
-        await supabaseClient
-            .from("metas")
-            .upsert(
-                {
-                    mes:
-                        month + "-01",
-
-                    objetivo_ingresos:
-                        revenue,
-
-                    objetivo_ganancia:
-                        profit
-                },
-                {
-                    onConflict:"mes"
-                }
-            );
-
-
-    if(result.error){
-
-        document.getElementById(
-            "goalMessage"
-        ).innerHTML =
-            `<div class="error">
-                ${escapeHtml(
-                    result.error.message
-                )}
-            </div>`;
-
-        return;
-    }
-
-
-    document.getElementById(
-        "goalMessage"
-    ).innerHTML =
-        `<div class="success">
-            Meta guardada correctamente.
-        </div>`;
-
-
-    await loadData();
-
-
-    setTimeout(
-        () =>
-            closeModal(
-                "goalModal"
-            ),
-        700
-    );
+async function fetchAll(table){
+  const size = 1000;
+  let from = 0, all = [];
+  while(true){
+    let q = sb.from(table).select("*");
+    if(table === "turnos") q = q.gte("fecha", START_DATE).lte("fecha", "2999-12-31");
+    q = q.order("id", {ascending:true}).range(from, from + size - 1);
+    const {data, error} = await q;
+    if(error) throw error;
+    all = all.concat(data || []);
+    if(!data || data.length < size) break;
+    from += size;
+  }
+  return all;
 }
-
-
-/* =========================================================
-   CARGAR DATOS
-========================================================= */
 
 async function loadData(){
+  $("globalMsg").innerHTML = "";
+  try{
+    const res = await Promise.all([fetchAll("turnos"), fetchAll("gastos"), fetchAll("metas")]);
+    turnos = res[0];
+    gastos = res[1];
+    metas = res[2];
+    lastLoad = Date.now();
 
-    showGlobalError("");
-
-    try{
-
-        const results =
-            await Promise.all([
-
-                supabaseClient
-                    .from("turnos")
-                    .select("*")
-                    .gte(
-                        "fecha",
-                        START_DATE
-                    )
-                    .order(
-                        "fecha",
-                        {
-                            ascending:true
-                        }
-                    ),
-
-                supabaseClient
-                    .from("gastos")
-                    .select("*")
-                    .gte(
-                        "fecha",
-                        START_DATE
-                    )
-                    .order(
-                        "fecha",
-                        {
-                            ascending:true
-                        }
-                    ),
-
-                supabaseClient
-                    .from("metas")
-                    .select("*")
-                    .order(
-                        "mes",
-                        {
-                            ascending:false
-                        }
-                    )
-
-            ]);
-
-
-        const turnosResult =
-            results[0];
-
-        const gastosResult =
-            results[1];
-
-        const metasResult =
-            results[2];
-
-
-        if(
-            turnosResult.error
-        ){
-
-            throw new Error(
-                "Error leyendo turnos: " +
-                turnosResult.error.message
-            );
-
-        }
-
-
-        if(
-            gastosResult.error
-        ){
-
-            throw new Error(
-                "Error leyendo gastos: " +
-                gastosResult.error.message
-            );
-
-        }
-
-
-        if(
-            metasResult.error
-        ){
-
-            throw new Error(
-                "Error leyendo metas: " +
-                metasResult.error.message
-            );
-
-        }
-
-
-        turnos =
-            turnosResult.data || [];
-
-        gastos =
-            gastosResult.data || [];
-
-        metas =
-            metasResult.data || [];
-
-
-        renderDashboard();
-
-        renderClients();
-
-        renderFinance();
-
-    }catch(error){
-
-        console.error(error);
-
-        showGlobalError(
-            error.message ||
-            "No se pudieron cargar los datos."
-        );
-
+    if(!turnos.length){
+      $("globalMsg").innerHTML = '<div class="msg err">No se ve ningún turno. Si debería haber datos, tu usuario puede no estar en la lista de administradores de Supabase.</div>';
     }
+    renderAll();
+  }catch(e){
+    console.error(e);
+    $("globalMsg").innerHTML = '<div class="msg err"><b>No se pudieron cargar los datos.</b><br>' + esc(e.message || e) + '</div>';
+  }
 }
 
-
 /* =========================================================
-   ERROR
+   GASTOS Y METAS
 ========================================================= */
+function openModal(id){ $(id).classList.remove("hidden"); }
+function closeModal(id){ $(id).classList.add("hidden"); }
 
-function showGlobalError(
-    message
-){
-
-    const element =
-        document.getElementById(
-            "globalError"
-        );
-
-
-    if(!message){
-
-        element.classList.add(
-            "hidden"
-        );
-
-        return;
-    }
-
-
-    element.textContent =
-        message;
-
-    element.classList.remove(
-        "hidden"
-    );
+function openExpense(){
+  $("exDate").value = todayStr();
+  $("exDesc").value = "";
+  $("exAmount").value = "";
+  $("exMsg").innerHTML = "";
+  openModal("expenseModal");
+}
+async function saveExpense(){
+  const fecha = $("exDate").value;
+  const monto = num($("exAmount").value);
+  if(!fecha || monto <= 0){
+    $("exMsg").innerHTML = '<div class="msg err">Escribe una fecha y un monto mayor que 0.</div>';
+    return;
+  }
+  $("saveExpense").disabled = true;
+  const {error} = await sb.from("gastos").insert({
+    fecha, categoria:$("exCat").value, descripcion:$("exDesc").value.trim(), monto
+  });
+  $("saveExpense").disabled = false;
+  if(error){ $("exMsg").innerHTML = '<div class="msg err">' + esc(error.message) + '</div>'; return; }
+  closeModal("expenseModal");
+  await loadData();
+}
+async function delExpense(id){
+  if(!confirm("¿Borrar este gasto?")) return;
+  const {error} = await sb.from("gastos").delete().eq("id", id);
+  if(error){ alert("No se pudo borrar: " + error.message); return; }
+  await loadData();
 }
 
+function openGoal(){
+  $("gMonth").value = todayStr().slice(0,7);
+  $("gRev").value = "";
+  $("gProfit").value = "";
+  $("gMsg").innerHTML = "";
+  const g = metas.find(m => String(m.mes).slice(0,7) === todayStr().slice(0,7));
+  if(g){ $("gRev").value = num(g.objetivo_ingresos) || ""; $("gProfit").value = num(g.objetivo_ganancia) || ""; }
+  openModal("goalModal");
+}
+async function saveGoal(){
+  const month = $("gMonth").value;
+  if(!month){ $("gMsg").innerHTML = '<div class="msg err">Elige el mes.</div>'; return; }
+  const mes = month + "-01";
+  const vals = {objetivo_ingresos:num($("gRev").value), objetivo_ganancia:num($("gProfit").value)};
+  $("saveGoal").disabled = true;
+  let error;
+  const found = metas.find(m => String(m.mes).slice(0,10) === mes);
+  if(found){
+    ({error} = await sb.from("metas").update(vals).eq("id", found.id));
+  }else{
+    ({error} = await sb.from("metas").insert(Object.assign({mes}, vals)));
+  }
+  $("saveGoal").disabled = false;
+  if(error){ $("gMsg").innerHTML = '<div class="msg err">' + esc(error.message) + '</div>'; return; }
+  closeModal("goalModal");
+  await loadData();
+}
 
 /* =========================================================
-   LOGIN
+   ENTRADA / SALIDA
 ========================================================= */
-
 async function login(){
-
-    const email =
-        document.getElementById(
-            "email"
-        ).value.trim();
-
-    const password =
-        document.getElementById(
-            "password"
-        ).value;
-
-
-    const message =
-        document.getElementById(
-            "loginMessage"
-        );
-
-    const button =
-        document.getElementById(
-            "loginButton"
-        );
-
-
-    if(
-        !email ||
-        !password
-    ){
-
-        message.innerHTML =
-            `<div class="error">
-                Introduce email y contraseña.
-            </div>`;
-
-        return;
-    }
-
-
-    button.disabled = true;
-
-    button.textContent =
-        "Comprobando...";
-
-    message.innerHTML = "";
-
-
-    try{
-
-        const result =
-            await supabaseClient
-                .auth
-                .signInWithPassword({
-                    email,
-                    password
-                });
-
-
-        if(result.error){
-
-            throw result.error;
-
-        }
-
-
-    }catch(error){
-
-        console.error(
-            "LOGIN:",
-            error
-        );
-
-        message.innerHTML =
-            `<div class="error">
-                <strong>
-                    No se pudo iniciar sesión.
-                </strong>
-                <br><br>
-                ${escapeHtml(
-                    error.message
-                )}
-            </div>`;
-
-    }finally{
-
-        button.disabled = false;
-
-        button.textContent =
-            "Entrar";
-
-    }
+  const email = $("email").value.trim();
+  const password = $("password").value;
+  if(!email || !password){
+    $("loginMsg").innerHTML = '<div class="msg err">Escribe tu correo y tu contraseña.</div>';
+    return;
+  }
+  $("loginBtn").disabled = true;
+  $("loginBtn").textContent = "Comprobando...";
+  $("loginMsg").innerHTML = "";
+  const {error} = await sb.auth.signInWithPassword({email, password});
+  $("loginBtn").disabled = false;
+  $("loginBtn").textContent = "Entrar";
+  if(error){
+    $("loginMsg").innerHTML = '<div class="msg err">No se pudo entrar: ' + esc(error.message) + '</div>';
+  }
 }
-
-
-/* =========================================================
-   MOSTRAR APP
-========================================================= */
-
-async function showApp(
-    session
-){
-
-    document
-        .getElementById(
-            "loginScreen"
-        )
-        .classList.add(
-            "hidden"
-        );
-
-
-    document
-        .getElementById(
-            "app"
-        )
-        .classList.remove(
-            "hidden"
-        );
-
-
-    document.getElementById(
-        "userEmail"
-    ).textContent =
-        session.user.email || "";
-
-
-    await loadData();
+async function enter(){
+  if(appShown) return;
+  appShown = true;
+  $("login").classList.add("hidden");
+  $("app").classList.remove("hidden");
+  $("pg-resumen").innerHTML = '<div class="spin"></div><div class="empty" style="text-align:center">Cargando datos...</div>';
+  await loadData();
 }
-
-
-function showLogin(){
-
-    document
-        .getElementById(
-            "app"
-        )
-        .classList.add(
-            "hidden"
-        );
-
-
-    document
-        .getElementById(
-            "loginScreen"
-        )
-        .classList.remove(
-            "hidden"
-        );
+function leave(){
+  appShown = false;
+  killCharts();
+  turnos = []; gastos = []; metas = []; reservas = [];
+  $("app").classList.add("hidden");
+  $("login").classList.remove("hidden");
+  $("password").value = "";
 }
-
-
-/* =========================================================
-   INICIALIZACIÓN
-========================================================= */
-
-async function initialize(){
-
-    if(!supabaseClient){
-        return;
-    }
-
-
-    try{
-
-        const result =
-            await supabaseClient
-                .auth
-                .getSession();
-
-
-        if(result.error){
-            throw result.error;
-        }
-
-
-        if(
-            result.data.session
-        ){
-
-            await showApp(
-                result.data.session
-            );
-
-        }else{
-
-            showLogin();
-
-        }
-
-
-        supabaseClient
-            .auth
-            .onAuthStateChange(
-                async (
-                    event,
-                    session
-                ) => {
-
-                    console.log(
-                        "AUTH:",
-                        event
-                    );
-
-
-                    if(session){
-
-                        await showApp(
-                            session
-                        );
-
-                    }else{
-
-                        showLogin();
-
-                    }
-
-                }
-            );
-
-
-    }catch(error){
-
-        console.error(
-            "INIT:",
-            error
-        );
-
-
-        document.getElementById(
-            "loginMessage"
-        ).innerHTML =
-            `<div class="error">
-
-                <strong>
-                    Error conectando con Supabase.
-                </strong>
-
-                <br><br>
-
-                ${escapeHtml(
-                    error.message
-                )}
-
-            </div>`;
-
-    }
-}
-
-
-/* =========================================================
-   NAVEGACIÓN
-========================================================= */
-
-function showPage(page){
-
-    const pages = [
-        "Dashboard",
-        "Clients",
-        "Finance",
-        "More"
-    ];
-
-
-    pages.forEach(
-        name => {
-
-            const section =
-                document.getElementById(
-                    "page" + name
-                );
-
-            if(section){
-
-                section.classList.toggle(
-                    "hidden",
-                    name !== page
-                );
-
-            }
-
-        }
-    );
-
-
-    document
-        .querySelectorAll(
-            ".navButton"
-        )
-        .forEach(
-            button => {
-
-                button.classList.toggle(
-                    "active",
-                    button.dataset.page ===
-                    page
-                );
-
-            }
-        );
-}
-
 
 /* =========================================================
    EVENTOS
 ========================================================= */
+$("loginBtn").addEventListener("click", login);
+$("password").addEventListener("keydown", e => { if(e.key === "Enter") login(); });
+$("logoutBtn").addEventListener("click", async () => { await sb.auth.signOut(); });
+$("refreshBtn").addEventListener("click", loadData);
+$("saveExpense").addEventListener("click", saveExpense);
+$("saveGoal").addEventListener("click", saveGoal);
 
-document
-    .getElementById(
-        "loginButton"
-    )
-    .addEventListener(
-        "click",
-        login
-    );
+document.querySelectorAll("[data-close]").forEach(b =>
+  b.addEventListener("click", () => closeModal(b.dataset.close)));
+document.querySelectorAll(".modal").forEach(m =>
+  m.addEventListener("click", e => { if(e.target === m) m.classList.add("hidden"); }));
 
+document.querySelectorAll(".period").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".period").forEach(x => x.classList.remove("on"));
+  b.classList.add("on");
+  period = b.dataset.p;
+  renderAll();
+}));
 
-document
-    .getElementById(
-        "password"
-    )
-    .addEventListener(
-        "keydown",
-        event => {
+document.querySelectorAll("nav.bottom button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll("nav.bottom button").forEach(x => x.classList.toggle("on", x === b));
+  ["resumen","dinero","clientes","agenda","noshows"].forEach(n =>
+    $("pg-" + n).classList.toggle("hidden", n !== b.dataset.pg));
+  window.scrollTo(0, 0);
+}));
 
-            if(
-                event.key === "Enter"
-            ){
+document.addEventListener("visibilitychange", () => {
+  if(!document.hidden && appShown && Date.now() - lastLoad > 60000) loadData();
+});
 
-                login();
-
-            }
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "logoutButton"
-    )
-    .addEventListener(
-        "click",
-        async () => {
-
-            await supabaseClient
-                .auth
-                .signOut();
-
-        }
-    );
-
-
-document
-    .querySelectorAll(
-        ".navButton"
-    )
-    .forEach(
-        button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    showPage(
-                        button.dataset.page
-                    );
-
-                }
-            );
-
-        }
-    );
-
-
-document
-    .querySelectorAll(
-        ".period"
-    )
-    .forEach(
-        button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    document
-                        .querySelectorAll(
-                            ".period"
-                        )
-                        .forEach(
-                            b =>
-                                b.classList.remove(
-                                    "active"
-                                )
-                        );
-
-
-                    button.classList.add(
-                        "active"
-                    );
-
-
-                    selectedPeriod =
-                        button.dataset.period;
-
-
-                    renderDashboard();
-
-                    renderFinance();
-
-                }
-            );
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "addExpenseButton"
-    )
-    .addEventListener(
-        "click",
-        () => {
-
-            document.getElementById(
-                "expenseDate"
-            ).value =
-                todayString();
-
-            openModal(
-                "expenseModal"
-            );
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "saveExpense"
-    )
-    .addEventListener(
-        "click",
-        saveExpense
-    );
-
-
-document
-    .getElementById(
-        "addGoalButton"
-    )
-    .addEventListener(
-        "click",
-        () => {
-
-            const d =
-                new Date();
-
-            document.getElementById(
-                "goalMonth"
-            ).value =
-                d.getFullYear() +
-                "-" +
-                String(
-                    d.getMonth()+1
-                ).padStart(2,"0");
-
-
-            openModal(
-                "goalModal"
-            );
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "saveGoal"
-    )
-    .addEventListener(
-        "click",
-        saveGoal
-    );
-
-
-/* =========================================================
-   ARRANCAR
-========================================================= */
-
-initialize();
-
+(async function init(){
+  if(!sb) return;
+  sb.auth.onAuthStateChange((event, session) => {
+    // No llamar a Supabase directamente dentro de este bloque
+    if(event === "SIGNED_OUT") setTimeout(leave, 0);
+    else if(event === "SIGNED_IN" && session) setTimeout(enter, 0);
+  });
+  const {data} = await sb.auth.getSession();
+  if(data && data.session) enter();
+})();
 </script>
-
 </body>
 </html>
