@@ -838,5 +838,477 @@ document.addEventListener("visibilitychange", () => { if(!document.hidden && app
   // Sin sesión guardada: siempre se empieza en la pantalla de login
 })();
 </script>
+  <!-- =====================================================================
+  CÓMO PONERLO (30 segundos):
+  1) Abre tu archivo del panel en GitHub y dale al lápiz (editar).
+  2) Busca la línea que dice  </body>  (casi al final).
+  3) Pega TODO este bloque justo ANTES de esa línea </body>.
+  4) Guarda (Commit changes). No borres nada de lo que ya tenías.
+===================================================================== -->
+<script>
+/* =====================================================================
+   ADMINISTRADOR INTELIGENTE — se monta encima de tu panel actual
+   ===================================================================== */
+(function(){
+"use strict";
+if(typeof renderAll !== "function" || typeof sb === "undefined") return;
+
+/* =====================================================================
+   ★★★  AQUÍ CAMBIAS LOS MENSAJES PARA TUS CLIENTES  ★★★
+   Escribe el texto entre comillas. Puedes usar estas palabras mágicas:
+     {nombre}  → el nombre del cliente        {dias}  → días que lleva sin venir
+     {ciclo}   → cada cuántos días suele venir  {link}  → el link de tus reservas
+   ===================================================================== */
+const MENSAJE_EN_RIESGO = "Hola {nombre} 👋 hace {dias} días que no te veo por Mono's. ¿Te aparto un turno esta semana? Reserva aquí: {link}";
+const MENSAJE_RECUPERAR = "Hola {nombre}, te extrañamos en Mono's 💈 Cuando quieras volver, aquí tienes tu turno: {link}";
+const LINK_RESERVAS = "https://monosbarberia.github.io/Monos-barber-a/";
+const CODIGO_PAIS = "53";   // Código de tu país SIN el +  (ej. "52" México, "53" Cuba, "34" España). Si los teléfonos ya lo traen, déjalo vacío.
+
+/* ---------- Otros ajustes (puedes dejarlos así) ---------- */
+const UMBRAL_RIESGO = 1.3;        // 1.3 = avisar cuando un cliente lleva 30% más días de lo normal sin venir
+const DIAS_SIN_RITMO = 30;        // para clientes con 1 sola visita: avisar a los 30 días
+const ALZA_COSTO_PCT = 20;        // avisar si el costo de productos por cliente sube más de 20%
+const MIN_COBRADAS_HORARIOS = 15; // clientes cobrados que necesito antes de opinar de horas flojas
+const TAG_APORTE = "APORTE PERSONAL: ";
+const TAG_DEVOL  = "DEVOLUCION PERSONAL: ";
+
+/* ---------- Utilidades ---------- */
+let ap = [];                                   // aportes y devoluciones de tu dinero personal
+const cobr = () => reservas.filter(r => r.status === "cobrada");
+const ingOf = r => r.charged + r.tip;
+const mon = t => String(t).slice(0,7);
+const isAp = g => { const d = norm(g.descripcion); return d.indexOf("aporte personal") === 0 || d.indexOf("devolucion personal") === 0; };
+const isDevol = g => norm(g.descripcion).indexOf("devolucion personal") === 0;
+const isProdGasto = g => norm(g.categoria) !== "otros" && num(g.monto) > 0;
+function conf(n){ return n < 4 ? "poca" : (n < 12 ? "media" : "alta"); }
+function median(a){ const s = a.slice().sort((x,y) => x-y), m = Math.floor(s.length/2); return s.length % 2 ? s[m] : (s[m-1]+s[m])/2; }
+const sgn = v => (v >= 0 ? "+" : "") + money(v);
+const barRow = (t, sub, val, pc) => '<div class="row"><div class="rowTop"><div><div class="rowTitle">'+t+'</div><div class="rowSub">'+sub+'</div></div><div class="rowVal">'+val+'</div></div><div class="bar"><i style="width:'+Math.max(0,Math.min(100,pc))+'%"></i></div></div>';
+
+/* =====================================================================
+   GRÁFICAS: líneas con puntos (y círculos). Reemplaza las barras de antes.
+   ===================================================================== */
+window.drawChart = function(id, type, labels, data, opt){
+  opt = opt || {}; if(!window.Chart) return;
+  const el = $(id); if(!el) return; if(charts[id]) charts[id].destroy();
+  if(type === "doughnut" || (type === "bar" && opt.horizontal)){
+    charts[id] = new Chart(el, {type:"doughnut", data:{labels, datasets:[{data, backgroundColor:PALETTE, borderWidth:0}]},
+      options:{responsive:true, maintainAspectRatio:false, cutout:"62%",
+        plugins:{legend:{position:"bottom", labels:{boxWidth:12}}, tooltip:{callbacks:{label:c => c.label+": "+(opt.money?money(c.raw):c.raw)}}}}});
+    return;
+  }
+  charts[id] = new Chart(el, {type:"line", data:{labels, datasets:[{data, borderColor:"#cbb26a", backgroundColor:"rgba(203,178,106,.12)", fill:true, tension:.35,
+      pointRadius:4, pointHoverRadius:6, pointBackgroundColor:"#0f1d13", pointBorderColor:"#cbb26a", pointBorderWidth:2, borderWidth:2.5}]},
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:c => opt.money?money(c.raw):String(c.raw)}}},
+      scales:{x:{grid:{display:false}}, y:{beginAtZero:true, grid:{color:"rgba(255,255,255,.05)"}, ticks:{precision:0, callback:v => opt.money?money(v):v}}}}});
+};
+function multiLine(id, labels, sets, opt){
+  opt = opt || {}; if(!window.Chart) return;
+  const el = $(id); if(!el) return; if(charts[id]) charts[id].destroy();
+  charts[id] = new Chart(el, {type:"line", data:{labels, datasets:sets.map(s => ({
+      label:s.label, data:s.data, borderColor:s.color, backgroundColor:s.fill ? s.color+"22" : "transparent", fill:!!s.fill,
+      tension:s.tension === undefined ? .3 : s.tension, borderDash:s.dash || [], pointRadius:s.r === undefined ? 4 : s.r, pointHoverRadius:6,
+      pointBackgroundColor:"#0f1d13", pointBorderColor:s.color, pointBorderWidth:2, borderWidth:2.5, spanGaps:false}))},
+    options:{responsive:true, maintainAspectRatio:false, interaction:{mode:"index", intersect:false},
+      plugins:{legend:{display:sets.length > 1, position:"bottom", labels:{boxWidth:12}},
+        tooltip:{callbacks:{label:c => (c.dataset.label ? c.dataset.label+": " : "")+(opt.money ? money(c.raw) : c.raw)}}},
+      scales:{x:{grid:{display:false}, ticks:{maxTicksLimit:opt.maxX || 10}},
+        y:{beginAtZero:opt.beginZero !== false, grid:{color:"rgba(255,255,255,.05)"}, ticks:{callback:v => opt.money ? money(v) : v}}}}});
+}
+
+/* =====================================================================
+   🧠 EL CEREBRO: aprende de tus cobros, gastos y clientes.
+   No guarda nada aparte: cada vez que cobras algo nuevo, recalcula todo
+   con TODO tu historial (lo reciente pesa más que lo viejo).
+   ===================================================================== */
+function learn(){
+  const t = todayStr(), month = mon(t), C = cobr(), byDay = {};
+  C.forEach(r => { byDay[r.fecha] = (byDay[r.fecha] || 0) + ingOf(r); });
+  const wd = {}; for(let d = 1; d <= 6; d++) wd[d] = {s:0, w:0, n:0, avg:null};
+  let allS = 0, allN = 0;
+  Object.keys(byDay).forEach(f => {
+    if(f >= t) return; const d = parseD(f).getDay(); if(d === 0) return;
+    const w = Math.pow(0.85, Math.floor(daysBetween(f, t)/7));      // cada semana atrás pesa 15% menos
+    wd[d].s += byDay[f]*w; wd[d].w += w; wd[d].n++; allS += byDay[f]; allN++;
+  });
+  for(let d = 1; d <= 6; d++) wd[d].avg = wd[d].w ? wd[d].s/wd[d].w : null;
+  const dayAvg = allN ? allS/allN : null;
+  const wdAvg = d => (wd[d] && wd[d].avg !== null) ? wd[d].avg : (dayAvg || 0);
+  const prodAll = gastos.filter(g => isProdGasto(g) && String(g.fecha) >= START_DATE);
+  return {t, month, C, byDay, wd, dayAvg, wdAvg, todayIng:byDay[t] || 0,
+    monthIng:C.filter(r => mon(r.fecha) === month).reduce((s,r) => s + ingOf(r), 0),
+    ticketAll:C.length ? C.reduce((s,r) => s + r.charged, 0)/C.length : 0,
+    costVar:C.length ? prodAll.reduce((s,g) => s + num(g.monto), 0)/C.length : 0,
+    prodAll, daysData:allN + (byDay[t] ? 1 : 0)};
+}
+function goals(m){
+  const g = metas.find(x => String(x.mes).slice(0,7) === m.month), meta = g ? num(g.objetivo_ingresos) : 0;
+  const b = monthBounds(m.month), s0 = b.first < START_DATE ? START_DATE : b.first;
+  const wdays = Math.max(1, workdaysBetween(s0, b.last)), todayWd = parseD(m.t).getDay();
+  let daily = null, src = "";
+  if(meta > 0){ daily = meta/wdays; src = "meta"; }
+  else if(todayWd !== 0 && m.wd[todayWd].n >= 2 && m.wd[todayWd].avg > 0){ daily = m.wd[todayWd].avg; src = "habito"; }
+  const gMonth = sumGastos(gastos.filter(x => mon(String(x.fecha)) === m.month));
+  return {meta, daily, src, eq:Math.max(BARBER_BUDGET, gMonth), gMonth, b, todayWd};
+}
+function projection(m, G){
+  const last = +G.b.last.slice(8,10), booked = {};
+  reservas.forEach(r => { if(r.status === "futura" && mon(r.fecha) === m.month) booked[r.fecha] = (booked[r.fecha] || 0) + (r.total || r.expected || 0); });
+  const todayProj = G.todayWd === 0 ? m.todayIng : Math.max(m.todayIng + (booked[m.t] || 0), m.wdAvg(G.todayWd));
+  const remain = Math.max(0, todayProj - m.todayIng), tomorrow = addDays(m.t, 1);
+  const labels = [], act = [], pro = []; let cum = 0, eqDay = null;
+  for(let i = 1; i <= last; i++){
+    const f = m.month+"-"+String(i).padStart(2,"0"), w = parseD(f).getDay(); labels.push(String(i));
+    if(f <= m.t){
+      cum += (m.byDay[f] || 0); act.push(Math.round(cum)); pro.push(f === m.t ? Math.round(cum) : null);
+      if(eqDay === null && cum >= G.eq) eqDay = i;
+    }else{
+      act.push(null);
+      cum += (f === tomorrow ? remain : 0) + Math.max(w === 0 ? 0 : m.wdAvg(w), booked[f] || 0);
+      pro.push(Math.round(cum));
+      if(eqDay === null && cum >= G.eq) eqDay = i;
+    }
+  }
+  if(m.t === G.b.last) cum += remain;
+  return {labels, act, pro, end:cum, eqDay};
+}
+function costModel(m){
+  const cur = weekStart(m.t), cl = {}, sp = {};
+  m.C.forEach(r => { const k = weekStart(r.fecha); cl[k] = (cl[k] || 0) + 1; });
+  m.prodAll.forEach(g => { const k = weekStart(String(g.fecha).slice(0,10)); sp[k] = (sp[k] || 0) + num(g.monto); });
+  const ks = Object.keys(cl).filter(k => k < cur).sort();
+  const pts = ks.map((k,i) => { const w = ks.slice(Math.max(0, i-3), i+1); const c = w.reduce((s,x) => s + cl[x], 0), s = w.reduce((a,x) => a + (sp[x] || 0), 0); return {k, v:c ? s/c : 0}; });
+  let alert = null;
+  if(pts.length >= 4){
+    const prev = pts.slice(0,-1), avg = prev.reduce((s,p) => s + p.v, 0)/prev.length, last = pts[pts.length-1].v;
+    if(avg > 0 && last > avg*(1 + ALZA_COSTO_PCT/100)) alert = {avg, last, pct:(last/avg - 1)*100};
+  }
+  return {pts, alert};
+}
+function comboModel(m){
+  const map = {};
+  m.C.forEach(r => {
+    if(!r.services.length) return;
+    const arr = r.services.slice().sort((a,b) => norm(a) < norm(b) ? -1 : 1), k = arr.map(norm).join("+");
+    const o = map[k] || (map[k] = {label:arr.join(" + "), n:0, rev:0, hours:0});
+    o.n++; o.rev += r.charged; o.hours += r.rows.length*0.5;
+  });
+  const list = Object.values(map).map(o => Object.assign(o, {perHour:o.hours ? o.rev/o.hours : 0, avg:o.n ? o.rev/o.n : 0}));
+  return {list, ranked:list.filter(o => o.n >= 2).sort((a,b) => b.perHour - a.perHour), byRev:list.slice().sort((a,b) => b.rev - a.rev)};
+}
+function slotModel(m){
+  const t = m.t, from0 = addDays(t,-56), from = from0 < START_DATE ? START_DATE : from0, y = addDays(t,-1);
+  const used = new Set(), blk = new Set(), worked = new Set(m.C.map(r => r.fecha)), occ = {}, tot = {};
+  m.C.forEach(r => r.rows.forEach(x => used.add(x.fecha+"|"+x.turno)));
+  bloqueos.forEach(b => blk.add(b.fecha+"|"+b.turno));
+  if(from <= y) eachDay(from, y, (d, wd) => {
+    if(wd === 0 || !worked.has(d)) return;           // solo cuento días en que trabajaste
+    SLOTS.forEach(s => { const k = d+"|"+s; if(blk.has(k)) return; const g = wd+"|"+s; tot[g] = (tot[g] || 0) + 1; if(used.has(k)) occ[g] = (occ[g] || 0) + 1; });
+  });
+  const list = Object.keys(tot).filter(g => tot[g] >= 3).map(g => { const p = g.split("|"); return {wd:+p[0], slot:p[1], tot:tot[g], occ:occ[g] || 0, rate:(occ[g] || 0)/tot[g]}; })
+    .sort((a,b) => a.rate - b.rate || b.tot - a.tot);
+  return {list, ready:m.C.length >= MIN_COBRADAS_HORARIOS};
+}
+function cycleModel(m){
+  const by = {}, fut = new Set();
+  reservas.forEach(r => { if(r.status === "futura") fut.add(r.client); });
+  m.C.forEach(r => {
+    const c = by[r.client] || (by[r.client] = {key:r.client, nombre:r.nombre, telefono:r.telefono, dates:[]});
+    if(r.nombre && r.nombre !== "Sin nombre") c.nombre = r.nombre; if(r.telefono) c.telefono = r.telefono;
+    if(c.dates.indexOf(r.fecha) < 0) c.dates.push(r.fecha);
+  });
+  const risk = []; let known = 0;
+  Object.values(by).forEach(c => {
+    c.dates.sort(); const last = c.dates[c.dates.length-1], since = daysBetween(last, m.t), gaps = [];
+    for(let i = 1; i < c.dates.length; i++){ const d = daysBetween(c.dates[i-1], c.dates[i]); if(d > 0) gaps.push(d); }
+    const isKnown = gaps.length >= 1, cycle = isKnown ? Math.max(7, Math.round(median(gaps.slice(-4)))) : DIAS_SIN_RITMO;
+    if(isKnown) known++;
+    const ratio = since/cycle;
+    if(!fut.has(c.key) && ratio >= (isKnown ? UMBRAL_RIESGO : 1))
+      risk.push({nombre:c.nombre, telefono:c.telefono, visits:c.dates.length, since, cycle, known:isKnown, ratio});
+  });
+  risk.sort((a,b) => b.visits - a.visits || a.since - b.since);
+  return {risk, known};
+}
+function fondoInfo(){
+  const t = todayStr(), fondo = fundTotal();
+  const inn = ap.filter(g => !isDevol(g)).reduce((s,g) => s + num(g.monto), 0), out = ap.filter(isDevol).reduce((s,g) => s + num(g.monto), 0);
+  const debt = Math.max(0, inn - out); let tone = "ok", txt;
+  if(fondo < 0){ tone = "bad"; txt = "El fondo está en negativo ("+money(fondo)+"): gastaste más de lo reservado y lo estás sacando de tu retiro."; }
+  else if(fondo < BARBER_BUDGET*0.2){ tone = "warn"; txt = "El fondo está bajo ("+money(fondo)+"). Cuidado con compras grandes por ahora."; }
+  else txt = "El fondo está sano ("+money(fondo)+"): la barbería se sostiene sola.";
+  return {fondo, inn, out, debt, tone, txt, canReturn:Math.max(0, Math.min(debt, fondo))};
+}
+function ctx(){
+  const m = learn(), G = goals(m);
+  return {m, G, P:projection(m, G), K:costModel(m), CB:comboModel(m), SL:slotModel(m), CY:cycleModel(m), F:fondoInfo()};
+}
+
+/* =====================================================================
+   🧩 LAS COSAS QUE EL ADMINISTRADOR TE DICE
+   Para enseñarle algo nuevo en el futuro: copia uno de estos bloques
+   "aprender(x => {...})", cambia el texto y listo. Cada aviso lleva una
+   prioridad p (1 = poco importante, 10 = urgente); salen los más importantes.
+   ===================================================================== */
+const INSIGHTS = [];
+function aprender(fn){ INSIGHTS.push(fn); }
+
+aprender(x => { const wp = weekPace();
+  if(wp.good === true) return [{p:8, tone:"ok", t:"Esta semana va bien: si sigues así cerrarías en "+money(wp.proj)+", por encima de tu promedio ("+money(wp.base)+")."}];
+  if(wp.good === false) return [{p:9, tone:"warn", t:"Esta semana va floja: al ritmo actual cerrarías en "+money(wp.proj)+" y tu promedio es "+money(wp.base)+". Aún hay tiempo: escríbeles a tus clientes en riesgo."}];
+  if(wp.base === null) return [{p:2, tone:"", t:"Aún no tengo una semana completa para compararte. Con la primera semana cerrada empiezo a decirte si vas bien o mal."}];
+  return []; });
+aprender(x => { const {m, G} = x;
+  if(G.todayWd === 0) return [{p:1, tone:"", t:"Hoy es domingo: descansa."}];
+  if(!G.daily) return [];
+  const falta = G.daily - m.todayIng;
+  if(falta <= 0) return [{p:7, tone:"ok", t:"¡Meta del día lograda! Llevas "+money(m.todayIng)+" de "+money(G.daily)+"."}];
+  const n = m.ticketAll ? Math.ceil(falta/m.ticketAll) : null;
+  return [{p:7, tone:"", t:"Hoy llevas "+money(m.todayIng)+" de "+money(G.daily)+(n ? ": te faltan unos "+n+" cliente(s)." : ".")}]; });
+aprender(x => { const {m, G, P} = x;
+  if(m.monthIng >= G.eq) return [{p:6, tone:"ok", t:"La barbería del mes ya está cubierta ("+money(G.eq)+"). Lo que entre ahora es ganancia."}];
+  const falta = G.eq - m.monthIng, n = m.ticketAll ? Math.ceil(falta/m.ticketAll) : null;
+  let t = "Para cubrir la barbería del mes te faltan "+money(falta)+(n ? " (unos "+n+" clientes)" : "")+".";
+  t += P.eqDay ? " Al ritmo actual lo logras el día "+P.eqDay+"." : " Al ritmo actual no llegarías este mes: toca más clientes o más ticket.";
+  return [{p:P.eqDay ? 5 : 9, tone:P.eqDay ? "" : "bad", t}]; });
+aprender(x => purchaseAdvice().filter(a => a.level === "buy" || a.level === "urgent").map(a => ({p:8, tone:a.level === "urgent" ? "bad" : "ok",
+  t:a.level === "urgent" ? a.name+" ya te tocaba y el fondo no alcanza: cómpralo con los próximos cobros." : "Es hora de abastecer "+a.name+": el fondo lo cubre."})));
+aprender(x => { const n = x.CY.risk.length;
+  return n ? [{p:8, tone:"warn", t:n+" cliente(s) ya pasaron su ritmo normal de visitas. Escríbeles desde Clientes: es la forma más barata de llenar la agenda."}] : []; });
+aprender(x => x.F.tone === "ok" ? [] : [{p:x.F.tone === "bad" ? 10 : 6, tone:x.F.tone, t:x.F.txt}]);
+aprender(x => { if(!x.SL.ready || !x.SL.list.length) return []; const s = x.SL.list[0]; if(s.rate > 0.4) return [];
+  return [{p:4, tone:"", t:"Tu hora más floja es "+DAYS[s.wd].toLowerCase()+" a las "+s.slot+" (ocupada "+s.occ+" de "+s.tot+" veces). Prueba una promo solo para ese horario."}]; });
+aprender(x => { const c = buildClients().filter(k => k.noshows >= 2); if(!c.length) return [];
+  return [{p:5, tone:"warn", t:c.map(k => k.nombre).slice(0,3).join(", ")+" ha faltado 2 veces o más. Pídele adelanto para reservar."}]; });
+aprender(x => x.K.alert ? [{p:8, tone:"warn", t:"Cada cliente te está costando "+x.K.alert.pct.toFixed(0)+"% más en productos que tu promedio ("+money(x.K.alert.last)+" contra "+money(x.K.alert.avg)+"). Revisa si algún producto subió de precio."}] : []);
+aprender(x => { const s = resumen(reservas.filter(r => mon(r.fecha) === x.m.month));
+  if(s.expected > 0 && s.disc/s.expected > 0.05) return [{p:5, tone:"warn", t:"Este mes has regalado "+money(s.disc)+" en descuentos ("+pct(s.disc/s.expected*100)+" de lo que cobrarías al precio normal)."}];
+  return []; });
+
+/* =====================================================================
+   PANTALLAS NUEVAS
+   ===================================================================== */
+const TONE_COLOR = {ok:"var(--ok)", warn:"var(--warn)", bad:"var(--bad)", "":"var(--gold)"};
+
+function adminBlock(X){
+  const all = [];
+  INSIGHTS.forEach(fn => { try{ (fn(X) || []).forEach(i => all.push(i)); }catch(e){ console.error(e); } });
+  all.sort((a,b) => b.p - a.p);
+  const top = all.slice(0,5);
+  const body = top.length ? top.map(i => '<div class="row"><div class="rowTitle" style="font-weight:500;line-height:1.45"><span style="color:'+(TONE_COLOR[i.tone] || TONE_COLOR[""])+'">●</span> '+esc(i.t)+'</div></div>').join("")
+    : empty("Todavía no tengo suficientes datos. Con cada cobro que anotes voy aprendiendo.");
+  return block("Tu administrador", body, "Resume lo más importante del momento. Aprende solo de tus cobros, gastos y clientes: mientras más datos, más acertado.");
+}
+
+function renderPlan(X){
+  const {m, G, P, K, CB, SL, CY, F} = X, after = [];
+  let h = '<h1>Plan</h1><p class="lead">Hacia dónde vas y por dónde se va el dinero. No depende del filtro de arriba.</p>';
+
+  // Hoy + equilibrio
+  let b = "";
+  if(G.todayWd === 0) b += empty("Hoy es domingo.");
+  else if(G.daily){
+    const pc = m.todayIng/G.daily*100;
+    b += barRow("Meta de hoy", money(m.todayIng)+" de "+money(G.daily)+(m.todayIng >= G.daily ? " · ¡lograda!" : " · faltan "+money(G.daily - m.todayIng)), pct(Math.min(100,pc)), pc);
+    b += '<div class="note">'+(G.src === "meta" ? "Sale de tu meta del mes repartida entre los días de trabajo." : "Es lo que sueles hacer los "+DAYS[G.todayWd].toLowerCase()+"s.")+'</div>';
+  }else b += empty("Aún no sé cuánto sueles hacer los "+DAYS[G.todayWd].toLowerCase()+"s. Configura una meta del mes o espera unos días de datos.");
+  const eqpc = m.monthIng/G.eq*100;
+  b += barRow("Barbería del mes cubierta", money(m.monthIng)+" de "+money(G.eq)+(m.monthIng >= G.eq ? " · ¡cubierta!" : " · faltan "+money(G.eq - m.monthIng)), pct(Math.min(100,eqpc)), eqpc);
+  h += block("Hoy y punto de equilibrio", b, "El punto de equilibrio es lo que necesitas cobrar para pagar la barbería del mes (el tope que fijaste o tus gastos anotados, lo que sea mayor). Pasado ese punto, lo demás es ganancia.");
+
+  // Proyección
+  let pj = '<div class="chartBox"><canvas id="chProj"></canvas></div>';
+  pj += row("Cierre estimado del mes", G.meta > 0 ? (P.end >= G.meta ? "Vas a superar tu meta de "+money(G.meta) : "Te faltarían "+money(G.meta - P.end)+" para tu meta de "+money(G.meta)) : "Configura una meta del mes para compararlo", money(P.end), P.end >= (G.meta || 0) ? "ok" : "warn");
+  h += block("¿Cómo vas a cerrar el mes?", pj, "La línea sólida es lo cobrado hasta hoy. La punteada es lo que pasaría si los días que faltan se parecen a lo que sueles hacer cada día de la semana (cuenta tus citas ya reservadas). Se corrige sola con cada cobro.");
+  after.push(() => {
+    const sets = [{label:"Cobrado", data:P.act, color:"#cbb26a", fill:true, r:2}, {label:"Proyección", data:P.pro, color:"#86c595", dash:[6,5], r:2},
+      {label:"Equilibrio", data:P.labels.map(() => Math.round(G.eq)), color:"#dc7b71", dash:[2,4], r:0, tension:0}];
+    if(G.meta > 0) sets.push({label:"Meta", data:P.labels.map(() => Math.round(G.meta)), color:"#7fa6c9", dash:[2,4], r:0, tension:0});
+    multiLine("chProj", P.labels, sets, {money:true, maxX:8});
+  });
+
+  // Fugas
+  const mr = reservas.filter(r => mon(r.fecha) === m.month), s = resumen(mr);
+  const nsList = mr.filter(r => r.status === "noshow" && !r.noShowPaid), nsLost = nsList.reduce((a,r) => a + (r.total || r.expected || 0), 0);
+  const gm = gastos.filter(g => mon(String(g.fecha)) === m.month), gProd = sumGastos(gm.filter(isProdGasto)), gOtros = sumGastos(gm) - gProd;
+  const reinc = buildClients().filter(c => c.noshows >= 2).sort((a,c) => c.noshows - a.noshows);
+  let fg = row("Descuentos", "Lo que dejaste de cobrar este mes", money(s.disc), s.disc > 0 ? "warn" : "") +
+    row("No-shows sin cobrar", nsList.length+" cliente(s) faltaron este mes", money(nsLost), nsLost > 0 ? "bad" : "") +
+    row("Productos y materiales", "Gastado este mes", money(gProd), "") +
+    row("Otros gastos", "Renta, luz u otros que anotaste", money(gOtros), "");
+  if(reinc.length) fg += row("Los que más faltan", reinc.slice(0,3).map(c => esc(c.nombre)+" ("+c.noshows+")").join(", "), "Pide adelanto", "warn");
+  h += block("Por dónde se te va el dinero", fg, "Resume el mes en curso: cuánto regalas en descuentos, cuánto pierdes por clientes que no vienen y en qué gastas. Si alguien falta 2 veces o más, conviene pedirle un adelanto para reservar.");
+
+  // Costo por cliente
+  let cs = "";
+  if(K.pts.length >= 2){
+    cs += '<div class="chartBox"><canvas id="chCost"></canvas></div>';
+    cs += K.alert ? row("Ojo", "Esta semana cada cliente cuesta más en productos que tu promedio ("+money(K.alert.avg)+")", "+"+K.alert.pct.toFixed(0)+"%", "bad")
+      : row("Todo normal", "El costo de productos por cliente está dentro de lo habitual", money(K.pts[K.pts.length-1].v), "ok");
+    after.push(() => multiLine("chCost", K.pts.map(p => shortDate(p.k)), [{label:"Productos por cliente", data:K.pts.map(p => Math.round(p.v)), color:"#d98f6a", fill:true}], {money:true}));
+  }else cs += empty("Aprendiendo: necesito al menos 2 semanas cerradas y compras de productos anotadas.");
+  h += block("Cuánto te cuesta cada cliente en productos", cs, "Suma lo que gastaste en productos de las últimas 4 semanas y lo divide entre los clientes cobrados. Si sube mucho, algún producto subió de precio o estás gastando de más.");
+
+  // Servicios
+  let sv = "";
+  if(CB.list.length){
+    sv += '<div class="chartBox"><canvas id="chCombo"></canvas></div>';
+    if(CB.ranked.length) sv += '<div class="subTitle">Lo que mejor te paga por hora</div>' + CB.ranked.slice(0,6).map(o => row(esc(o.label), o.n+" vez/veces · cobras "+money(o.avg)+" en promedio · confianza "+conf(o.n), money(o.perHour)+"/h", o === CB.ranked[0] ? "ok" : "")).join("");
+    else sv += '<div class="note">Cuando un servicio se repita 2 veces te digo cuál paga mejor por hora.</div>';
+    after.push(() => drawChart("chCombo", "doughnut", CB.byRev.slice(0,6).map(o => o.label), CB.byRev.slice(0,6).map(o => Math.round(o.rev)), {money:true}));
+  }else sv += empty("Aún no hay servicios cobrados con su nombre.");
+  h += block("De dónde viene tu dinero", sv, "Cada combinación de servicios cuenta aparte (por ejemplo 'Degradado + Barba'). El dinero por hora es lo cobrado dividido entre el tiempo que ocupó (cada turno de 30 minutos es media hora).");
+
+  // Horas flojas
+  let hf = "";
+  if(!SL.ready) hf = empty("Aprendiendo: necesito unos "+MIN_COBRADAS_HORARIOS+" clientes cobrados para hablar de horas flojas con seguridad.");
+  else{
+    const low = SL.list.filter(o => o.rate <= 0.4).slice(0,4);
+    hf = low.length ? low.map(o => row(DAYS[o.wd]+" · "+esc(o.slot), "Ocupada "+o.occ+" de "+o.tot+" veces (últimas 8 semanas)", pct(o.rate*100), "warn")).join("") +
+      '<div class="note">Idea: una promo solo para estas horas llena lo que hoy no te deja nada.</div>' : empty("No hay horas flojas claras. ¡Buen trabajo!");
+  }
+  h += block("Horas y días flojos", hf, "Mira tus últimas 8 semanas de días trabajados y muestra los horarios que casi siempre están vacíos.");
+
+  // Dinero personal
+  let dp = row("Estado del fondo", esc(F.txt), "", F.tone);
+  dp += row("Dinero tuyo metido en la barbería", "Total que has puesto de tu bolsillo", money(F.inn), F.inn > 0 ? "warn" : "") +
+    row("Ya devuelto", "Lo que te has devuelto del fondo", money(F.out), "ok") +
+    row("Por devolverte", F.canReturn > 0 ? "El fondo ya permite devolverte hasta "+money(F.canReturn) : "Cuando el fondo tenga de sobra, te aviso", money(F.debt), F.debt > 0 ? "warn" : "");
+  dp += '<button class="btnGhost" onclick="aporteDinero(\'in\')">Puse dinero mío en la barbería</button><button class="btnGhost" onclick="aporteDinero(\'out\')">Me devolví dinero del fondo</button>';
+  const mov = ap.slice().sort((a,c) => String(c.fecha).localeCompare(String(a.fecha))).slice(0,6);
+  if(mov.length) dp += '<div class="sep"></div>' + mov.map(g => row(isDevol(g) ? "Devolución" : "Aporte", niceDate(String(g.fecha))+" · "+esc(String(g.descripcion).replace(/^[^:]*:\s*/, "")), money(g.monto)+' <button class="del" onclick="delAporte('+Number(g.id)+')" aria-label="Borrar">×</button>', isDevol(g) ? "ok" : "warn")).join("");
+  h += block("Tu dinero personal y la barbería", dp, "Anota aquí cada vez que pongas dinero tuyo para algo de la barbería, y cuando te lo devuelvas del fondo. Estos movimientos no cuentan como gasto ni cambian tus ganancias; solo te muestran cuánto te debe la barbería.");
+
+  // Confianza
+  const nCompras = purchaseAdvice().length;
+  h += block("Qué tan seguro estoy",
+    row("Días con cobros", "Para saber tu ritmo de cada día de la semana", conf(m.daysData), "") +
+    row("Clientes con ritmo conocido", m.C.length ? CY.known+" cliente(s) con 2 o más visitas" : "Todavía ninguno", conf(CY.known), "") +
+    row("Combos de servicios", CB.list.length+" distintos", conf(CB.list.length), "") +
+    row("Productos que sigo", nCompras+" producto(s)", conf(nCompras), "") +
+    '<div class="note">Cada vez que cobras algo nuevo todo se recalcula solo. Lo reciente pesa más que lo viejo.</div>',
+    "'Poca' significa que aún son pocos datos: tómalo como una idea. 'Alta' significa que ya hay base para confiar.");
+
+  $("pg-plan").innerHTML = h;
+  after.forEach(f => f());
+}
+
+/* ---------- Simulador (aparte, no toca tus datos reales) ---------- */
+const SIM = {N:null, T:null, C:null, X:50, L:10, touched:{}};
+function simDefaults(m){
+  const from = addDays(m.t,-28), last = m.C.filter(r => r.fecha > from), s0 = from < START_DATE ? START_DATE : from;
+  const wdays = Math.max(1, workdaysBetween(s0, m.t));
+  return {N:last.length ? Math.round(last.length/wdays*26) : null, T:last.length ? Math.round(last.reduce((s,r) => s + r.charged, 0)/last.length) : null, C:Math.round(m.costVar)};
+}
+const simField = (k, label, val) => '<div class="field"><label>'+label+'</label><input type="number" inputmode="decimal" data-k="'+k+'" value="'+(val === null || val === undefined ? "" : val)+'"></div>';
+function renderSim(X){
+  const d = simDefaults(X.m);
+  ["N","T","C"].forEach(k => { if(!SIM.touched[k]) SIM[k] = d[k]; });
+  let h = '<h1>Simula</h1><p class="lead">Prueba cambiar tus precios y mira cómo te iría.</p>';
+  h += '<div class="msg" style="margin:0 0 12px;background:rgba(203,178,106,.1);border:1px solid var(--line);color:var(--gold-soft)">Esto es solo una simulación: nada de lo que escribas aquí se guarda ni cambia tus cifras reales.</div>';
+  h += '<div class="block">' + simField("N","Clientes que atiendes al mes",SIM.N) + simField("T","Cuánto cobras en promedio por cliente",SIM.T) + simField("C","Lo que gastas en productos por cliente",SIM.C) +
+    simField("X","Cuánto subirías el precio (por cliente)",SIM.X) + simField("L","Clientes que crees que podrías perder (%)",SIM.L) +
+    '<div class="note">Los 3 primeros los calculé con tus últimos 28 días. Cámbialos si quieres probar otra situación.</div></div>';
+  h += '<div class="block"><div class="blockTitle">Resultado</div><div id="simOut"></div><div class="chartBox" style="margin-top:12px"><canvas id="chSim"></canvas></div>' +
+    '<div class="note">La línea muestra cuánto ganas de más (o de menos) al mes según el % de clientes que pierdas. Donde cruza el cero está tu punto seguro.</div></div>';
+  $("pg-sim").innerHTML = h;
+  simOut();
+}
+function simOut(){
+  const box = $("simOut"); if(!box) return;
+  const N = SIM.N, T = SIM.T, c = SIM.C || 0, X = SIM.X || 0, L = (SIM.L || 0)/100;
+  if(!(N > 0) || !(T > 0)){ box.innerHTML = empty("Escribe cuántos clientes atiendes al mes y cuánto cobras en promedio."); if(charts.chSim){ charts.chSim.destroy(); delete charts.chSim; } return; }
+  const base = N*(T - c), prof = l => N*(1 - l)*(T + X - c), extra = l => prof(l) - base;
+  const brk = (X > 0 && (T + X - c) > 0) ? X/(T + X - c)*100 : null;
+  let h = row("Hoy ganas al mes", "Clientes × (lo que cobras − productos)", money(base), "") +
+    row("Subes "+money(X)+" y no pierdes a nadie", "Lo mismo, con el precio nuevo", sgn(extra(0)), extra(0) >= 0 ? "ok" : "bad") +
+    row("Subes "+money(X)+" y pierdes "+(SIM.L || 0)+"% de clientes", "Con menos clientes pero más caros", sgn(extra(L)), extra(L) >= 0 ? "ok" : "bad");
+  if(brk !== null) h += row("Tu punto seguro", "Puedes perder hasta este % de clientes y ganar igual que hoy", brk.toFixed(0)+"%", "warn");
+  box.innerHTML = h;
+  const xs = [], ys = []; for(let l = 0; l <= 20; l += 2){ xs.push(l+"%"); ys.push(Math.round(extra(l/100))); }
+  multiLine("chSim", xs, [{label:"Ganancia de más al mes", data:ys, color:"#cbb26a", fill:true}, {label:"Igual que hoy", data:xs.map(() => 0), color:"#dc7b71", dash:[2,4], r:0, tension:0}], {money:true, beginZero:false});
+}
+
+/* ---------- Avisos a clientes (en la pantalla Clientes) ---------- */
+function fill(tpl, c){
+  const first = c.nombre === "Sin nombre" ? "amigo" : String(c.nombre).split(/\s+/)[0];
+  return String(tpl).replace(/\{nombre\}/g, first).replace(/\{dias\}/g, c.since).replace(/\{ciclo\}/g, c.cycle).replace(/\{link\}/g, LINK_RESERVAS);
+}
+function waLink(c, txt){
+  let p = digits(c.telefono); if(!p) return "";
+  if(CODIGO_PAIS && p.length <= 10 && p.indexOf(CODIGO_PAIS) !== 0) p = CODIGO_PAIS + p;
+  return "https://wa.me/"+p+"?text="+encodeURIComponent(txt);
+}
+function injectClientes(X){
+  const rows = X.CY.risk.slice(0,10);
+  const body = rows.length ? rows.map(c => {
+    const link = waLink(c, fill(c.ratio >= 2.5 ? MENSAJE_RECUPERAR : MENSAJE_EN_RIESGO, c));
+    return row(esc(c.nombre), c.known ? "Suele venir cada ~"+c.cycle+" días · van "+c.since : "Aún no sé su ritmo · van "+c.since+" días", c.since+" días", "warn",
+      link ? '<a class="act good" href="'+link+'" target="_blank" rel="noopener">Escribir por WhatsApp</a>' : '<span class="note">Sin teléfono</span>');
+  }).join("") : empty("Nadie ha pasado su ritmo normal por ahora.");
+  const html = block("Avisos: clientes por escribirles", body,
+    "Aprendo cada cuántos días viene cada cliente. Cuando pasa de su ritmo normal, aparece aquí con un botón que abre WhatsApp con el mensaje listo. Para cambiar el mensaje, busca MENSAJE_EN_RIESGO en el código.");
+  const g = $("pg-clientes").querySelector(".grid"); if(g) g.insertAdjacentHTML("afterend", html);
+}
+function injectResumen(X){
+  const hero = $("pg-resumen").querySelector(".hero"); if(hero) hero.insertAdjacentHTML("afterend", adminBlock(X));
+}
+
+/* ---------- Dinero personal: guardar y borrar ---------- */
+window.aporteDinero = async function(tipo){
+  const m = prompt(tipo === "in" ? "¿Cuánto dinero tuyo pusiste en la barbería?" : "¿Cuánto dinero te devolviste del fondo?", ""); if(m === null) return;
+  const monto = num(m); if(monto <= 0){ alert("Escribe un monto mayor que 0."); return; }
+  const n = prompt("¿Para qué fue? (opcional)", "") || "";
+  const {error} = await sb.from("gastos").insert({fecha:todayStr(), categoria:"otros", descripcion:(tipo === "in" ? TAG_APORTE : TAG_DEVOL)+n.trim(), monto});
+  if(error){ alert("No se pudo guardar: "+error.message); return; }
+  await loadData();
+};
+window.delAporte = async function(id){
+  if(!confirm("¿Borrar este movimiento?")) return;
+  const {error} = await sb.from("gastos").delete().eq("id", id);
+  if(error){ alert("No se pudo borrar: "+error.message); return; }
+  await loadData();
+};
+
+/* =====================================================================
+   ENGANCHE CON TU PANEL (no hace falta tocar nada de lo anterior)
+   ===================================================================== */
+const main = document.querySelector("main");
+["plan","sim"].forEach(n => { const s = document.createElement("section"); s.id = "pg-"+n; s.className = "hidden"; main.appendChild(s); });
+const nav = document.querySelector("nav.bottom");
+nav.insertAdjacentHTML("beforeend", '<button data-pg="plan"><span>↗</span>Plan</button><button data-pg="sim"><span>≈</span>Simula</button>');
+const st = document.createElement("style");
+st.textContent = "nav.bottom button{font-size:10px}nav.bottom span{font-size:17px}a.act{display:inline-block;text-decoration:none}";
+document.head.appendChild(st);
+const PAGES = ["resumen","dinero","clientes","agenda","noshows","plan","sim"];
+nav.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+  nav.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+  PAGES.forEach(n => $("pg-"+n).classList.toggle("hidden", n !== b.dataset.pg));
+  $("periods").classList.toggle("hidden", b.dataset.pg === "plan" || b.dataset.pg === "sim");
+  window.scrollTo(0,0);
+}));
+$("pg-sim").addEventListener("input", e => {
+  const k = e.target.dataset ? e.target.dataset.k : null; if(!k) return;
+  SIM[k] = e.target.value === "" ? null : num(e.target.value); SIM.touched[k] = true; simOut();
+});
+
+const _renderAll = window.renderAll;
+window.renderAll = function(){
+  if(!gastos._s){                                  // separo tus aportes personales de los gastos reales
+    ap = gastos.filter(isAp);
+    const clean = gastos.filter(g => !isAp(g)); clean._s = true; gastos = clean;
+  }
+  _renderAll();
+  try{
+    const X = ctx();
+    injectResumen(X); injectClientes(X); renderPlan(X); renderSim(X);
+  }catch(e){
+    console.error(e);
+    $("globalMsg").insertAdjacentHTML("beforeend", '<div class="msg err">Las funciones nuevas tuvieron un problema: '+esc(e.message || e)+'</div>');
+  }
+};
+if(typeof appShown !== "undefined" && appShown && turnos.length) window.renderAll();   // por si los datos ya estaban cargados
+})();
+</script>
 </body>
 </html>
