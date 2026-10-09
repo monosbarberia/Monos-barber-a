@@ -8,370 +8,229 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
-
 <style>
-:root{
-  --forest:#1c3823;
-  --deep:#0f1d13;
-  --night:#0a130c;
-  --gold:#cbb26a;
-  --gold-soft:#e3cf8c;
-  --cream:#f2ecd9;
-  --muted:#9fa594;
-  --line:rgba(203,178,106,.16);
-  --bad:#dc7b71;
-  --ok:#86c595;
-  --warn:#e3b76c;
-  --serif:"Cormorant Garamond",Georgia,serif;
-  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-}
+:root{--forest:#1c3823;--deep:#0f1d13;--night:#0a130c;--gold:#cbb26a;--gold-soft:#e3cf8c;--cream:#f2ecd9;--muted:#9fa594;--line:rgba(203,178,106,.16);--bad:#dc7b71;--ok:#86c595;--warn:#e3b76c;--serif:"Cormorant Garamond",Georgia,serif;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--night);color:var(--cream);font-family:var(--sans);font-size:15px;line-height:1.45}
-button,input,select{font:inherit;color:inherit}
-button{cursor:pointer}
+button,input,select{font:inherit;color:inherit}button{cursor:pointer}
 .hidden{display:none!important}
-:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-
-/* ---------- Entrada ---------- */
-#login{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;
-  background:radial-gradient(ellipse at 50% 0%,#24432b 0%,var(--night) 60%)}
+#login{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 0%,#24432b 0%,var(--night) 60%)}
 .loginBox{width:100%;max-width:380px}
 .loginBrand{font-family:var(--serif);font-weight:700;font-size:44px;color:var(--gold);line-height:1;margin:0 0 4px}
 .loginSub{color:var(--muted);margin:0 0 28px}
-.field{margin-bottom:14px}
-.field label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
+.field{margin-bottom:14px}.field label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
 .field input,.field select{width:100%;background:var(--deep);border:1px solid var(--line);border-radius:10px;padding:13px 14px;outline:none}
-.field input:focus,.field select:focus{border-color:var(--gold)}
 .btn{width:100%;border:0;border-radius:10px;padding:14px;background:var(--gold);color:var(--forest);font-weight:700}
 .btn:disabled{opacity:.55}
 .btnGhost{width:100%;border:1px solid var(--line);border-radius:10px;padding:13px;background:transparent;color:var(--gold);font-weight:600;margin-top:10px}
 .msg{margin-top:14px;padding:12px;border-radius:10px;font-size:13px}
 .msg.err{background:rgba(220,123,113,.12);border:1px solid rgba(220,123,113,.35);color:#ffc2bb}
-
-/* ---------- Estructura ---------- */
 #app{min-height:100dvh;padding-bottom:calc(80px + env(safe-area-inset-bottom))}
-.top{position:sticky;top:0;z-index:20;background:rgba(10,19,12,.93);backdrop-filter:blur(14px);
-  border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top) + 10px) 16px 10px}
-.topRow{display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:760px;margin:0 auto}
-.brand{font-family:var(--serif);font-weight:700;font-size:24px;color:var(--gold);line-height:1}
+.top{position:sticky;top:0;z-index:20;background:rgba(10,19,12,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top) + 10px) 16px 10px}
+.topRow{display:flex;align-items:center;justify-content:space-between;max-width:760px;margin:0 auto}
+.brand{font-family:var(--serif);font-weight:700;font-size:24px;color:var(--gold)}
 .topBtns{display:flex;gap:8px}
 .chip{border:1px solid var(--line);background:transparent;color:var(--gold);border-radius:9px;padding:7px 11px;font-size:13px}
 .periods{display:flex;gap:6px;max-width:760px;margin:10px auto 0;overflow-x:auto}
-.period{white-space:nowrap;border:1px solid var(--line);background:var(--deep);color:var(--cream);border-radius:9px;padding:7px 14px;font-size:13px}
+.period{white-space:nowrap;border:1px solid var(--line);background:var(--deep);border-radius:9px;padding:7px 14px;font-size:13px}
 .period.on{background:var(--gold);color:var(--forest);border-color:var(--gold);font-weight:700}
 main{max-width:760px;margin:0 auto;padding:18px 16px 30px}
 h1{font-family:var(--serif);font-weight:700;font-size:30px;color:var(--gold);margin:4px 0 2px;line-height:1.1}
 .lead{color:var(--muted);margin:0 0 18px;font-size:14px}
 .note{color:var(--muted);font-size:12px;margin:6px 0 0}
-
-/* ---------- Tarjetas ---------- */
 .hero{padding:6px 0 18px;border-bottom:1px solid var(--line);margin-bottom:16px}
-.hero .big{font-family:var(--serif);font-weight:700;font-size:56px;line-height:1;color:var(--cream);font-variant-numeric:lining-nums}
+.hero .big{font-family:var(--serif);font-weight:700;font-size:56px;line-height:1}
 .hero .cap{color:var(--muted);font-size:13px;margin-bottom:6px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.card{background:var(--deep);border:1px solid var(--line);border-radius:12px;padding:14px;position:relative}
+.card{background:var(--deep);border:1px solid var(--line);border-radius:12px;padding:14px}
 .card.gold .value{color:var(--gold-soft)}
-.card .label{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:6px;margin-bottom:6px}
-.card .value{font-family:var(--serif);font-weight:700;font-size:28px;line-height:1.05;font-variant-numeric:lining-nums}
+.card .label{color:var(--muted);font-size:12px;margin-bottom:6px}
+.card .value{font-family:var(--serif);font-weight:700;font-size:28px;line-height:1.05}
 .card .sub{color:var(--muted);font-size:12px;margin-top:5px}
-.info{width:18px;height:18px;border-radius:50%;border:1px solid var(--muted);background:transparent;color:var(--muted);font-size:11px;line-height:1;padding:0;flex-shrink:0}
-.help{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);color:#c9cdbf;font-size:12.5px;line-height:1.5}
 .block{background:var(--deep);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:12px}
-.blockHead{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.blockTitle{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--gold)}
+.blockTitle{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--gold);margin-bottom:4px}
+.blockHelp{color:var(--muted);font-size:12.5px;margin-bottom:10px}
 .chartBox{height:220px;position:relative}
-.row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.06)}
-.row:last-child{border-bottom:0}
-.rowMain{min-width:0}
-.rowTitle{font-weight:600;font-size:14px}
-.rowSub{color:var(--muted);font-size:12px;margin-top:2px}
+.row{padding:11px 0;border-bottom:1px solid rgba(255,255,255,.06)}.row:last-child{border-bottom:0}
+.rowTop{display:flex;justify-content:space-between;gap:12px}
+.rowTitle{font-weight:600;font-size:14px}.rowSub{color:var(--muted);font-size:12px;margin-top:2px}
 .rowVal{font-weight:700;white-space:nowrap;color:var(--gold-soft);text-align:right}
 .rowVal.bad{color:var(--bad)}.rowVal.warn{color:var(--warn)}.rowVal.ok{color:var(--ok)}
 .empty{color:var(--muted);font-size:13px;padding:6px 0}
 .bar{height:8px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;margin-top:6px}
-.bar>i{display:block;height:100%;background:var(--gold);border-radius:6px}
+.bar>i{display:block;height:100%;background:var(--gold)}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.act{border:1px solid var(--line);background:transparent;color:var(--gold);border-radius:8px;padding:6px 10px;font-size:12px}
+.act.good{background:var(--gold);color:var(--forest);border-color:var(--gold);font-weight:700}
+.act.red{color:var(--bad);border-color:rgba(220,123,113,.4)}
 .del{border:0;background:transparent;color:var(--bad);font-size:18px;padding:0 4px}
-
-/* ---------- Navegación ---------- */
-nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;background:rgba(10,19,12,.97);
-  backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px 4px calc(env(safe-area-inset-bottom) + 6px)}
+nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;background:rgba(10,19,12,.97);border-top:1px solid var(--line);padding:6px 4px calc(env(safe-area-inset-bottom) + 6px)}
 nav.bottom button{flex:1;border:0;background:transparent;color:var(--muted);font-size:11px;padding:6px 2px}
-nav.bottom button.on{color:var(--gold)}
-nav.bottom span{display:block;font-size:18px;margin-bottom:1px}
-
-/* ---------- Ventanas ---------- */
+nav.bottom button.on{color:var(--gold)}nav.bottom span{display:block;font-size:18px}
 .modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center}
 .sheet{width:100%;max-width:560px;max-height:90dvh;overflow-y:auto;background:var(--forest);border-radius:18px 18px 0 0;padding:20px 18px calc(24px + env(safe-area-inset-bottom))}
 .sheet h2{font-family:var(--serif);font-size:24px;color:var(--gold);margin:0 0 16px}
 .sheet .field input,.sheet .field select{background:var(--night)}
 .spin{width:28px;height:28px;border:3px solid rgba(203,178,106,.2);border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite;margin:40px auto 12px}
 @keyframes sp{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){.spin{animation:none}}
 </style>
 </head>
 <body>
+<section id="login"><div class="loginBox">
+  <h1 class="loginBrand">Mono's</h1><p class="loginSub">Panel de la barbería</p>
+  <div class="field"><label for="email">Correo</label><input id="email" type="email" autocomplete="username"></div>
+  <div class="field"><label for="password">Contraseña</label><input id="password" type="password" autocomplete="current-password"></div>
+  <button id="loginBtn" class="btn">Entrar</button><div id="loginMsg"></div>
+</div></section>
 
-<!-- ===================== ENTRADA ===================== -->
-<section id="login">
-  <div class="loginBox">
-    <h1 class="loginBrand">Mono's</h1>
-    <p class="loginSub">Panel de la barbería</p>
-    <div class="field"><label for="email">Correo</label>
-      <input id="email" type="email" autocomplete="username" placeholder="tu@correo.com"></div>
-    <div class="field"><label for="password">Contraseña</label>
-      <input id="password" type="password" autocomplete="current-password" placeholder="Tu contraseña"></div>
-    <button id="loginBtn" class="btn">Entrar</button>
-    <div id="loginMsg"></div>
-  </div>
-</section>
-
-<!-- ===================== APP ===================== -->
 <section id="app" class="hidden">
   <header class="top">
-    <div class="topRow">
-      <div class="brand">Mono's</div>
-      <div class="topBtns">
-        <button class="chip" id="refreshBtn" aria-label="Actualizar datos">Actualizar</button>
-        <button class="chip" id="logoutBtn">Salir</button>
-      </div>
-    </div>
+    <div class="topRow"><div class="brand">Mono's</div>
+      <div class="topBtns"><button class="chip" id="refreshBtn">Actualizar</button><button class="chip" id="logoutBtn">Salir</button></div></div>
     <div class="periods" id="periods">
-      <button class="period on" data-p="today">Hoy</button>
-      <button class="period" data-p="week">Esta semana</button>
-      <button class="period" data-p="month">Este mes</button>
-      <button class="period" data-p="all">Todo</button>
+      <button class="period on" data-p="today">Hoy</button><button class="period" data-p="week">Esta semana</button>
+      <button class="period" data-p="month">Este mes</button><button class="period" data-p="all">Todo</button>
     </div>
   </header>
-
   <main>
     <div id="globalMsg"></div>
-    <section id="pg-resumen"></section>
-    <section id="pg-dinero" class="hidden"></section>
-    <section id="pg-clientes" class="hidden"></section>
-    <section id="pg-agenda" class="hidden"></section>
+    <section id="pg-resumen"></section><section id="pg-dinero" class="hidden"></section>
+    <section id="pg-clientes" class="hidden"></section><section id="pg-agenda" class="hidden"></section>
     <section id="pg-noshows" class="hidden"></section>
   </main>
-
   <nav class="bottom">
-    <button class="on" data-pg="resumen"><span>⌂</span>Resumen</button>
-    <button data-pg="dinero"><span>$</span>Dinero</button>
-    <button data-pg="clientes"><span>♙</span>Clientes</button>
-    <button data-pg="agenda"><span>▦</span>Agenda</button>
+    <button class="on" data-pg="resumen"><span>⌂</span>Resumen</button><button data-pg="dinero"><span>$</span>Dinero</button>
+    <button data-pg="clientes"><span>♙</span>Clientes</button><button data-pg="agenda"><span>▦</span>Agenda</button>
     <button data-pg="noshows"><span>!</span>No-shows</button>
   </nav>
 </section>
 
-<!-- ===================== VENTANA: GASTO ===================== -->
 <div id="expenseModal" class="modal hidden"><div class="sheet">
   <h2>Añadir gasto</h2>
   <div class="field"><label for="exDate">Fecha</label><input id="exDate" type="date"></div>
-  <div class="field"><label for="exCat">Categoría</label>
-    <select id="exCat">
-      <option value="productos">Productos</option>
-      <option value="mantenimiento de máquinas">Mantenimiento de máquinas</option>
-      <option value="navajas">Navajas</option>
-      <option value="otros">Otros</option>
-    </select></div>
-  <div class="field"><label for="exDesc">Descripción</label><input id="exDesc" type="text" placeholder="Ej. Talco"></div>
-  <div class="field"><label for="exAmount">Monto</label><input id="exAmount" type="number" inputmode="decimal" placeholder="0"></div>
+  <div class="field"><label for="exCat">Categoría</label><select id="exCat">
+    <option value="productos">Productos</option><option value="mantenimiento de máquinas">Mantenimiento de máquinas</option>
+    <option value="navajas">Navajas</option><option value="otros">Otros</option></select></div>
+  <div class="field"><label for="exDesc">Descripción (usa: colonia, cuchillas, talco…)</label><input id="exDesc" type="text" placeholder="Ej. Colonia"></div>
+  <div class="field"><label for="exAmount">Monto</label><input id="exAmount" type="number" inputmode="decimal"></div>
   <button class="btn" id="saveExpense">Guardar gasto</button>
-  <button class="btnGhost" data-close="expenseModal">Cancelar</button>
-  <div id="exMsg"></div>
+  <button class="btnGhost" data-close="expenseModal">Cancelar</button><div id="exMsg"></div>
 </div></div>
 
-<!-- ===================== VENTANA: META ===================== -->
 <div id="goalModal" class="modal hidden"><div class="sheet">
   <h2>Meta del mes</h2>
   <div class="field"><label for="gMonth">Mes</label><input id="gMonth" type="month"></div>
-  <div class="field"><label for="gRev">Meta de dinero cobrado</label><input id="gRev" type="number" inputmode="decimal" placeholder="120000"></div>
-  <div class="field"><label for="gProfit">Meta de ganancia neta</label><input id="gProfit" type="number" inputmode="decimal" placeholder="90000"></div>
+  <div class="field"><label for="gRev">Meta de dinero cobrado</label><input id="gRev" type="number" inputmode="decimal"></div>
+  <div class="field"><label for="gProfit">Meta de ganancia neta</label><input id="gProfit" type="number" inputmode="decimal"></div>
   <button class="btn" id="saveGoal">Guardar meta</button>
-  <button class="btnGhost" data-close="goalModal">Cancelar</button>
-  <div id="gMsg"></div>
+  <button class="btnGhost" data-close="goalModal">Cancelar</button><div id="gMsg"></div>
 </div></div>
 
 <script>
 /* =========================================================
-   CONFIGURACIÓN
-   - START_DATE: el panel solo cuenta desde esta fecha.
-     Cámbiala si quieres que cuente desde otro día.
+   ⚙️ CONFIGURACIÓN — LO ÚNICO QUE TIENES QUE CAMBIAR
+   START_DATE: el panel cuenta SOLO desde este día.
+   Cuando empieces a trabajar, cambia la fecha (AAAA-MM-DD)
+   y sube el archivo a GitHub. Nada más.
 ========================================================= */
+const START_DATE = "2026-10-08";   // <-- CAMBIA ESTA FECHA
+
+const BARBER_BUDGET = 12000;  // gastos fijos de la barbería por mes
+const SAVE_PCT = 10;          // % de ahorro sobre lo que queda
+// Productos: cada cuántos días los compras. "clave" se busca en la descripción del gasto.
+const PRODUCTS = [
+  {name:"Colonia",  clave:"colonia",  days:15},
+  {name:"Cuchillas",clave:"cuchilla", days:30},
+  {name:"Talco",    clave:"talco",    days:30}
+];
+
 const SB_URL = "https://ldxxflhwpyzldisydhmd.supabase.co";
 const SB_KEY = "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
-const START_DATE = "2026-10-08";
-
-const SLOTS = ["9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM",
-               "2:00 PM","2:30 PM","3:00 PM","3:30 PM","4:00 PM"];
+const SLOTS = ["9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM","2:00 PM","2:30 PM","3:00 PM","3:30 PM","4:00 PM"];
 const DAYS = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
-let sb = null;
-let turnos = [], gastos = [], metas = [];
-let reservas = [], bloqueos = [];
-let period = "today";
-let appShown = false;
-let lastLoad = 0;
+let sb = null, turnos = [], gastos = [], metas = [], reservas = [], bloqueos = [];
+let period = "today", appShown = false, lastLoad = 0;
 const charts = {};
-let helpN = 0;
+try{ sb = window.supabase.createClient(SB_URL, SB_KEY); }
+catch(e){ document.getElementById("loginMsg").innerHTML = '<div class="msg err">No se pudo cargar Supabase. Recarga la página.</div>'; }
+if(window.Chart){ Chart.defaults.color = "#9fa594"; }
 
-try{
-  sb = window.supabase.createClient(SB_URL, SB_KEY);
-}catch(e){
-  document.getElementById("loginMsg").innerHTML =
-    '<div class="msg err">No se pudo cargar Supabase. Revisa tu conexión y recarga la página.</div>';
-}
-if(window.Chart){
-  Chart.defaults.color = "#9fa594";
-  Chart.defaults.font.family = '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif';
-}
-
-/* =========================================================
-   UTILIDADES
-========================================================= */
+/* ---------- Utilidades ---------- */
 const $ = id => document.getElementById(id);
-
-function esc(v){
-  return String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
-}
-function num(v){
-  if(v === null || v === undefined || v === "") return 0;
-  const n = Number(String(v).replace(",","."));
-  return Number.isFinite(n) ? n : 0;
-}
-function money(v){
-  const n = Math.round(num(v));
-  return (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString("en-US");
-}
-function pct(v){ return (Number.isFinite(v) ? v : 0).toFixed(0) + "%"; }
-function norm(s){
-  return String(s ?? "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-}
-function digits(s){ return String(s ?? "").replace(/\D/g,""); }
-
-function fmt(d){
-  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
-}
-function parseD(s){
-  const p = String(s).split("-");
-  return new Date(Number(p[0]), Number(p[1])-1, Number(p[2]));
-}
-function todayStr(){ return fmt(new Date()); }
-function niceDate(s){
-  if(!ISO.test(s)) return s;
-  const p = s.split("-");
-  return p[2] + "-" + p[1] + "-" + p[0];
-}
-function shortDate(s){
-  const p = s.split("-");
-  return p[2] + "/" + p[1];
-}
-function daysBetween(a,b){
-  return Math.round((parseD(b) - parseD(a)) / 86400000);
-}
+const esc = v => String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+function num(v){ if(v===null||v===undefined||v==="") return 0; const n = Number(String(v).replace(",",".")); return Number.isFinite(n)?n:0; }
+function money(v){ const n = Math.round(num(v)); return (n<0?"-$":"$") + Math.abs(n).toLocaleString("en-US"); }
+const pct = v => (Number.isFinite(v)?v:0).toFixed(0) + "%";
+const norm = s => String(s ?? "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+const digits = s => String(s ?? "").replace(/\D/g,"");
+const fmt = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+function parseD(s){ const p = String(s).split("-"); return new Date(+p[0], +p[1]-1, +p[2]); }
+const todayStr = () => fmt(new Date());
+function niceDate(s){ if(!ISO.test(s)) return s; const p = s.split("-"); return p[2]+"-"+p[1]+"-"+p[0]; }
+const shortDate = s => { const p = s.split("-"); return p[2]+"/"+p[1]; };
+const daysBetween = (a,b) => Math.round((parseD(b)-parseD(a))/86400000);
 function slotMin(t){
-  const m = String(t || "").trim().toUpperCase().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
-  if(!m) return null;
-  let h = Number(m[1]) % 12;
-  if(m[3] === "PM") h += 12;
-  return h * 60 + Number(m[2]);
+  const m = String(t||"").trim().toUpperCase().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+  if(!m) return null; let h = Number(m[1])%12; if(m[3]==="PM") h+=12; return h*60+Number(m[2]);
 }
 function slotPassed(fecha, turno){
-  const t = todayStr();
-  if(fecha < t) return true;
-  if(fecha > t) return false;
-  const m = slotMin(turno);
-  if(m === null) return false;
-  const n = new Date();
-  return m <= n.getHours() * 60 + n.getMinutes();
+  const t = todayStr(); if(fecha<t) return true; if(fecha>t) return false;
+  const m = slotMin(turno); if(m===null) return false;
+  const n = new Date(); return m <= n.getHours()*60+n.getMinutes();
 }
-function eachDay(start, end, fn){
-  const d = parseD(start), e = parseD(end);
-  while(d <= e){ fn(fmt(d), d.getDay()); d.setDate(d.getDate() + 1); }
-}
+function eachDay(start, end, fn){ const d = parseD(start), e = parseD(end); while(d<=e){ fn(fmt(d), d.getDay()); d.setDate(d.getDate()+1); } }
+// Lunes de la semana (lunes–sábado; un domingo suelto cae en la semana anterior)
+function weekStart(s){ const d = parseD(s), w = d.getDay(); d.setDate(d.getDate() - (w===0?6:w-1)); return fmt(d); }
 
-/* =========================================================
-   PERIODO
-========================================================= */
 function getPeriod(){
   const t = todayStr();
-  if(period === "today") return {start:t, end:t, label:"hoy"};
-  if(period === "week"){
-    const d = parseD(t);
-    const back = d.getDay() === 0 ? 6 : d.getDay() - 1;
-    d.setDate(d.getDate() - back);
-    return {start:fmt(d), end:t, label:"esta semana"};
-  }
-  if(period === "month"){
-    const d = parseD(t);
-    return {start:fmt(new Date(d.getFullYear(), d.getMonth(), 1)), end:t, label:"este mes"};
-  }
-  return {start:START_DATE, end:t, label:"desde el " + niceDate(START_DATE)};
+  if(period==="today") return {start:t,end:t,label:"hoy"};
+  if(period==="week") return {start:weekStart(t),end:t,label:"esta semana"};
+  if(period==="month"){ const d = parseD(t); return {start:fmt(new Date(d.getFullYear(),d.getMonth(),1)),end:t,label:"este mes"}; }
+  return {start:START_DATE,end:t,label:"desde el "+niceDate(START_DATE)};
 }
-function inPeriod(r){
-  const p = getPeriod();
-  return r.fecha >= p.start && r.fecha <= p.end;
-}
+function inPeriod(r){ const p = getPeriod(); return r.fecha>=p.start && r.fecha<=p.end; }
 
-/* =========================================================
-   RESERVAS
-   Varias filas con el mismo reserva_id son UNA reserva
-   (una hora de turno = 2 filas de 30 minutos).
-========================================================= */
+/* ---------- Reservas (varias filas con igual reserva_id = 1 reserva) ---------- */
 function splitServices(text){
   const out = [], seen = new Set();
-  String(text || "").replace(/[{}]/g,"").split(",").forEach(x => {
-    const label = x.trim();
-    const key = norm(label);
-    if(key && !seen.has(key)){ seen.add(key); out.push(label); }
-  });
+  String(text||"").replace(/[{}]/g,"").split(",").forEach(x => { const l = x.trim(), k = norm(l); if(k && !seen.has(k)){ seen.add(k); out.push(l); } });
   return out;
 }
-function hasCharge(row){
-  return row.precio_cobrado !== null && row.precio_cobrado !== undefined;
-}
+const hasCharge = row => row.precio_cobrado !== null && row.precio_cobrado !== undefined;
 
 function buildReservas(){
-  const map = new Map();
-  bloqueos = [];
-
+  const map = new Map(); bloqueos = [];
   turnos.forEach(row => {
-    if(!row.fecha || !ISO.test(row.fecha)) return;
+    if(!row.fecha || !ISO.test(row.fecha) || row.fecha < START_DATE) return;
     if(row.estado && row.estado !== "ocupado") return;
     if(row.cancelado === true) return;
-
     const phone = digits(row.telefono);
     const financial = hasCharge(row) || row.no_show === true || num(row.total) > 0 || !!row.servicios;
-    // Sin teléfono y sin datos de cobro = bloqueo de horario (ej. Playa)
     if(!phone && !financial){ bloqueos.push(row); return; }
-
-    const key = row.reserva_id ? "r:" + row.reserva_id : "i:" + row.id;
-    if(!map.has(key)){
-      map.set(key, {
-        key, rows:[], fecha:row.fecha, nombre:row.nombre || "Sin nombre",
-        telefono:row.telefono || "", client: phone ? "p:" + phone : "n:" + norm(row.nombre),
-        services:[], total:0, expected:0, charged:0, charge:false, noShow:false, noShowPaid:false
-      });
-    }
+    const key = row.reserva_id ? "r:"+row.reserva_id : "i:"+row.id;
+    if(!map.has(key)) map.set(key, {key, rows:[], fecha:row.fecha, nombre:row.nombre||"Sin nombre", telefono:row.telefono||"",
+      client: phone ? "p:"+phone : "n:"+norm(row.nombre), services:[], total:0, expected:0, charged:0, tip:0,
+      charge:false, noShow:false, noShowPaid:false});
     const r = map.get(key);
     r.rows.push(row);
-    if(row.fecha < r.fecha) r.fecha = row.fecha;
     r.total = Math.max(r.total, num(row.total));
     r.expected += num(row.precio_esperado);
     r.charged += num(row.precio_cobrado);
+    r.tip += num(row.propina);
     if(hasCharge(row)) r.charge = true;
     if(row.no_show === true) r.noShow = true;
     if(row.no_show_cobrado === true) r.noShowPaid = true;
-    splitServices(row.servicios).forEach(s => {
-      if(!r.services.some(x => norm(x) === norm(s))) r.services.push(s);
-    });
+    splitServices(row.servicios).forEach(s => { if(!r.services.some(x => norm(x)===norm(s))) r.services.push(s); });
   });
-
   reservas = [...map.values()];
   reservas.forEach(r => {
-    r.rows.sort((a,b) => (slotMin(a.turno) ?? 0) - (slotMin(b.turno) ?? 0));
+    r.rows.sort((a,b) => (slotMin(a.turno)??0) - (slotMin(b.turno)??0));
     r.turno = r.rows[0].turno;
     r.passed = slotPassed(r.fecha, r.turno);
+    // cobrada = realmente atendida. Pasada y sin cobro = pendiente (NO cuenta como servicio)
     if(r.noShow) r.status = "noshow";
     else if(r.charge) r.status = "cobrada";
     else if(r.passed) r.status = "pendiente";
@@ -380,650 +239,436 @@ function buildReservas(){
 }
 
 function resumen(list){
-  const cobradas = list.filter(r => r.status === "cobrada");
-  const pend = list.filter(r => r.status === "pendiente");
-  const noshows = list.filter(r => r.status === "noshow");
-  const attended = cobradas.concat(pend);
-
-  let revenue = 0, expected = 0, disc = 0, extra = 0;
+  const cobradas = list.filter(r => r.status==="cobrada");
+  const pend = list.filter(r => r.status==="pendiente");
+  const noshows = list.filter(r => r.status==="noshow");
+  let revenue = 0, tips = 0, expected = 0, disc = 0, extra = 0;
   cobradas.forEach(r => {
-    revenue += r.charged;
-    if(r.expected > 0){
-      expected += r.expected;
-      const d = r.charged - r.expected;
-      if(d < 0) disc += -d; else extra += d;
-    }else{
-      expected += r.charged;
-    }
+    revenue += r.charged; tips += r.tip;
+    if(r.expected > 0){ expected += r.expected; const d = r.charged - r.expected; if(d<0) disc += -d; else extra += d; }
+    else expected += r.charged;
   });
-
-  const svc = {};
-  let svcTotal = 0;
-  attended.forEach(r => {
-    r.services.forEach(s => {
-      const k = norm(s);
-      if(!svc[k]) svc[k] = {label:s, n:0};
-      svc[k].n++;
-      svcTotal++;
-    });
-  });
-
+  const svc = {}; let svcTotal = 0;
+  cobradas.forEach(r => r.services.forEach(s => {   // SOLO cobradas
+    const k = norm(s); if(!svc[k]) svc[k] = {label:s,n:0}; svc[k].n++; svcTotal++;
+  }));
   let pendAmount = 0, pendUnknown = 0;
-  pend.forEach(r => {
-    const a = r.total || r.expected || 0;
-    if(a > 0) pendAmount += a; else pendUnknown++;
-  });
-
-  return {cobradas, pend, noshows, attended, revenue, expected, disc, extra,
-          svc, svcTotal, pendAmount, pendUnknown,
-          ticket: cobradas.length ? revenue / cobradas.length : 0};
+  pend.forEach(r => { const a = r.total || r.expected || 0; if(a>0) pendAmount += a; else pendUnknown++; });
+  return {cobradas, pend, noshows, revenue, tips, expected, disc, extra, svc, svcTotal, pendAmount, pendUnknown,
+          ticket: cobradas.length ? revenue/cobradas.length : 0};
 }
+const gastosPeriodo = () => { const p = getPeriod(); return gastos.filter(g => String(g.fecha)>=p.start && String(g.fecha)<=p.end); };
+const sumGastos = l => l.reduce((s,g) => s + num(g.monto), 0);
 
-function gastosPeriodo(){
-  const p = getPeriod();
-  return gastos.filter(g => String(g.fecha) >= p.start && String(g.fecha) <= p.end);
-}
-function sumGastos(list){ return list.reduce((s,g) => s + num(g.monto), 0); }
-
-/* =========================================================
-   CLIENTES
-========================================================= */
 function buildClients(){
-  const p = getPeriod();
-  const map = new Map();
+  const p = getPeriod(), map = new Map();
   reservas.forEach(r => {
     let c = map.get(r.client);
-    if(!c){
-      c = {key:r.client, nombre:r.nombre, telefono:r.telefono, visits:0, revenue:0,
-           first:null, last:null, noshows:0, future:false, pVisits:0, pRevenue:0};
-      map.set(r.client, c);
-    }
-    if(r.nombre && r.nombre !== "Sin nombre") c.nombre = r.nombre;
+    if(!c){ c = {key:r.client,nombre:r.nombre,telefono:r.telefono,visits:0,revenue:0,first:null,last:null,noshows:0,future:false,pVisits:0,pRevenue:0}; map.set(r.client,c); }
+    if(r.nombre && r.nombre!=="Sin nombre") c.nombre = r.nombre;
     if(r.telefono) c.telefono = r.telefono;
-    if(r.status === "noshow") c.noshows++;
-    if(r.status === "futura") c.future = true;
-    if(r.status === "cobrada" || r.status === "pendiente"){
-      c.visits++;
-      c.revenue += r.charged;
-      if(!c.first || r.fecha < c.first) c.first = r.fecha;
-      if(!c.last || r.fecha > c.last) c.last = r.fecha;
-      if(r.fecha >= p.start && r.fecha <= p.end){ c.pVisits++; c.pRevenue += r.charged; }
+    if(r.status==="noshow") c.noshows++;
+    if(r.status==="futura") c.future = true;
+    if(r.status==="cobrada"){   // solo cobradas son visitas
+      c.visits++; c.revenue += r.charged;
+      if(!c.first || r.fecha<c.first) c.first = r.fecha;
+      if(!c.last || r.fecha>c.last) c.last = r.fecha;
+      if(r.fecha>=p.start && r.fecha<=p.end){ c.pVisits++; c.pRevenue += r.charged; }
     }
   });
   return [...map.values()];
 }
 
-/* =========================================================
-   COMPONENTES VISUALES
-========================================================= */
-function toggleHelp(id){ $(id).classList.toggle("hidden"); }
+/* ---------- Finanzas del mes: ahorro y retiro ---------- */
+function monthFin(month){
+  const rs = reservas.filter(r => r.status==="cobrada" && r.fecha.slice(0,7)===month);
+  const ing = rs.reduce((s,r) => s + r.charged + r.tip, 0);
+  const gReg = sumGastos(gastos.filter(x => String(x.fecha).slice(0,7)===month));
+  const gBase = Math.max(gReg, BARBER_BUDGET);        // se reserva al menos el presupuesto fijo
+  const resto = Math.max(0, ing - gBase);
+  const ahorro = resto * SAVE_PCT / 100;
+  return {ing, gReg, gBase, resto, ahorro, libre: Math.max(0, resto - ahorro)};
+}
 
-function card(label, value, sub, help, cls){
-  const id = "h" + (++helpN);
-  return '<div class="card ' + (cls || "") + '"><div class="label">' + label +
-    (help ? '<button class="info" onclick="toggleHelp(\'' + id + '\')" aria-label="Qué significa">?</button>' : "") +
-    '</div><div class="value">' + value + '</div>' +
-    (sub ? '<div class="sub">' + sub + '</div>' : "") +
-    (help ? '<div class="help hidden" id="' + id + '">' + help + '</div>' : "") + '</div>';
+/* ---------- Componentes ---------- */
+function card(label, value, sub, cls){
+  return '<div class="card '+(cls||"")+'"><div class="label">'+label+'</div><div class="value">'+value+'</div>'+(sub?'<div class="sub">'+sub+'</div>':"")+'</div>';
 }
 function block(title, body, help){
-  const id = "h" + (++helpN);
-  return '<div class="block"><div class="blockHead"><div class="blockTitle">' + title + '</div>' +
-    (help ? '<button class="info" onclick="toggleHelp(\'' + id + '\')" aria-label="Qué significa">?</button>' : "") +
-    '</div>' + (help ? '<div class="help hidden" id="' + id + '" style="margin:-4px 0 12px;border-top:0;padding-top:0">' + help + '</div>' : "") +
-    body + '</div>';
+  return '<div class="block"><div class="blockTitle">'+title+'</div>'+(help?'<div class="blockHelp">'+help+'</div>':"")+body+'</div>';
 }
-function row(title, sub, val, cls){
-  return '<div class="row"><div class="rowMain"><div class="rowTitle">' + title + '</div>' +
-    (sub ? '<div class="rowSub">' + sub + '</div>' : "") + '</div>' +
-    '<div class="rowVal ' + (cls || "") + '">' + val + '</div></div>';
+function row(title, sub, val, cls, acts){
+  return '<div class="row"><div class="rowTop"><div><div class="rowTitle">'+title+'</div>'+(sub?'<div class="rowSub">'+sub+'</div>':"")+
+    '</div><div class="rowVal '+(cls||"")+'">'+val+'</div></div>'+(acts?'<div class="acts">'+acts+'</div>':"")+'</div>';
 }
-function empty(text){ return '<div class="empty">' + text + '</div>'; }
-function canvas(id){ return '<div class="chartBox"><canvas id="' + id + '"></canvas></div>'; }
-
+const empty = t => '<div class="empty">'+t+'</div>';
+const canvas = id => '<div class="chartBox"><canvas id="'+id+'"></canvas></div>';
+function btn(a, r, label, cls){ return '<button class="act '+(cls||"")+'" data-a="'+a+'" data-k="'+esc(r.key)+'">'+label+'</button>'; }
 const PALETTE = ["#cbb26a","#86c595","#7fa6c9","#d98f6a","#b58fc7","#e3cf8c","#8fb8a8","#c9a0a0"];
 
 function drawChart(id, type, labels, data, opt){
-  opt = opt || {};
-  if(!window.Chart) return;
-  const el = $(id);
-  if(!el) return;
-  if(charts[id]) charts[id].destroy();
-  const round = type === "doughnut";
-  charts[id] = new Chart(el, {
-    type,
-    data:{
-      labels,
-      datasets:[{
-        data,
-        backgroundColor: round ? PALETTE : "#cbb26a",
-        borderColor: "#cbb26a",
-        borderWidth: 0,
-        borderRadius: type === "bar" ? 5 : 0
-      }]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      indexAxis: opt.horizontal ? "y" : "x",
-      plugins:{
-        legend:{display: round, position:"bottom", labels:{boxWidth:12}},
-        tooltip:{callbacks:{label: c => (opt.money ? money(c.raw) : String(c.raw))}}
-      },
-      scales: round ? {} : {
-        x:{grid:{color:"rgba(255,255,255,.05)"}, beginAtZero:true, ticks:{precision:0}},
-        y:{grid:{color:"rgba(255,255,255,.05)"}, beginAtZero:true, ticks:{precision:0}}
-      }
-    }
-  });
+  opt = opt || {}; if(!window.Chart) return;
+  const el = $(id); if(!el) return; if(charts[id]) charts[id].destroy();
+  const round = type==="doughnut";
+  charts[id] = new Chart(el, {type, data:{labels, datasets:[{data, backgroundColor: round?PALETTE:"#cbb26a", borderWidth:0, borderRadius: type==="bar"?5:0}]},
+    options:{responsive:true, maintainAspectRatio:false, indexAxis: opt.horizontal?"y":"x",
+      plugins:{legend:{display:round,position:"bottom",labels:{boxWidth:12}}, tooltip:{callbacks:{label:c => opt.money?money(c.raw):String(c.raw)}}},
+      scales: round?{}:{x:{grid:{color:"rgba(255,255,255,.05)"},beginAtZero:true,ticks:{precision:0}},y:{grid:{color:"rgba(255,255,255,.05)"},beginAtZero:true,ticks:{precision:0}}}}});
 }
-function killCharts(){
-  Object.keys(charts).forEach(k => { try{ charts[k].destroy(); }catch(e){} delete charts[k]; });
+function killCharts(){ Object.keys(charts).forEach(k => { try{charts[k].destroy();}catch(e){} delete charts[k]; }); }
+
+/* ---------- Acciones sobre reservas (reemplazan los atajos) ---------- */
+async function updRows(ids, vals){
+  const {error} = await sb.from("turnos").update(vals).in("id", ids);
+  if(error){ alert("No se pudo guardar: " + error.message + "\n\nSi dice 'permission' o 'policy', falta dar permiso a tu usuario en Supabase (ver SQL)."); return false; }
+  return true;
+}
+async function act(a, key){
+  const r = reservas.find(x => x.key === key); if(!r) return;
+  const ids = r.rows.map(x => x.id), first = [ids[0]], rest = ids.slice(1);
+  let ok = false;
+  if(a === "cobrar"){
+    const m = prompt("¿Cuánto cobraste a " + r.nombre + "?", r.total || r.expected || ""); if(m === null) return;
+    const amount = num(m); if(amount < 0) return;
+    const t = prompt("Propina (0 si no hubo)", "0"); if(t === null) return;
+    ok = await updRows(first, {precio_cobrado:amount, precio_esperado:r.total || amount, propina:num(t)});
+    if(ok && rest.length) ok = await updRows(rest, {precio_cobrado:0, propina:0});
+  }else if(a === "propina"){
+    const t = prompt("Propina de " + r.nombre + " (reemplaza la anterior)", r.tip || ""); if(t === null) return;
+    ok = await updRows(first, {propina:num(t)});
+    if(ok && rest.length) ok = await updRows(rest, {propina:0});
+  }else if(a === "noshow"){
+    if(!confirm("¿Marcar a " + r.nombre + " como no-show?")) return;
+    ok = await updRows(ids, {no_show:true});
+  }else if(a === "cancelar"){
+    if(!confirm("¿Cancelar la reserva de " + r.nombre + "? (no vino y no cuenta como no-show)")) return;
+    ok = await updRows(ids, {cancelado:true});
+  }else if(a === "nspaid"){
+    ok = await updRows(ids, {no_show_cobrado:true, cobro_no_show:r.total || r.expected || 0});
+  }else if(a === "quitarns"){
+    if(!confirm("¿Quitar la marca de no-show?")) return;
+    ok = await updRows(ids, {no_show:false, no_show_cobrado:false});
+  }
+  if(ok) await loadData();
 }
 
-/* =========================================================
-   PÁGINA: RESUMEN
-========================================================= */
+/* ---------- RESUMEN ---------- */
 function renderResumen(){
-  const p = getPeriod();
-  const list = reservas.filter(inPeriod);
-  const s = resumen(list);
-  const g = sumGastos(gastosPeriodo());
-  const profit = s.revenue - g;
-
-  const dueSlots = s.attended.length + s.noshows.length;
-  const nsPct = dueSlots ? s.noshows.length / dueSlots * 100 : 0;
+  const p = getPeriod(), list = reservas.filter(inPeriod), s = resumen(list);
+  const g = sumGastos(gastosPeriodo()), profit = s.revenue + s.tips - g;
+  const due = s.cobradas.length + s.noshows.length;
   const occ = occupancy(list, p);
+  const topSvc = Object.values(s.svc).sort((a,b) => b.n-a.n)[0];
 
-  const topSvc = Object.values(s.svc).sort((a,b) => b.n - a.n)[0];
+  let h = '<h1>Resumen</h1><p class="lead">Cómo va la barbería '+esc(p.label)+'.</p>';
+  h += '<div class="hero"><div class="cap">Dinero cobrado '+esc(p.label)+'</div><div class="big">'+money(s.revenue)+'</div><div class="note">Solo cuenta cobros registrados. Propinas aparte: '+money(s.tips)+'.</div></div>';
+  h += '<div class="grid">' +
+    card("Ganancia neta", money(profit), "Cobrado + propinas − gastos ("+money(g)+")", "gold") +
+    card("Clientes atendidos", s.cobradas.length, "Solo los cobrados") +
+    card("Ticket promedio", money(s.ticket), "Por cliente cobrado") +
+    card("Servicios realizados", s.svcTotal, topSvc ? "Más pedido: "+esc(topSvc.label) : "Sin datos todavía") +
+    card("Por cobrar", money(s.pendAmount), s.pend.length+" pendiente(s)"+(s.pendUnknown?" · "+s.pendUnknown+" sin monto":"")) +
+    card("No-shows", s.noshows.length, pct(due ? s.noshows.length/due*100 : 0)+" de las citas") +
+    card("Ocupación", pct(occ.pct), occ.used+" de "+occ.avail+" turnos") +
+    card("Propinas", money(s.tips), esc(p.label)) + '</div>';
 
-  let html = '<h1>Resumen</h1><p class="lead">Cómo va la barbería ' + esc(p.label) + '.</p>';
-
-  html += '<div class="hero"><div class="cap">Dinero cobrado ' + esc(p.label) + '</div>' +
-    '<div class="big">' + money(s.revenue) + '</div>' +
-    '<div class="note">Solo cuenta lo que ya registraste al cobrar.</div></div>';
-
-  html += '<div class="grid">' +
-    card("Ganancia neta", money(profit), "Cobrado menos gastos (" + money(g) + ")",
-      "Lo que realmente te queda: todo el dinero cobrado menos lo que gastaste en productos, navajas, mantenimiento u otros.", "gold") +
-    card("Clientes atendidos", s.attended.length, s.cobradas.length + " cobrados",
-      "Reservas cuya hora ya pasó y el cliente vino. Una hora de turno (2 bloques de 30 minutos) cuenta como un solo cliente.") +
-    card("Ticket promedio", money(s.ticket), "Lo que deja cada cliente",
-      "Dinero cobrado dividido entre los clientes cobrados. Si sube, cada cliente te deja más.") +
-    card("Servicios realizados", s.svcTotal, topSvc ? "Más pedido: " + esc(topSvc.label) : "Sin datos todavía",
-      "Cada servicio cuenta por separado: un degradado con barba son 2 servicios. Se toma de lo que el cliente reservó.") +
-    card("Por cobrar", money(s.pendAmount), s.pend.length + " cliente(s) sin cobro" + (s.pendUnknown ? " · " + s.pendUnknown + " sin monto" : ""),
-      "Clientes que ya vinieron pero todavía no tienen el cobro registrado en el atajo Cobrar servicio.") +
-    card("No-shows", s.noshows.length, pct(nsPct) + " de las citas",
-      "Clientes que reservaron y no vinieron. El porcentaje compara los que faltaron con todos los que debían venir.") +
-    card("Ocupación", pct(occ.pct), occ.used + " de " + occ.avail + " turnos",
-      "De los turnos de 30 minutos que tuviste disponibles, cuántos se usaron con clientes. Es un cálculo aproximado: cuenta como disponibles todos los días de lunes a sábado.") +
-    card("Gastos", money(g), "Registrados " + esc(p.label),
-      "Dinero que anotaste como gasto. Puedes añadirlos desde la pestaña Dinero.") +
-    '</div>';
-
-  const byDay = {};
-  s.cobradas.forEach(r => { byDay[r.fecha] = (byDay[r.fecha] || 0) + r.charged; });
+  const byDay = {}; s.cobradas.forEach(r => { byDay[r.fecha] = (byDay[r.fecha]||0) + r.charged; });
   const dayKeys = Object.keys(byDay).sort();
-  html += block("Cobros por día",
-    dayKeys.length ? canvas("chDay") : empty("Todavía no hay cobros en este período."),
-    "Cuánto dinero cobraste cada día. Sirve para ver qué días te va mejor.");
+  h += block("Cobros por día", dayKeys.length ? canvas("chDay") : empty("Todavía no hay cobros en este período."));
 
-  const allPend = reservas.filter(r => r.status === "pendiente")
-    .sort((a,b) => (a.fecha + a.turno).localeCompare(b.fecha + b.turno));
-  html += block("Cobros pendientes",
-    allPend.length ? allPend.map(r =>
-      row(esc(r.nombre), niceDate(r.fecha) + " · " + esc(r.turno) + (r.services.length ? " · " + esc(r.services.join(", ")) : ""),
-        (r.total || r.expected) ? money(r.total || r.expected) : "sin monto", "warn")).join("")
-      : empty("No hay clientes pendientes de cobro."),
-    "Clientes que ya vinieron y no tienen el cobro registrado. Cóbralos con el atajo Cobrar servicio y desaparecen de aquí.");
+  const allPend = reservas.filter(r => r.status==="pendiente").sort((a,b) => (a.fecha+a.turno).localeCompare(b.fecha+b.turno));
+  h += block("Pendientes de resolver", allPend.length ? allPend.map(r =>
+    row(esc(r.nombre), niceDate(r.fecha)+" · "+esc(r.turno)+(r.services.length?" · "+esc(r.services.join(", ")):""),
+      (r.total||r.expected)?money(r.total||r.expected):"sin monto", "warn",
+      btn("cobrar",r,"Cobrar","good")+btn("noshow",r,"No-show","red")+btn("cancelar",r,"No atendido / cancelar","red"))).join("")
+    : empty("No hay clientes pendientes."), "Si el día pasó y no los cobraste: cóbralos, márcalos no-show o cancélalos. Mientras tanto NO cuentan como servicios.");
 
-  html += block("Meta del mes", goalHtml(),
-    "Compara lo cobrado este mes con la meta que configuraste. Toca el botón para cambiarla.");
+  const done = list.filter(r => r.status==="cobrada").sort((a,b) => (b.fecha+b.turno).localeCompare(a.fecha+a.turno));
+  h += block("Cobrados "+esc(p.label), done.length ? done.map(r =>
+    row(esc(r.nombre), niceDate(r.fecha)+" · "+esc(r.turno)+" · propina "+money(r.tip), money(r.charged), "ok",
+      btn("propina",r,r.tip ? "Cambiar propina" : "+ Propina"))).join("") : empty("Aún no hay cobros."),
+    "Toca + Propina al final del día para anotarla.");
 
-  $("pg-resumen").innerHTML = html;
-
-  if(dayKeys.length) drawChart("chDay", "bar", dayKeys.map(shortDate), dayKeys.map(k => byDay[k]), {money:true});
+  h += block("Meta del mes", goalHtml());
+  $("pg-resumen").innerHTML = h;
+  if(dayKeys.length) drawChart("chDay","bar",dayKeys.map(shortDate),dayKeys.map(k => byDay[k]),{money:true});
 }
 
 function occupancy(list, p){
   let avail = 0;
-  eachDay(p.start, p.end, (d, wd) => {
-    if(wd === 0) return;
-    avail += SLOTS.filter(t => slotPassed(d, t)).length;
-  });
-  const blocked = bloqueos.filter(b => b.fecha >= p.start && b.fecha <= p.end && slotPassed(b.fecha, b.turno)).length;
+  eachDay(p.start, p.end, (d, wd) => { if(wd===0) return; avail += SLOTS.filter(t => slotPassed(d,t)).length; });
+  const blocked = bloqueos.filter(b => b.fecha>=p.start && b.fecha<=p.end && slotPassed(b.fecha,b.turno)).length;
   avail = Math.max(0, avail - blocked);
   let used = 0;
-  list.forEach(r => {
-    if(r.status === "cobrada" || r.status === "pendiente"){
-      r.rows.forEach(x => { if(slotPassed(x.fecha, x.turno)) used++; });
-    }
-  });
-  return {avail, used, pct: avail ? Math.min(100, used / avail * 100) : 0};
+  list.forEach(r => { if(r.status==="cobrada") r.rows.forEach(x => { if(slotPassed(x.fecha,x.turno)) used++; }); });
+  return {avail, used, pct: avail ? Math.min(100, used/avail*100) : 0};
 }
 
 function goalHtml(){
   const month = todayStr().slice(0,7);
-  const g = metas.find(m => String(m.mes).slice(0,7) === month);
+  const g = metas.find(m => String(m.mes).slice(0,7)===month);
   let body;
-  if(!g){
-    body = empty("No has configurado una meta para este mes.");
-  }else{
-    const mr = reservas.filter(r => r.status === "cobrada" && r.fecha.slice(0,7) === month);
-    const rev = mr.reduce((s,r) => s + r.charged, 0);
-    const exp = sumGastos(gastos.filter(x => String(x.fecha).slice(0,7) === month));
-    const profit = rev - exp;
+  if(!g) body = empty("No has configurado una meta para este mes.");
+  else{
+    const f = monthFin(month), rev = f.ing, profit = rev - f.gReg;
     const gr = num(g.objetivo_ingresos), gp = num(g.objetivo_ganancia);
-    const pr = gr > 0 ? Math.min(100, rev / gr * 100) : 0;
-    const pp = gp > 0 ? Math.min(100, profit / gp * 100) : 0;
-    body = '<div class="row"><div class="rowMain"><div class="rowTitle">Dinero cobrado</div>' +
-      '<div class="rowSub">' + money(rev) + ' de ' + money(gr) + (gr > rev ? ' · faltan ' + money(gr - rev) : ' · ¡meta lograda!') + '</div>' +
-      '<div class="bar"><i style="width:' + pr + '%"></i></div></div><div class="rowVal">' + pct(pr) + '</div></div>' +
-      '<div class="row"><div class="rowMain"><div class="rowTitle">Ganancia neta</div>' +
-      '<div class="rowSub">' + money(profit) + ' de ' + money(gp) + (gp > profit ? ' · faltan ' + money(gp - profit) : ' · ¡meta lograda!') + '</div>' +
-      '<div class="bar"><i style="width:' + pp + '%"></i></div></div><div class="rowVal">' + pct(pp) + '</div></div>';
+    const pr = gr>0 ? Math.min(100,rev/gr*100) : 0, pp = gp>0 ? Math.min(100,profit/gp*100) : 0;
+    const line = (t,a,b,pc) => '<div class="row"><div class="rowTop"><div><div class="rowTitle">'+t+'</div><div class="rowSub">'+money(a)+' de '+money(b)+(b>a?' · faltan '+money(b-a):' · ¡meta lograda!')+'</div></div><div class="rowVal">'+pct(pc)+'</div></div><div class="bar"><i style="width:'+pc+'%"></i></div></div>';
+    body = line("Dinero cobrado",rev,gr,pr) + line("Ganancia neta",profit,gp,pp);
   }
-  return body + '<button class="btnGhost" onclick="openGoal()">' + (g ? "Cambiar meta" : "Configurar meta") + '</button>';
+  return body + '<button class="btnGhost" onclick="openGoal()">'+(g?"Cambiar meta":"Configurar meta")+'</button>';
 }
 
-/* =========================================================
-   PÁGINA: DINERO
-========================================================= */
+/* ---------- DINERO ---------- */
+function weeksData(){
+  const w = {};
+  reservas.filter(r => r.status==="cobrada").forEach(r => {
+    const k = weekStart(r.fecha); if(!w[k]) w[k] = {k, rev:0, n:0};
+    w[k].rev += r.charged + r.tip; w[k].n++;
+  });
+  return Object.values(w).sort((a,b) => a.k.localeCompare(b.k)).map(x => Object.assign(x, {ticket:x.n ? x.rev/x.n : 0}));
+}
+function weeksBlock(){
+  const ws = weeksData(), cur = weekStart(todayStr());
+  if(!ws.length) return block("Mejor y peor semana", empty("Todavía no hay semanas con cobros."), "Semanas de lunes a sábado.");
+  const closed = ws.filter(x => x.k < cur), base = closed.length ? closed : ws;
+  const best = base.reduce((a,b) => b.rev>a.rev?b:a), worst = base.reduce((a,b) => b.rev<a.rev?b:a);
+  const max = Math.max.apply(null, ws.map(x => x.rev)) || 1;
+  const body = ws.slice().reverse().slice(0,8).map(x => {
+    const end = new Date(parseD(x.k)); end.setDate(end.getDate()+5);
+    const tag = x.k===cur ? " · en curso" : (base.length>1 && x.k===best.k ? " · 🏆 mejor" : (base.length>1 && x.k===worst.k ? " · más floja" : ""));
+    return '<div class="row"><div class="rowTop"><div><div class="rowTitle">'+shortDate(x.k)+' al '+shortDate(fmt(end))+esc(tag)+'</div><div class="rowSub">'+x.n+' clientes · ticket '+money(x.ticket)+'</div></div><div class="rowVal">'+money(x.rev)+'</div></div><div class="bar"><i style="width:'+(x.rev/max*100)+'%"></i></div></div>';
+  }).join("");
+  return block("Mejor y peor semana", body, "Lunes a sábado, con propinas. Las semanas terminadas se comparan entre sí.");
+}
+function savingsBlock(){
+  const f = monthFin(todayStr().slice(0,7));
+  const msg = f.ing < f.gBase
+    ? "Todavía no cubres los gastos de la barbería ("+money(f.gBase)+"). Espera antes de retirar dinero."
+    : "Ya cubriste la barbería. Puedes retirar hasta "+money(f.libre)+" para ti sin descuidar el negocio.";
+  return block("Ahorro y retiro del mes",
+    row("Ingresos del mes","cobrado + propinas",money(f.ing)) +
+    row("Gastos de la barbería","el mayor entre lo registrado ("+money(f.gReg)+") y tu presupuesto",money(f.gBase),"bad") +
+    row("Queda","ingresos − gastos",money(f.resto)) +
+    row("Ahorro para la barbería ("+SAVE_PCT+"%)","no lo toques",money(f.ahorro),"ok") +
+    row("Disponible para retirar","lo que queda tras el ahorro",money(f.libre),"ok") +
+    '<div class="note" style="margin-top:10px"><b>'+esc(msg)+'</b></div>',
+    "Ejemplo: 100000 − 12000 = 88000; el "+SAVE_PCT+"% = 8800 de ahorro.");
+}
+function productsBlock(){
+  const f = monthFin(todayStr().slice(0,7)), t = todayStr();
+  const body = PRODUCTS.map(pr => {
+    const buys = gastos.filter(g => norm(g.descripcion).includes(pr.clave)).sort((a,b) => String(b.fecha).localeCompare(String(a.fecha)));
+    if(!buys.length) return row(esc(pr.name), "Sin compras registradas (usa '"+esc(pr.clave)+"' en la descripción)", "—");
+    const last = buys[0], since = daysBetween(String(last.fecha), t), left = pr.days - since, cost = num(last.monto);
+    let txt, cls;
+    if(left > 2){ txt = "Espera ("+left+" días)"; cls = "ok"; }
+    else if(f.libre >= cost){ txt = "Compra ahora"; cls = "warn"; }
+    else { txt = "Toca, pero espera: falta dinero libre"; cls = "bad"; }
+    return row(esc(pr.name), "Última compra hace "+since+" días · "+money(cost)+" · cada "+pr.days+" días", txt, cls);
+  }).join("");
+  return block("¿Cuándo comprar?", body, "Compra cuando toca por días Y hay dinero libre este mes (después de gastos y ahorro). Si no, espera.");
+}
+
 function renderDinero(){
-  const p = getPeriod();
-  const list = reservas.filter(inPeriod);
-  const s = resumen(list);
-  const gl = gastosPeriodo();
-  const g = sumGastos(gl);
-  const profit = s.revenue - g;
-  const margin = s.revenue > 0 ? profit / s.revenue * 100 : 0;
+  const p = getPeriod(), s = resumen(reservas.filter(inPeriod)), gl = gastosPeriodo(), g = sumGastos(gl);
+  const profit = s.revenue + s.tips - g, total = s.revenue + s.tips;
+  let h = '<h1>Dinero</h1><p class="lead">Ingresos, ahorro y gastos '+esc(p.label)+'.</p>';
+  h += '<div class="grid">' +
+    card("Precio normal", money(s.expected), "Servicios cobrados") + card("Descuentos", money(s.disc), "Cobrado de menos") +
+    card("Extras", money(s.extra), "Cobrado sobre el precio") + card("Propinas", money(s.tips), esc(p.label)) +
+    card("Dinero cobrado", money(s.revenue), "Lo que entró por servicios", "gold") + card("Gastos", money(g), gl.length+" registro(s)") +
+    card("Ganancia neta", money(profit), "Margen: "+pct(total>0 ? profit/total*100 : 0), "gold") + '</div>';
+  h += savingsBlock() + productsBlock() + weeksBlock();
 
-  let html = '<h1>Dinero</h1><p class="lead">Ingresos, descuentos y gastos ' + esc(p.label) + '.</p>';
-
-  html += '<div class="grid">' +
-    card("Precio normal", money(s.expected), "Lo que costaban los servicios cobrados",
-      "Suma de los precios normales de los servicios que ya cobraste, sin descuentos ni extras.") +
-    card("Descuentos", money(s.disc), "Cobrado de menos",
-      "Dinero que dejaste de cobrar cuando le hiciste descuento a un cliente: precio normal menos lo que cobraste.") +
-    card("Extras cobrados", money(s.extra), "No-shows y propinas",
-      "Dinero cobrado por encima del precio normal. Casi siempre es un no-show que el cliente pagó junto con su corte de hoy, o una propina.") +
-    card("Dinero cobrado", money(s.revenue), "Lo que realmente entró",
-      "Precio normal, menos descuentos, más extras. Es el dinero que entró de verdad.", "gold") +
-    card("Gastos", money(g), gl.length + " registro(s)",
-      "Todo lo que anotaste como gasto en este período.") +
-    card("Ganancia neta", money(profit), "Margen: " + pct(margin),
-      "Dinero cobrado menos gastos. El margen es el porcentaje de lo cobrado que te queda como ganancia.", "gold") +
-    '</div>';
-
-  const byCat = {};
-  gl.forEach(x => { const k = x.categoria || "otros"; byCat[k] = (byCat[k] || 0) + num(x.monto); });
+  const byCat = {}; gl.forEach(x => { const k = x.categoria||"otros"; byCat[k] = (byCat[k]||0) + num(x.monto); });
   const cats = Object.keys(byCat);
-  html += block("Gastos por categoría",
-    cats.length ? canvas("chCat") : empty("No hay gastos registrados en este período."),
-    "En qué se va el dinero que gastas. Te ayuda a ver qué categoría pesa más.");
-
-  html += '<button class="btn" style="margin-top:12px" onclick="openExpense()">Añadir gasto</button>';
-
+  h += block("Gastos por categoría", cats.length ? canvas("chCat") : empty("No hay gastos en este período."));
+  h += '<button class="btn" style="margin-top:12px" onclick="openExpense()">Añadir gasto</button>';
   const recent = gl.slice().sort((a,b) => String(b.fecha).localeCompare(String(a.fecha)));
-  html += block("Gastos registrados",
-    recent.length ? recent.map(x =>
-      '<div class="row"><div class="rowMain"><div class="rowTitle">' + esc(x.descripcion || x.categoria || "Gasto") + '</div>' +
-      '<div class="rowSub">' + niceDate(String(x.fecha)) + ' · ' + esc(x.categoria || "otros") + '</div></div>' +
-      '<div class="rowVal bad">' + money(x.monto) + ' <button class="del" onclick="delExpense(' + Number(x.id) + ')" aria-label="Borrar gasto">×</button></div></div>').join("")
-      : empty("Todavía no hay gastos."),
-    "Lista de los gastos del período. Toca la × para borrar uno que anotaste por error.");
-
-  $("pg-dinero").innerHTML = html;
-  if(cats.length) drawChart("chCat", "doughnut", cats, cats.map(k => byCat[k]));
+  h += block("Gastos registrados", recent.length ? recent.map(x =>
+    row(esc(x.descripcion||x.categoria||"Gasto"), niceDate(String(x.fecha))+" · "+esc(x.categoria||"otros"),
+      money(x.monto)+' <button class="del" onclick="delExpense('+Number(x.id)+')" aria-label="Borrar">×</button>', "bad")).join("") : empty("Todavía no hay gastos."));
+  $("pg-dinero").innerHTML = h;
+  if(cats.length) drawChart("chCat","doughnut",cats,cats.map(k => byCat[k]));
 }
 
-/* =========================================================
-   PÁGINA: CLIENTES
-========================================================= */
+/* ---------- CLIENTES ---------- */
 function renderClientes(){
-  const p = getPeriod();
-  const clients = buildClients();
-  const t = todayStr();
-
-  const active = clients.filter(c => c.pVisits > 0);
-  const nuevos = clients.filter(c => c.first && c.first >= p.start && c.first <= p.end);
-  const recurrentes = active.filter(c => c.visits >= 2);
-  const perdidos = clients.filter(c => c.last && !c.future && daysBetween(c.last, t) >= 30)
-    .sort((a,b) => a.last.localeCompare(b.last));
-
-  let html = '<h1>Clientes</h1><p class="lead">Quiénes vienen, quiénes vuelven y quiénes se fueron.</p>';
-
-  html += '<div class="grid">' +
-    card("Clientes del período", active.length, "Vinieron " + esc(p.label),
-      "Personas distintas que vinieron en este período. Si alguien vino 2 veces, cuenta una sola vez.") +
-    card("Nuevos", nuevos.length, "Primera visita en el período",
-      "Clientes cuya primera visita registrada cae en este período. El panel cuenta desde el " + niceDate(START_DATE) + ", así que al inicio casi todos aparecen como nuevos.") +
-    card("Recurrentes", recurrentes.length, "Con 2 visitas o más",
-      "Clientes que vinieron en este período y ya tienen 2 o más visitas en total. Son los que te mantienen la agenda llena.") +
-    card("Desaparecidos", perdidos.length, "30 días o más sin venir",
-      "Clientes que llevan 30 días o más sin venir y no tienen ninguna cita reservada. Puedes escribirles para que vuelvan.") +
-    '</div>';
-
-  const top = active.slice().sort((a,b) => b.pRevenue - a.pRevenue || b.pVisits - a.pVisits).slice(0, 10);
-  html += block("Quién te deja más dinero",
-    top.length ? top.map((c,i) => row((i + 1) + ". " + esc(c.nombre),
-      c.pVisits + " visita(s) en el período · " + c.visits + " en total", money(c.pRevenue))).join("")
-      : empty("Todavía no hay clientes en este período."),
-    "Los clientes que más dinero dejaron en el período, de mayor a menor.");
-
-  html += block("Clientes desaparecidos",
-    perdidos.length ? perdidos.slice(0, 20).map(c => row(esc(c.nombre),
-      "Última visita: " + niceDate(c.last) + " · " + c.visits + " visita(s)" + (c.telefono ? " · " + esc(c.telefono) : ""),
-      daysBetween(c.last, t) + " días", "warn")).join("")
-      : empty("Nadie lleva 30 días sin venir. Esto se llena con el tiempo."),
-    "Clientes que dejaron de venir. Escríbeles un mensaje: recuperar uno cuesta menos que conseguir uno nuevo.");
-
-  $("pg-clientes").innerHTML = html;
+  const p = getPeriod(), clients = buildClients(), t = todayStr();
+  const active = clients.filter(c => c.pVisits>0);
+  const nuevos = clients.filter(c => c.first && c.first>=p.start && c.first<=p.end);
+  const recurrentes = active.filter(c => c.visits>=2);
+  const perdidos = clients.filter(c => c.last && !c.future && daysBetween(c.last,t)>=30).sort((a,b) => a.last.localeCompare(b.last));
+  let h = '<h1>Clientes</h1><p class="lead">Quiénes vienen, quiénes vuelven y quiénes se fueron.</p>';
+  h += '<div class="grid">'+card("Clientes del período",active.length,"Vinieron "+esc(p.label))+card("Nuevos",nuevos.length,"Primera visita en el período")+
+    card("Recurrentes",recurrentes.length,"2 visitas o más")+card("Desaparecidos",perdidos.length,"30 días o más sin venir")+'</div>';
+  const top = active.slice().sort((a,b) => b.pRevenue-a.pRevenue || b.pVisits-a.pVisits).slice(0,10);
+  h += block("Quién te deja más dinero", top.length ? top.map((c,i) => row((i+1)+". "+esc(c.nombre), c.pVisits+" visita(s) · "+c.visits+" en total", money(c.pRevenue))).join("") : empty("Todavía no hay clientes."));
+  h += block("Clientes desaparecidos", perdidos.length ? perdidos.slice(0,20).map(c => row(esc(c.nombre),
+    "Última visita: "+niceDate(c.last)+" · "+c.visits+" visita(s)"+(c.telefono?" · "+esc(c.telefono):""), daysBetween(c.last,t)+" días","warn")).join("")
+    : empty("Nadie lleva 30 días sin venir."), "Escríbeles: recuperar un cliente cuesta menos que conseguir uno nuevo.");
+  $("pg-clientes").innerHTML = h;
 }
 
-/* =========================================================
-   PÁGINA: AGENDA
-========================================================= */
+/* ---------- AGENDA ---------- */
 function renderAgenda(){
-  const p = getPeriod();
-  const list = reservas.filter(inPeriod);
-  const s = resumen(list);
-  const occ = occupancy(list, p);
+  const p = getPeriod(), list = reservas.filter(inPeriod), s = resumen(list), occ = occupancy(list,p);
   const lostSlots = s.noshows.reduce((n,r) => n + r.rows.length, 0);
-
-  const hist = reservas.filter(r => r.status === "cobrada" || r.status === "pendiente");
+  const hist = reservas.filter(r => r.status==="cobrada");
   const wdRev = [0,0,0,0,0,0,0], wdN = [0,0,0,0,0,0,0];
   hist.forEach(r => { const d = parseD(r.fecha).getDay(); wdRev[d] += r.charged; wdN[d]++; });
-  const order = [1,2,3,4,5,6];
-  const bestDay = order.slice().sort((a,b) => wdRev[b] - wdRev[a] || wdN[b] - wdN[a])[0];
-  const hasHist = hist.length > 0;
-
-  const hourN = {};
-  SLOTS.forEach(t => hourN[t] = 0);
-  hist.forEach(r => r.rows.forEach(x => { if(hourN[x.turno] !== undefined) hourN[x.turno]++; }));
-  const bestHour = SLOTS.slice().sort((a,b) => hourN[b] - hourN[a])[0];
-
-  const svc = Object.values(s.svc).sort((a,b) => b.n - a.n);
-
-  let html = '<h1>Agenda</h1><p class="lead">Cuándo se llena la barbería y qué se pide más.</p>';
-
-  html += '<div class="grid">' +
-    card("Ocupación", pct(occ.pct), occ.used + " de " + occ.avail + " turnos (" + esc(p.label) + ")",
-      "De todos los turnos de 30 minutos disponibles, cuántos se usaron con clientes. Es aproximada: cuenta como disponibles todos los días de lunes a sábado.") +
-    card("Turnos perdidos", lostSlots, "Por no-shows (" + esc(p.label) + ")",
-      "Turnos de 30 minutos que se quedaron vacíos porque el cliente reservó y no vino.") +
-    card("Mejor día", hasHist && wdRev[bestDay] + wdN[bestDay] > 0 ? DAYS[bestDay] : "—",
-      hasHist ? "Según todo el historial" : "Sin datos todavía",
-      "El día de la semana en el que más dinero has cobrado, sumando todo el historial.") +
-    card("Hora más pedida", hasHist && hourN[bestHour] > 0 ? esc(bestHour) : "—",
-      hasHist ? "Según todo el historial" : "Sin datos todavía",
-      "El horario que más veces se ha usado, sumando todo el historial.") +
-    '</div>';
-
-  html += block("Servicios realizados (" + esc(p.label) + ")",
-    svc.length ? canvas("chSvc") : empty("Todavía no hay servicios en este período."),
-    "Cuántas veces se hizo cada servicio. Se toma de lo que el cliente reservó, no de lo que cambiaste al cobrar.");
-
-  html += block("Dinero por día de la semana",
-    hasHist ? canvas("chWd") : empty("Todavía no hay datos."),
-    "Dinero cobrado según el día de la semana, sumando todo el historial. Sirve para saber qué días rinden más.");
-
-  html += block("Horas más ocupadas",
-    hasHist ? canvas("chHr") : empty("Todavía no hay datos."),
-    "Cuántos turnos de 30 minutos se han usado en cada horario, sumando todo el historial.");
-
-  $("pg-agenda").innerHTML = html;
-
-  if(svc.length) drawChart("chSvc", "bar", svc.map(x => x.label), svc.map(x => x.n), {horizontal:true});
+  const order = [1,2,3,4,5,6], bestDay = order.slice().sort((a,b) => wdRev[b]-wdRev[a] || wdN[b]-wdN[a])[0];
+  const hasHist = hist.length>0, hourN = {}; SLOTS.forEach(t => hourN[t] = 0);
+  hist.forEach(r => r.rows.forEach(x => { if(hourN[x.turno]!==undefined) hourN[x.turno]++; }));
+  const bestHour = SLOTS.slice().sort((a,b) => hourN[b]-hourN[a])[0];
+  const svc = Object.values(s.svc).sort((a,b) => b.n-a.n);
+  let h = '<h1>Agenda</h1><p class="lead">Cuándo se llena la barbería y qué se pide más.</p>';
+  h += '<div class="grid">'+card("Ocupación",pct(occ.pct),occ.used+" de "+occ.avail+" turnos")+card("Turnos perdidos",lostSlots,"Por no-shows")+
+    card("Mejor día",hasHist && wdN[bestDay]>0 ? DAYS[bestDay] : "—","Según el historial")+
+    card("Hora más pedida",hasHist && hourN[bestHour]>0 ? esc(bestHour) : "—","Según el historial")+'</div>';
+  h += block("Servicios realizados ("+esc(p.label)+")", svc.length ? canvas("chSvc") : empty("Todavía no hay servicios cobrados."), "Solo servicios de clientes cobrados.");
+  h += block("Dinero por día de la semana", hasHist ? canvas("chWd") : empty("Todavía no hay datos."));
+  h += block("Horas más ocupadas", hasHist ? canvas("chHr") : empty("Todavía no hay datos."));
+  $("pg-agenda").innerHTML = h;
+  if(svc.length) drawChart("chSvc","bar",svc.map(x => x.label),svc.map(x => x.n),{horizontal:true});
   if(hasHist){
-    drawChart("chWd", "bar", order.map(d => DAYS[d].slice(0,3)), order.map(d => wdRev[d]), {money:true});
-    drawChart("chHr", "bar", SLOTS.map(t => t.replace(":00","").replace(" ","")), SLOTS.map(t => hourN[t]));
+    drawChart("chWd","bar",order.map(d => DAYS[d].slice(0,3)),order.map(d => wdRev[d]),{money:true});
+    drawChart("chHr","bar",SLOTS.map(t => t.replace(":00","").replace(" ","")),SLOTS.map(t => hourN[t]));
   }
 }
 
-/* =========================================================
-   PÁGINA: NO-SHOWS
-========================================================= */
+/* ---------- NO-SHOWS ---------- */
 function renderNoShows(){
-  const p = getPeriod();
-  const list = reservas.filter(inPeriod);
-  const s = resumen(list);
-  const due = s.attended.length + s.noshows.length;
-  const nsPct = due ? s.noshows.length / due * 100 : 0;
-
-  const owed = reservas.filter(r => r.status === "noshow" && !r.noShowPaid)
-    .sort((a,b) => a.fecha.localeCompare(b.fecha));
+  const p = getPeriod(), s = resumen(reservas.filter(inPeriod));
+  const due = s.cobradas.length + s.noshows.length;
+  const owed = reservas.filter(r => r.status==="noshow" && !r.noShowPaid).sort((a,b) => a.fecha.localeCompare(b.fecha));
   let owedAmount = 0, owedUnknown = 0;
-  owed.forEach(r => { const a = r.total || r.expected || 0; if(a > 0) owedAmount += a; else owedUnknown++; });
-
-  const clients = buildClients().filter(c => c.noshows > 0)
-    .sort((a,b) => b.noshows - a.noshows || a.nombre.localeCompare(b.nombre)).slice(0, 10);
-
-  let html = '<h1>No-shows</h1><p class="lead">Quién falta y cuánto dinero te deben por eso.</p>';
-
-  html += '<div class="grid">' +
-    card("No-shows", s.noshows.length, esc(p.label),
-      "Clientes que reservaron y no vinieron, en el período elegido.") +
-    card("Porcentaje", pct(nsPct), "De las citas que debían venir",
-      "No-shows divididos entre todas las citas que ya debieron cumplirse. Mientras más bajo, mejor.") +
-    card("Te deben", money(owedAmount), owed.length + " no-show(s) sin cobrar" + (owedUnknown ? " · " + owedUnknown + " sin monto" : ""),
-      "Dinero de los no-shows que todavía no marcaste como cobrados. Cuando el cliente venga, súmalo a su cobro en Cobrar servicio.", owed.length ? "gold" : "") +
-    card("Ya cobrados", reservas.filter(r => r.status === "noshow" && r.noShowPaid).length, "No-shows que ya te pagaron",
-      "No-shows que el cliente ya te pagó y marcaste como cobrados.") +
-    '</div>';
-
-  html += block("Debes cobrarles",
-    owed.length ? owed.map(r => row(esc(r.nombre),
-      "Faltó el " + niceDate(r.fecha) + " · " + esc(r.turno) + (r.services.length ? " · " + esc(r.services.join(", ")) : "") +
-      (r.telefono ? " · " + esc(r.telefono) : ""),
-      (r.total || r.expected) ? money(r.total || r.expected) : "sin monto", "bad")).join("")
-      : empty("Nadie te debe un no-show."),
-    "Clientes que faltaron y no te han pagado. Cuando vuelvan a reservar, el atajo Cobrar servicio te avisa que tienen un no-show pendiente.");
-
-  html += block("Los que más faltan",
-    clients.length ? clients.map(c => row(esc(c.nombre),
-      c.visits + " visita(s) · " + c.noshows + " falta(s)", c.noshows + "×", "bad")).join("")
-      : empty("Nadie ha faltado todavía."),
-    "Clientes con más no-shows. Sirve para decidir a quién pedirle confirmación o a quién ceder el turno si no avisa.");
-
-  $("pg-noshows").innerHTML = html;
+  owed.forEach(r => { const a = r.total||r.expected||0; if(a>0) owedAmount += a; else owedUnknown++; });
+  const paid = reservas.filter(r => r.status==="noshow" && r.noShowPaid);
+  const clients = buildClients().filter(c => c.noshows>0).sort((a,b) => b.noshows-a.noshows).slice(0,10);
+  let h = '<h1>No-shows</h1><p class="lead">Quién falta y cuánto te deben por eso.</p>';
+  h += '<div class="grid">'+card("No-shows",s.noshows.length,esc(p.label))+card("Porcentaje",pct(due ? s.noshows.length/due*100 : 0),"De las citas que debían venir")+
+    card("Te deben",money(owedAmount),owed.length+" sin cobrar"+(owedUnknown?" · "+owedUnknown+" sin monto":""),owed.length?"gold":"")+
+    card("Ya cobrados",paid.length,"No-shows pagados")+'</div>';
+  h += block("Debes cobrarles", owed.length ? owed.map(r => row(esc(r.nombre),
+    "Faltó el "+niceDate(r.fecha)+" · "+esc(r.turno)+(r.telefono?" · "+esc(r.telefono):""),
+    (r.total||r.expected)?money(r.total||r.expected):"sin monto","bad",
+    btn("nspaid",r,"Marcar cobrado","good")+btn("quitarns",r,"Quitar no-show"))).join("") : empty("Nadie te debe un no-show."),
+    "El no-show cobrado se cuenta solo aquí, no como cliente atendido.");
+  h += block("Los que más faltan", clients.length ? clients.map(c => row(esc(c.nombre), c.visits+" visita(s) · "+c.noshows+" falta(s)", c.noshows+"×","bad")).join("") : empty("Nadie ha faltado todavía."));
+  $("pg-noshows").innerHTML = h;
 }
 
-/* =========================================================
-   RENDER GENERAL
-========================================================= */
-function renderAll(){
-  killCharts();
-  buildReservas();
-  renderResumen();
-  renderDinero();
-  renderClientes();
-  renderAgenda();
-  renderNoShows();
-}
+function renderAll(){ killCharts(); buildReservas(); renderResumen(); renderDinero(); renderClientes(); renderAgenda(); renderNoShows(); }
 
-/* =========================================================
-   CARGA DE DATOS
-========================================================= */
+/* ---------- Datos ---------- */
 async function fetchAll(table){
-  const size = 1000;
-  let from = 0, all = [];
+  const size = 1000; let from = 0, all = [];
   while(true){
     let q = sb.from(table).select("*");
-    if(table === "turnos") q = q.gte("fecha", START_DATE).lte("fecha", "2999-12-31");
-    q = q.order("id", {ascending:true}).range(from, from + size - 1);
-    const {data, error} = await q;
-    if(error) throw error;
-    all = all.concat(data || []);
-    if(!data || data.length < size) break;
-    from += size;
+    if(table==="turnos") q = q.gte("fecha", START_DATE).lte("fecha","2999-12-31");
+    q = q.order("id",{ascending:true}).range(from, from+size-1);
+    const {data, error} = await q; if(error) throw error;
+    all = all.concat(data||[]); if(!data || data.length<size) break; from += size;
   }
   return all;
 }
-
 async function loadData(){
   $("globalMsg").innerHTML = "";
   try{
     const res = await Promise.all([fetchAll("turnos"), fetchAll("gastos"), fetchAll("metas")]);
-    turnos = res[0];
-    gastos = res[1];
-    metas = res[2];
-    lastLoad = Date.now();
-
-    if(!turnos.length){
-      $("globalMsg").innerHTML = '<div class="msg err">No se ve ningún turno. Si debería haber datos, tu usuario puede no estar en la lista de administradores de Supabase.</div>';
-    }
+    turnos = res[0]; gastos = res[1].filter(g => String(g.fecha) >= START_DATE); metas = res[2]; lastLoad = Date.now();
+    if(!turnos.length) $("globalMsg").innerHTML = '<div class="msg err">No hay turnos desde '+niceDate(START_DATE)+'. Si debería haber, revisa que tu usuario esté en la tabla admins.</div>';
     renderAll();
-  }catch(e){
-    console.error(e);
-    $("globalMsg").innerHTML = '<div class="msg err"><b>No se pudieron cargar los datos.</b><br>' + esc(e.message || e) + '</div>';
-  }
+  }catch(e){ console.error(e); $("globalMsg").innerHTML = '<div class="msg err"><b>No se pudieron cargar los datos.</b><br>'+esc(e.message||e)+'</div>'; }
 }
 
-/* =========================================================
-   GASTOS Y METAS
-========================================================= */
-function openModal(id){ $(id).classList.remove("hidden"); }
-function closeModal(id){ $(id).classList.add("hidden"); }
-
-function openExpense(){
-  $("exDate").value = todayStr();
-  $("exDesc").value = "";
-  $("exAmount").value = "";
-  $("exMsg").innerHTML = "";
-  openModal("expenseModal");
-}
+/* ---------- Gastos y metas ---------- */
+const openModal = id => $(id).classList.remove("hidden");
+const closeModal = id => $(id).classList.add("hidden");
+function openExpense(){ $("exDate").value = todayStr(); $("exDesc").value = ""; $("exAmount").value = ""; $("exMsg").innerHTML = ""; openModal("expenseModal"); }
 async function saveExpense(){
-  const fecha = $("exDate").value;
-  const monto = num($("exAmount").value);
-  if(!fecha || monto <= 0){
-    $("exMsg").innerHTML = '<div class="msg err">Escribe una fecha y un monto mayor que 0.</div>';
-    return;
-  }
+  const fecha = $("exDate").value, monto = num($("exAmount").value);
+  if(!fecha || monto<=0){ $("exMsg").innerHTML = '<div class="msg err">Escribe una fecha y un monto mayor que 0.</div>'; return; }
   $("saveExpense").disabled = true;
-  const {error} = await sb.from("gastos").insert({
-    fecha, categoria:$("exCat").value, descripcion:$("exDesc").value.trim(), monto
-  });
+  const {error} = await sb.from("gastos").insert({fecha, categoria:$("exCat").value, descripcion:$("exDesc").value.trim(), monto});
   $("saveExpense").disabled = false;
-  if(error){ $("exMsg").innerHTML = '<div class="msg err">' + esc(error.message) + '</div>'; return; }
-  closeModal("expenseModal");
-  await loadData();
+  if(error){ $("exMsg").innerHTML = '<div class="msg err">'+esc(error.message)+'</div>'; return; }
+  closeModal("expenseModal"); await loadData();
 }
 async function delExpense(id){
   if(!confirm("¿Borrar este gasto?")) return;
   const {error} = await sb.from("gastos").delete().eq("id", id);
-  if(error){ alert("No se pudo borrar: " + error.message); return; }
+  if(error){ alert("No se pudo borrar: "+error.message); return; }
   await loadData();
 }
-
 function openGoal(){
-  $("gMonth").value = todayStr().slice(0,7);
-  $("gRev").value = "";
-  $("gProfit").value = "";
-  $("gMsg").innerHTML = "";
-  const g = metas.find(m => String(m.mes).slice(0,7) === todayStr().slice(0,7));
-  if(g){ $("gRev").value = num(g.objetivo_ingresos) || ""; $("gProfit").value = num(g.objetivo_ganancia) || ""; }
+  const m = todayStr().slice(0,7); $("gMonth").value = m; $("gRev").value = ""; $("gProfit").value = ""; $("gMsg").innerHTML = "";
+  const g = metas.find(x => String(x.mes).slice(0,7)===m);
+  if(g){ $("gRev").value = num(g.objetivo_ingresos)||""; $("gProfit").value = num(g.objetivo_ganancia)||""; }
   openModal("goalModal");
 }
 async function saveGoal(){
   const month = $("gMonth").value;
   if(!month){ $("gMsg").innerHTML = '<div class="msg err">Elige el mes.</div>'; return; }
-  const mes = month + "-01";
-  const vals = {objetivo_ingresos:num($("gRev").value), objetivo_ganancia:num($("gProfit").value)};
-  $("saveGoal").disabled = true;
-  let error;
-  const found = metas.find(m => String(m.mes).slice(0,10) === mes);
-  if(found){
-    ({error} = await sb.from("metas").update(vals).eq("id", found.id));
-  }else{
-    ({error} = await sb.from("metas").insert(Object.assign({mes}, vals)));
-  }
+  const mes = month+"-01", vals = {objetivo_ingresos:num($("gRev").value), objetivo_ganancia:num($("gProfit").value)};
+  $("saveGoal").disabled = true; let error;
+  const found = metas.find(m => String(m.mes).slice(0,10)===mes);
+  if(found) ({error} = await sb.from("metas").update(vals).eq("id", found.id));
+  else ({error} = await sb.from("metas").insert(Object.assign({mes}, vals)));
   $("saveGoal").disabled = false;
-  if(error){ $("gMsg").innerHTML = '<div class="msg err">' + esc(error.message) + '</div>'; return; }
-  closeModal("goalModal");
-  await loadData();
+  if(error){ $("gMsg").innerHTML = '<div class="msg err">'+esc(error.message)+'</div>'; return; }
+  closeModal("goalModal"); await loadData();
 }
 
-/* =========================================================
-   ENTRADA / SALIDA
-========================================================= */
+/* ---------- Entrada / salida ---------- */
 async function login(){
-  const email = $("email").value.trim();
-  const password = $("password").value;
-  if(!email || !password){
-    $("loginMsg").innerHTML = '<div class="msg err">Escribe tu correo y tu contraseña.</div>';
-    return;
-  }
-  $("loginBtn").disabled = true;
-  $("loginBtn").textContent = "Comprobando...";
-  $("loginMsg").innerHTML = "";
+  const email = $("email").value.trim(), password = $("password").value;
+  if(!email || !password){ $("loginMsg").innerHTML = '<div class="msg err">Escribe tu correo y tu contraseña.</div>'; return; }
+  $("loginBtn").disabled = true; $("loginBtn").textContent = "Comprobando..."; $("loginMsg").innerHTML = "";
   const {error} = await sb.auth.signInWithPassword({email, password});
-  $("loginBtn").disabled = false;
-  $("loginBtn").textContent = "Entrar";
-  if(error){
-    $("loginMsg").innerHTML = '<div class="msg err">No se pudo entrar: ' + esc(error.message) + '</div>';
-  }
+  $("loginBtn").disabled = false; $("loginBtn").textContent = "Entrar";
+  if(error) $("loginMsg").innerHTML = '<div class="msg err">No se pudo entrar: '+esc(error.message)+'</div>';
 }
 async function enter(){
-  if(appShown) return;
-  appShown = true;
-  $("login").classList.add("hidden");
-  $("app").classList.remove("hidden");
+  if(appShown) return; appShown = true;
+  $("login").classList.add("hidden"); $("app").classList.remove("hidden");
   $("pg-resumen").innerHTML = '<div class="spin"></div><div class="empty" style="text-align:center">Cargando datos...</div>';
   await loadData();
 }
 function leave(){
-  appShown = false;
-  killCharts();
-  turnos = []; gastos = []; metas = []; reservas = [];
-  $("app").classList.add("hidden");
-  $("login").classList.remove("hidden");
-  $("password").value = "";
+  appShown = false; killCharts(); turnos = []; gastos = []; metas = []; reservas = [];
+  $("app").classList.add("hidden"); $("login").classList.remove("hidden"); $("password").value = "";
 }
 
-/* =========================================================
-   EVENTOS
-========================================================= */
+/* ---------- Eventos ---------- */
 $("loginBtn").addEventListener("click", login);
-$("password").addEventListener("keydown", e => { if(e.key === "Enter") login(); });
+$("password").addEventListener("keydown", e => { if(e.key==="Enter") login(); });
 $("logoutBtn").addEventListener("click", async () => { await sb.auth.signOut(); });
 $("refreshBtn").addEventListener("click", loadData);
 $("saveExpense").addEventListener("click", saveExpense);
 $("saveGoal").addEventListener("click", saveGoal);
-
-document.querySelectorAll("[data-close]").forEach(b =>
-  b.addEventListener("click", () => closeModal(b.dataset.close)));
-document.querySelectorAll(".modal").forEach(m =>
-  m.addEventListener("click", e => { if(e.target === m) m.classList.add("hidden"); }));
-
+document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => closeModal(b.dataset.close)));
+document.querySelectorAll(".modal").forEach(m => m.addEventListener("click", e => { if(e.target===m) m.classList.add("hidden"); }));
 document.querySelectorAll(".period").forEach(b => b.addEventListener("click", () => {
-  document.querySelectorAll(".period").forEach(x => x.classList.remove("on"));
-  b.classList.add("on");
-  period = b.dataset.p;
-  renderAll();
+  document.querySelectorAll(".period").forEach(x => x.classList.remove("on")); b.classList.add("on"); period = b.dataset.p; renderAll();
 }));
-
 document.querySelectorAll("nav.bottom button").forEach(b => b.addEventListener("click", () => {
-  document.querySelectorAll("nav.bottom button").forEach(x => x.classList.toggle("on", x === b));
-  ["resumen","dinero","clientes","agenda","noshows"].forEach(n =>
-    $("pg-" + n).classList.toggle("hidden", n !== b.dataset.pg));
-  window.scrollTo(0, 0);
+  document.querySelectorAll("nav.bottom button").forEach(x => x.classList.toggle("on", x===b));
+  ["resumen","dinero","clientes","agenda","noshows"].forEach(n => $("pg-"+n).classList.toggle("hidden", n!==b.dataset.pg));
+  window.scrollTo(0,0);
 }));
-
-document.addEventListener("visibilitychange", () => {
-  if(!document.hidden && appShown && Date.now() - lastLoad > 60000) loadData();
-});
+// Botones de acción (Cobrar, No-show, Propina...)
+document.addEventListener("click", e => { const b = e.target.closest("button.act"); if(b) act(b.dataset.a, b.dataset.k); });
+document.addEventListener("visibilitychange", () => { if(!document.hidden && appShown && Date.now()-lastLoad>60000) loadData(); });
 
 (async function init(){
   if(!sb) return;
   sb.auth.onAuthStateChange((event, session) => {
-    // No llamar a Supabase directamente dentro de este bloque
-    if(event === "SIGNED_OUT") setTimeout(leave, 0);
-    else if(event === "SIGNED_IN" && session) setTimeout(enter, 0);
+    if(event==="SIGNED_OUT") setTimeout(leave,0); else if(event==="SIGNED_IN" && session) setTimeout(enter,0);
   });
-  const {data} = await sb.auth.getSession();
-  if(data && data.session) enter();
+  const {data} = await sb.auth.getSession(); if(data && data.session) enter();
 })();
 </script>
 </body>
