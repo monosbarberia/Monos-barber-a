@@ -73,6 +73,10 @@ nav.bottom button.on{color:var(--gold)}nav.bottom span{display:block;font-size:1
 .sheet .field input,.sheet .field select{background:var(--night)}
 .spin{width:28px;height:28px;border:3px solid rgba(203,178,106,.2);border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite;margin:40px auto 12px}
 @keyframes sp{to{transform:rotate(360deg)}}
+.info{width:18px;height:18px;border-radius:50%;border:1px solid var(--muted);background:transparent;color:var(--muted);font-size:11px;line-height:1;padding:0;flex-shrink:0;margin-left:6px}
+.help{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);color:#c9cdbf;font-size:12.5px;line-height:1.5}
+.card .label{display:flex;align-items:center}
+.blockHead{display:flex;align-items:center;margin-bottom:4px}.blockHead .blockTitle{margin-bottom:0}
 </style>
 </head>
 <body>
@@ -291,11 +295,40 @@ function monthFin(month){
 }
 
 /* ---------- Componentes ---------- */
+const HELP = {
+"Ganancia neta":"Lo que realmente te queda: dinero cobrado más propinas, menos los gastos.",
+"Clientes atendidos":"Clientes que vinieron y ya cobraste. Una hora de turno (2 bloques de 30 min) cuenta como un solo cliente.",
+"Ticket promedio":"Dinero cobrado dividido entre los clientes cobrados. Es lo que te deja cada cliente en promedio. Si sube, cada cliente te deja más.",
+"Servicios realizados":"Servicios de clientes ya cobrados. Cada servicio cuenta por separado: un degradado con barba son 2.",
+"Por cobrar":"Clientes cuya hora ya pasó y no están cobrados ni marcados no-show. No cuentan como servicios hasta que los cobres.",
+"No-shows":"Clientes que reservaron y no vinieron. El porcentaje compara los que faltaron con todos los que debían venir.",
+"Ocupación":"De los turnos de 30 minutos disponibles (lunes a sábado), cuántos se usaron con clientes cobrados. Es aproximado.",
+"Propinas":"Propinas que anotaste con el botón + Propina.",
+"Precio normal":"Suma de los precios normales de los servicios cobrados, sin descuentos ni extras.",
+"Descuentos":"Dinero que dejaste de cobrar por descuentos: precio normal menos lo cobrado.",
+"Extras":"Dinero cobrado por encima del precio normal (por ejemplo, un no-show pagado junto con el corte).",
+"Dinero cobrado":"Precio normal, menos descuentos, más extras. Es el dinero que entró por servicios.",
+"Gastos":"Todo lo que anotaste como gasto en este período.",
+"Clientes del período":"Personas distintas que vinieron y se cobraron en este período. Si vino 2 veces, cuenta una.",
+"Nuevos":"Clientes cuya primera visita registrada cae en este período. Al inicio casi todos aparecen como nuevos.",
+"Recurrentes":"Clientes que vinieron en este período y ya tienen 2 o más visitas en total.",
+"Desaparecidos":"Clientes que llevan 30 días o más sin venir y no tienen cita reservada.",
+"Turnos perdidos":"Turnos de 30 minutos que quedaron vacíos porque el cliente reservó y no vino.",
+"Mejor día":"Día de la semana en el que más dinero has cobrado, sumando todo el historial.",
+"Hora más pedida":"Horario que más veces se ha usado, sumando todo el historial.",
+"Porcentaje":"No-shows divididos entre las citas que ya debieron cumplirse. Mientras más bajo, mejor.",
+"Te deben":"Dinero de no-shows que todavía no marcaste como cobrados.",
+"Ya cobrados":"No-shows que el cliente ya te pagó."
+};
+let helpN = 0;
+function toggleHelp(id){ $(id).classList.toggle("hidden"); }
 function card(label, value, sub, cls){
-  return '<div class="card '+(cls||"")+'"><div class="label">'+label+'</div><div class="value">'+value+'</div>'+(sub?'<div class="sub">'+sub+'</div>':"")+'</div>';
+  const help = HELP[label], id = "h"+(++helpN);
+  return '<div class="card '+(cls||"")+'"><div class="label">'+label+(help?'<button class="info" onclick="toggleHelp(\''+id+'\')" aria-label="Qué significa">?</button>':"")+'</div><div class="value">'+value+'</div>'+(sub?'<div class="sub">'+sub+'</div>':"")+(help?'<div class="help hidden" id="'+id+'">'+help+'</div>':"")+'</div>';
 }
 function block(title, body, help){
-  return '<div class="block"><div class="blockTitle">'+title+'</div>'+(help?'<div class="blockHelp">'+help+'</div>':"")+body+'</div>';
+  const id = "h"+(++helpN);
+  return '<div class="block"><div class="blockHead"><div class="blockTitle">'+title+'</div>'+(help?'<button class="info" onclick="toggleHelp(\''+id+'\')" aria-label="Qué significa">?</button>':"")+'</div>'+(help?'<div class="help hidden" id="'+id+'" style="margin:0 0 10px;border-top:0;padding-top:0">'+help+'</div>':"")+body+'</div>';
 }
 function row(title, sub, val, cls, acts){
   return '<div class="row"><div class="rowTop"><div><div class="rowTitle">'+title+'</div>'+(sub?'<div class="rowSub">'+sub+'</div>':"")+
