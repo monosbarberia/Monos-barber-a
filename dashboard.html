@@ -77,6 +77,8 @@ nav.bottom button.on{color:var(--gold)}nav.bottom span{display:block;font-size:1
 .help{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);color:#c9cdbf;font-size:12.5px;line-height:1.5}
 .card .label{display:flex;align-items:center}
 .blockHead{display:flex;align-items:center;margin-bottom:4px}.blockHead .blockTitle{margin-bottom:0}
+.sep{height:1px;background:var(--line);margin:8px 0}
+.subTitle{color:var(--gold);font-size:13px;font-weight:700;margin:10px 0 2px}
 </style>
 </head>
 <body>
@@ -114,8 +116,8 @@ nav.bottom button.on{color:var(--gold)}nav.bottom span{display:block;font-size:1
   <div class="field"><label for="exDate">Fecha</label><input id="exDate" type="date"></div>
   <div class="field"><label for="exCat">Categoría</label><select id="exCat">
     <option value="productos">Productos</option><option value="mantenimiento de máquinas">Mantenimiento de máquinas</option>
-    <option value="navajas">Navajas</option><option value="otros">Otros</option></select></div>
-  <div class="field"><label for="exDesc">Descripción (usa: colonia, cuchillas, talco…)</label><input id="exDesc" type="text" placeholder="Ej. Colonia"></div>
+    <option value="navajas">Navajas</option><option value="otros">Otros (renta, luz… no entran en "compras")</option></select></div>
+  <div class="field"><label for="exDesc">Nombre del producto (siempre igual: Colonia, Cuchillas, Talco…)</label><input id="exDesc" type="text" placeholder="Ej. Colonia"></div>
   <div class="field"><label for="exAmount">Monto</label><input id="exAmount" type="number" inputmode="decimal"></div>
   <button class="btn" id="saveExpense">Guardar gasto</button>
   <button class="btnGhost" data-close="expenseModal">Cancelar</button><div id="exMsg"></div>
@@ -140,13 +142,7 @@ nav.bottom button.on{color:var(--gold)}nav.bottom span{display:block;font-size:1
 const START_DATE = "2026-10-08";   // <-- CAMBIA ESTA FECHA
 
 const BARBER_BUDGET = 12000;  // gastos fijos de la barbería por mes
-const SAVE_PCT = 10;          // % de ahorro sobre lo que queda
-// Productos: cada cuántos días los compras. "clave" se busca en la descripción del gasto.
-const PRODUCTS = [
-  {name:"Colonia",  clave:"colonia",  days:15},
-  {name:"Cuchillas",clave:"cuchilla", days:30},
-  {name:"Talco",    clave:"talco",    days:30}
-];
+const SAVE_PCT = 10;          // % de ahorro sobre lo que queda después de la barbería
 
 const SB_URL = "https://ldxxflhwpyzldisydhmd.supabase.co";
 const SB_KEY = "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
@@ -157,8 +153,15 @@ const ISO = /^\d{4}-\d{2}-\d{2}$/;
 let sb = null, turnos = [], gastos = [], metas = [], reservas = [], bloqueos = [];
 let period = "today", appShown = false, lastLoad = 0;
 const charts = {};
-try{ sb = window.supabase.createClient(SB_URL, SB_KEY); }
+
+/* ---------- SEGURIDAD: la sesión NO se guarda. Al recargar o cerrar la página, hay que entrar de nuevo ---------- */
+try{
+  [localStorage, sessionStorage].forEach(st => Object.keys(st).filter(k => k.indexOf("sb-")===0 || k.indexOf("supabase")>=0).forEach(k => st.removeItem(k)));
+}catch(e){}
+try{ sb = window.supabase.createClient(SB_URL, SB_KEY, {auth:{persistSession:false, autoRefreshToken:true, detectSessionInUrl:false}}); }
 catch(e){ document.getElementById("loginMsg").innerHTML = '<div class="msg err">No se pudo cargar Supabase. Recarga la página.</div>'; }
+// Si el navegador restaura la página desde memoria (botón atrás), forzar recarga limpia
+window.addEventListener("pageshow", e => { if(e.persisted) location.reload(); });
 if(window.Chart){ Chart.defaults.color = "#9fa594"; }
 
 /* ---------- Utilidades ---------- */
@@ -172,6 +175,7 @@ const digits = s => String(s ?? "").replace(/\D/g,"");
 const fmt = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 function parseD(s){ const p = String(s).split("-"); return new Date(+p[0], +p[1]-1, +p[2]); }
 const todayStr = () => fmt(new Date());
+function addDays(s, n){ const d = parseD(s); d.setDate(d.getDate()+n); return fmt(d); }
 function niceDate(s){ if(!ISO.test(s)) return s; const p = s.split("-"); return p[2]+"-"+p[1]+"-"+p[0]; }
 const shortDate = s => { const p = s.split("-"); return p[2]+"/"+p[1]; };
 const daysBetween = (a,b) => Math.round((parseD(b)-parseD(a))/86400000);
@@ -185,8 +189,10 @@ function slotPassed(fecha, turno){
   const n = new Date(); return m <= n.getHours()*60+n.getMinutes();
 }
 function eachDay(start, end, fn){ const d = parseD(start), e = parseD(end); while(d<=e){ fn(fmt(d), d.getDay()); d.setDate(d.getDate()+1); } }
+function workdaysBetween(a, b){ let n = 0; if(a>b) return 0; eachDay(a, b, (d, wd) => { if(wd!==0) n++; }); return n; }
 // Lunes de la semana (lunes–sábado; un domingo suelto cae en la semana anterior)
 function weekStart(s){ const d = parseD(s), w = d.getDay(); d.setDate(d.getDate() - (w===0?6:w-1)); return fmt(d); }
+function monthBounds(month){ const y = +month.slice(0,4), m = +month.slice(5,7); return {first:fmt(new Date(y,m-1,1)), last:fmt(new Date(y,m,0))}; }
 
 function getPeriod(){
   const t = todayStr();
@@ -194,6 +200,14 @@ function getPeriod(){
   if(period==="week") return {start:weekStart(t),end:t,label:"esta semana"};
   if(period==="month"){ const d = parseD(t); return {start:fmt(new Date(d.getFullYear(),d.getMonth(),1)),end:t,label:"este mes"}; }
   return {start:START_DATE,end:t,label:"desde el "+niceDate(START_DATE)};
+}
+// Período COMPLETO (incluye días que aún no llegan): para poder cobrar clientes que vienen antes de su turno
+function periodFull(){
+  const t = todayStr();
+  if(period==="today") return {start:t,end:t};
+  if(period==="week"){ const s = weekStart(t); return {start:s,end:addDays(s,6)}; }
+  if(period==="month"){ const b = monthBounds(t.slice(0,7)); return {start:b.first,end:b.last}; }
+  return {start:START_DATE,end:"2999-12-31"};
 }
 function inPeriod(r){ const p = getPeriod(); return r.fecha>=p.start && r.fecha<=p.end; }
 
@@ -283,16 +297,127 @@ function buildClients(){
   return [...map.values()];
 }
 
-/* ---------- Finanzas del mes: ahorro y retiro ---------- */
+/* ---------- Finanzas: reparto automático de cada ingreso ----------
+   Cada peso que entra se divide al instante en 3:
+   1) Fondo de la barbería (gastos fijos + insumos)  2) Ahorro (SAVE_PCT del resto)  3) Para ti
+   El % del fondo = BARBER_BUDGET / ingreso esperado del mes (meta si la hay, si no tu ritmo actual). */
 function monthFin(month){
   const rs = reservas.filter(r => r.status==="cobrada" && r.fecha.slice(0,7)===month);
   const ing = rs.reduce((s,r) => s + r.charged + r.tip, 0);
   const gReg = sumGastos(gastos.filter(x => String(x.fecha).slice(0,7)===month));
-  const gBase = Math.max(gReg, BARBER_BUDGET);        // se reserva al menos el presupuesto fijo
-  const resto = Math.max(0, ing - gBase);
+  const mb = monthBounds(month), t = todayStr();
+  const startEff = mb.first < START_DATE ? START_DATE : mb.first;
+  const g = metas.find(m => String(m.mes).slice(0,7)===month);
+  let expected = g ? num(g.objetivo_ingresos) : 0, source = "meta";
+  if(!(expected > 0)){
+    let upto;
+    if(month === t.slice(0,7)) upto = rs.some(r => r.fecha===t) ? t : addDays(t,-1);
+    else upto = mb.last;
+    const elapsed = Math.max(1, workdaysBetween(startEff, upto));
+    const total = Math.max(1, workdaysBetween(startEff, mb.last));
+    expected = ing / elapsed * total; source = "ritmo";
+  }
+  expected = Math.max(expected, BARBER_BUDGET*1.5);          // nunca reserva más de ~2/3 de cada cobro
+  const rate = Math.min(0.67, BARBER_BUDGET / expected);
+  const reserve = Math.min(BARBER_BUDGET, ing * rate);       // reservado para la barbería este mes
+  const resto = ing - reserve;
   const ahorro = resto * SAVE_PCT / 100;
-  return {ing, gReg, gBase, resto, ahorro, libre: Math.max(0, resto - ahorro)};
+  const deficit = Math.max(0, gReg - reserve);               // gastos que pasaron lo reservado (salen de tu retiro)
+  const libre = Math.max(0, resto - ahorro - deficit);
+  return {ing, gReg, rate, expected, source, reserve, resto, ahorro, deficit, libre, fondo: reserve - gReg};
 }
+function dayFin(day){
+  const f = monthFin(day.slice(0,7));
+  const ing = reservas.filter(r => r.status==="cobrada" && r.fecha===day).reduce((s,r) => s + r.charged + r.tip, 0);
+  const reserve = ing * f.rate, resto = ing - reserve, ahorro = resto * SAVE_PCT / 100;
+  return {ing, reserve, ahorro, libre: resto - ahorro, rate: f.rate};
+}
+// Fondo acumulado de la barbería (lo reservado menos lo gastado, de todos los meses)
+function fundTotal(){
+  let y = +START_DATE.slice(0,4), m = +START_DATE.slice(5,7), sum = 0;
+  const cur = todayStr().slice(0,7);
+  for(let i=0;i<120;i++){
+    const k = y+"-"+String(m).padStart(2,"0");
+    sum += monthFin(k).fondo;
+    if(k >= cur) break;
+    m++; if(m>12){ m = 1; y++; }
+  }
+  return sum;
+}
+
+/* ---------- Compras inteligentes ----------
+   Aprende de TUS gastos: agrupa por nombre del producto, calcula cada cuántos días lo compras
+   (promedio de tus últimas compras reales), y combina eso con el fondo y el ritmo de la semana. */
+function weekPace(){
+  const t = todayStr(), cur = weekStart(t), closed = {}; let curRev = 0;
+  reservas.filter(r => r.status==="cobrada").forEach(r => {
+    const k = weekStart(r.fecha), v = r.charged + r.tip;
+    if(k===cur) curRev += v; else if(k<cur) closed[k] = (closed[k]||0) + v;
+  });
+  const ks = Object.keys(closed).sort().slice(-4);
+  const base = ks.length ? ks.reduce((s,k) => s + closed[k], 0) / ks.length : null;
+  const elapsed = Math.max(1, workdaysBetween(cur, t));
+  const proj = curRev / elapsed * 6;
+  const good = (base===null || elapsed<2) ? null : proj >= base*0.9;   // null = todavía no se sabe
+  return {base, proj, curRev, good};
+}
+function purchaseAdvice(){
+  const t = todayStr(), wp = weekPace(), groups = {};
+  gastos.forEach(g => {
+    if(norm(g.categoria)==="otros" || num(g.monto)<=0 || String(g.fecha)<START_DATE) return;
+    const name = String(g.descripcion||"").trim() || String(g.categoria||"Producto"), k = norm(name);
+    if(!groups[k]) groups[k] = {name, buys:[]};
+    groups[k].buys.push({fecha:String(g.fecha), monto:num(g.monto)});
+  });
+  let fondo = fundTotal();
+  const items = Object.values(groups).map(gr => {
+    gr.buys.sort((a,b) => a.fecha.localeCompare(b.fecha));
+    const last = gr.buys[gr.buys.length-1], recent = gr.buys.slice(-3);
+    const cost = recent.reduce((s,b) => s + b.monto, 0) / recent.length;
+    const gaps = []; for(let i=1;i<gr.buys.length;i++){ const d = daysBetween(gr.buys[i-1].fecha, gr.buys[i].fecha); if(d>0) gaps.push(d); }
+    const cycle = gaps.length ? Math.round(gaps.slice(-3).reduce((s,x) => s + x, 0) / Math.min(3,gaps.length)) : null;
+    return {name:gr.name, last, cost, cycle, left: cycle===null ? null : cycle - daysBetween(last.fecha, t)};
+  });
+  items.sort((a,b) => (a.left===null?9999:a.left) - (b.left===null?9999:b.left));
+  return items.map(it => {
+    const a = {name:it.name, level:"ok", short:"", detail:""};
+    if(it.cycle===null){
+      a.level = "learn"; a.short = "Aprendiendo";
+      a.detail = "Solo hay 1 compra anotada ("+money(it.cost)+" el "+niceDate(it.last.fecha)+"). Con la próxima calculo cada cuánto se te acaba.";
+      return a;
+    }
+    const lead = Math.max(3, Math.round(it.cycle*0.2)), early = lead + 7, left = it.left, can = fondo >= it.cost;
+    const info = "Lo compras cada ~"+it.cycle+" días · "+money(it.cost)+". ";
+    if(left > early){
+      a.short = "Aún no toca"; a.detail = info + "Te dura unos "+left+" días (≈ "+shortDate(addDays(t,left))+").";
+    }else if(left <= lead){
+      if(can){
+        a.level = "buy"; a.short = left<=0 ? "Compra ya" : "Buen momento";
+        a.detail = info + (left<=0 ? "Ya te tocaba. " : "Te quedan ~"+left+" días. ") + "El fondo de la barbería lo cubre: cómpralo de ahí, no de tu retiro.";
+        fondo -= it.cost;
+      }else if(left <= 0){
+        a.level = "urgent"; a.short = "Falta fondo";
+        a.detail = info + "Ya te tocaba y el fondo tiene "+money(Math.max(0,fondo))+" de "+money(it.cost)+". Cómpralo con los próximos ingresos del día.";
+      }else{
+        a.level = "wait"; a.short = "Espera";
+        a.detail = info + "Te quedan ~"+left+" días y el fondo aún no alcanza (faltan "+money(it.cost-Math.max(0,fondo))+"). Se va llenando con cada cobro.";
+      }
+    }else{ // ventana de adelanto: hay margen para elegir una buena semana
+      if(wp.good===true && can){
+        a.level = "buy"; a.short = "Adelanta";
+        a.detail = info + "Esta semana va bien y el fondo alcanza. Comprarlo ahora evita que te agarre una semana floja (te quedan ~"+left+" días).";
+        fondo -= it.cost;
+      }else if(wp.good===false){
+        a.level = "wait"; a.short = "Espera";
+        a.detail = info + "Esta semana va floja y aún te dura ~"+left+" días: mejor espera una semana mejor.";
+      }else{
+        a.short = "Ya viene"; a.detail = info + "Te quedan ~"+left+" días. Te aviso cuando sea buen momento.";
+      }
+    }
+    return a;
+  });
+}
+const LEVEL_CLS = {buy:"ok", urgent:"bad", wait:"warn", ok:"", learn:""};
 
 /* ---------- Componentes ---------- */
 const HELP = {
@@ -350,7 +475,7 @@ function drawChart(id, type, labels, data, opt){
 }
 function killCharts(){ Object.keys(charts).forEach(k => { try{charts[k].destroy();}catch(e){} delete charts[k]; }); }
 
-/* ---------- Acciones sobre reservas (reemplazan los atajos) ---------- */
+/* ---------- Acciones sobre reservas ---------- */
 async function updRows(ids, vals){
   const {error} = await sb.from("turnos").update(vals).in("id", ids);
   if(error){ alert("No se pudo guardar: " + error.message + "\n\nSi dice 'permission' o 'policy', falta dar permiso a tu usuario en Supabase (ver SQL)."); return false; }
@@ -387,7 +512,7 @@ async function act(a, key){
 
 /* ---------- RESUMEN ---------- */
 function renderResumen(){
-  const p = getPeriod(), list = reservas.filter(inPeriod), s = resumen(list);
+  const p = getPeriod(), pf = periodFull(), list = reservas.filter(inPeriod), s = resumen(list);
   const g = sumGastos(gastosPeriodo()), profit = s.revenue + s.tips - g;
   const due = s.cobradas.length + s.noshows.length;
   const occ = occupancy(list, p);
@@ -395,7 +520,13 @@ function renderResumen(){
 
   let h = '<h1>Resumen</h1><p class="lead">Cómo va la barbería '+esc(p.label)+'.</p>';
   h += '<div class="hero"><div class="cap">Dinero cobrado '+esc(p.label)+'</div><div class="big">'+money(s.revenue)+'</div><div class="note">Solo cuenta cobros registrados. Propinas aparte: '+money(s.tips)+'.</div></div>';
-  h += '<div class="grid">' +
+
+  // Aviso de compras (solo si hay algo que hacer)
+  const alerts = purchaseAdvice().filter(a => a.level==="buy" || a.level==="urgent");
+  if(alerts.length) h += block("Aviso de compras", alerts.map(a => row(esc(a.name), esc(a.detail), esc(a.short), LEVEL_CLS[a.level])).join(""),
+    "Calculado con tus compras anteriores, el fondo de la barbería y cómo va la semana.");
+
+  h += '<div class="grid" style="margin-top:12px">' +
     card("Ganancia neta", money(profit), "Cobrado + propinas − gastos ("+money(g)+")", "gold") +
     card("Clientes atendidos", s.cobradas.length, "Solo los cobrados") +
     card("Ticket promedio", money(s.ticket), "Por cliente cobrado") +
@@ -409,12 +540,15 @@ function renderResumen(){
   const dayKeys = Object.keys(byDay).sort();
   h += block("Cobros por día", dayKeys.length ? canvas("chDay") : empty("Todavía no hay cobros en este período."));
 
-  const allPend = reservas.filter(r => r.status==="pendiente").sort((a,b) => (a.fecha+a.turno).localeCompare(b.fecha+b.turno));
-  h += block("Pendientes de resolver", allPend.length ? allPend.map(r =>
-    row(esc(r.nombre), niceDate(r.fecha)+" · "+esc(r.turno)+(r.services.length?" · "+esc(r.services.join(", ")):""),
-      (r.total||r.expected)?money(r.total||r.expected):"sin monto", "warn",
-      btn("cobrar",r,"Cobrar","good")+btn("noshow",r,"No-show","red")+btn("cancelar",r,"No atendido / cancelar","red"))).join("")
-    : empty("No hay clientes pendientes."), "Si el día pasó y no los cobraste: cóbralos, márcalos no-show o cancélalos. Mientras tanto NO cuentan como servicios.");
+  // TODOS los clientes agendados del período (aunque su hora no haya llegado) + los pendientes de días anteriores
+  const toCharge = reservas.filter(r => r.status==="pendiente" || (r.status==="futura" && r.fecha>=pf.start && r.fecha<=pf.end))
+    .sort((a,b) => (a.fecha+String(slotMin(a.turno)).padStart(4,"0")).localeCompare(b.fecha+String(slotMin(b.turno)).padStart(4,"0")));
+  h += block("Clientes por cobrar", toCharge.length ? toCharge.map(r =>
+    row(esc(r.nombre), (r.passed?"Pendiente · ":"Agendado · ")+niceDate(r.fecha)+" · "+esc(r.turno)+(r.services.length?" · "+esc(r.services.join(", ")):""),
+      (r.total||r.expected)?money(r.total||r.expected):"sin monto", r.passed?"warn":"",
+      btn("cobrar",r,"Cobrar","good")+(r.passed?btn("noshow",r,"No-show","red"):"")+btn("cancelar",r,r.passed?"No atendido / cancelar":"Cancelar","red"))).join("")
+    : empty("No hay clientes por cobrar."),
+    "Aquí salen todos los clientes agendados del período, aunque su hora no haya llegado, para cobrarlos si llegan antes. Los amarillos ya pasaron de hora sin cobrarse: cóbralos, márcalos no-show o cancélalos. Mientras no se cobren NO cuentan como servicios.");
 
   const done = list.filter(r => r.status==="cobrada").sort((a,b) => (b.fecha+b.turno).localeCompare(a.fecha+a.turno));
   h += block("Cobrados "+esc(p.label), done.length ? done.map(r =>
@@ -475,32 +609,32 @@ function weeksBlock(){
   return block("Mejor y peor semana", body, "Lunes a sábado, con propinas. Las semanas terminadas se comparan entre sí.");
 }
 function savingsBlock(){
-  const f = monthFin(todayStr().slice(0,7));
-  const msg = f.ing < f.gBase
-    ? "Todavía no cubres los gastos de la barbería ("+money(f.gBase)+"). Espera antes de retirar dinero."
-    : "Ya cubriste la barbería. Puedes retirar hasta "+money(f.libre)+" para ti sin descuidar el negocio.";
-  return block("Ahorro y retiro del mes",
+  const t = todayStr(), f = monthFin(t.slice(0,7)), d = dayFin(t), fondo = fundTotal();
+  const r = f.rate*100, ah = (100-r)*SAVE_PCT/100, tuyo = 100-r-ah;
+  let body = '<div class="note" style="margin:0 0 6px"><b>Por cada $100 que entran: $'+r.toFixed(0)+' a la barbería, $'+ah.toFixed(0)+' a ahorro y $'+tuyo.toFixed(0)+' son para ti.</b></div>';
+  body += '<div class="subTitle">De lo que entró hoy</div>' +
+    row("Entró hoy","cobrado + propinas",money(d.ing)) +
+    row("Para la barbería","gastos e insumos",money(d.reserve),"bad") +
+    row("Ahorro ("+SAVE_PCT+"% del resto)","no lo toques",money(d.ahorro),"ok") +
+    row("Para ti hoy","puedes retirarlo",money(d.libre),"ok");
+  body += '<div class="sep"></div><div class="subTitle">Acumulado del mes</div>' +
     row("Ingresos del mes","cobrado + propinas",money(f.ing)) +
-    row("Gastos de la barbería","el mayor entre lo registrado ("+money(f.gReg)+") y tu presupuesto",money(f.gBase),"bad") +
-    row("Queda","ingresos − gastos",money(f.resto)) +
-    row("Ahorro para la barbería ("+SAVE_PCT+"%)","no lo toques",money(f.ahorro),"ok") +
-    row("Disponible para retirar","lo que queda tras el ahorro",money(f.libre),"ok") +
-    '<div class="note" style="margin-top:10px"><b>'+esc(msg)+'</b></div>',
-    "Ejemplo: 100000 − 12000 = 88000; el "+SAVE_PCT+"% = 8800 de ahorro.");
+    row("Reservado para la barbería","tope mensual "+money(BARBER_BUDGET),money(f.reserve),"bad") +
+    row("Gastado (registrado)","lo que anotaste en Gastos",money(f.gReg),"bad") +
+    row("Fondo de la barbería","reservado − gastado, acumulado",money(fondo), fondo<0?"bad":"ok") +
+    row("Ahorro del mes",SAVE_PCT+"% de lo que queda",money(f.ahorro),"ok") +
+    row("Disponible para retirar este mes","ya descontado barbería y ahorro",money(f.libre),"ok");
+  if(f.deficit>0) body += '<div class="note" style="margin-top:8px;color:var(--bad)">Gastaste '+money(f.deficit)+' más de lo reservado este mes; ya se descontó de tu retiro.</div>';
+  body += '<div class="note" style="margin-top:8px">El % para la barbería se ajusta solo según '+(f.source==="meta"?"tu meta del mes ("+money(f.expected)+")":"tu ritmo actual (proyección ≈ "+money(f.expected)+" al mes)")+'. Registra la renta y demás gastos fijos en Gastos para que el fondo sea real.</div>';
+  return block("Ahorro y retiro", body,
+    "Cada cobro se reparte solo: primero una parte va al fondo de la barbería (así los gastos se cubren poco a poco, no de golpe), luego el "+SAVE_PCT+"% del resto se ahorra, y lo demás es tuyo desde el primer día. No tienes que esperar a cubrir la barbería para retirar. Lo que retires hoy y lo acumulado del mes se calculan por separado: no se descuentan los retiros que ya hiciste.");
 }
 function productsBlock(){
-  const f = monthFin(todayStr().slice(0,7)), t = todayStr();
-  const body = PRODUCTS.map(pr => {
-    const buys = gastos.filter(g => norm(g.descripcion).includes(pr.clave)).sort((a,b) => String(b.fecha).localeCompare(String(a.fecha)));
-    if(!buys.length) return row(esc(pr.name), "Sin compras registradas (usa '"+esc(pr.clave)+"' en la descripción)", "—");
-    const last = buys[0], since = daysBetween(String(last.fecha), t), left = pr.days - since, cost = num(last.monto);
-    let txt, cls;
-    if(left > 2){ txt = "Espera ("+left+" días)"; cls = "ok"; }
-    else if(f.libre >= cost){ txt = "Compra ahora"; cls = "warn"; }
-    else { txt = "Toca, pero espera: falta dinero libre"; cls = "bad"; }
-    return row(esc(pr.name), "Última compra hace "+since+" días · "+money(cost)+" · cada "+pr.days+" días", txt, cls);
-  }).join("");
-  return block("¿Cuándo comprar?", body, "Compra cuando toca por días Y hay dinero libre este mes (después de gastos y ahorro). Si no, espera.");
+  const adv = purchaseAdvice();
+  const body = adv.length ? adv.map(a => row(esc(a.name), esc(a.detail), esc(a.short), LEVEL_CLS[a.level])).join("")
+    : empty("Cuando anotes compras de productos (colonia, cuchillas, talco…) aprendo cada cuánto los compras y te aviso cuándo conviene.");
+  return block("¿Cuándo comprar?", body,
+    "No hay días fijos. Cada vez que anotas un gasto de producto (con el mismo nombre), calculo cada cuánto lo compras de verdad: si un día se te acaba antes, el ciclo se acorta solo. Con eso, el fondo de la barbería y cómo va la semana te digo si es buen momento, si te conviene adelantarlo en una buena semana o si mejor esperar. Siempre se paga del fondo de la barbería, no de tu retiro. Los gastos de categoría 'Otros' no entran aquí.");
 }
 
 function renderDinero(){
@@ -696,12 +830,12 @@ document.querySelectorAll("nav.bottom button").forEach(b => b.addEventListener("
 document.addEventListener("click", e => { const b = e.target.closest("button.act"); if(b) act(b.dataset.a, b.dataset.k); });
 document.addEventListener("visibilitychange", () => { if(!document.hidden && appShown && Date.now()-lastLoad>60000) loadData(); });
 
-(async function init(){
+(function init(){
   if(!sb) return;
   sb.auth.onAuthStateChange((event, session) => {
     if(event==="SIGNED_OUT") setTimeout(leave,0); else if(event==="SIGNED_IN" && session) setTimeout(enter,0);
   });
-  const {data} = await sb.auth.getSession(); if(data && data.session) enter();
+  // Sin sesión guardada: siempre se empieza en la pantalla de login
 })();
 </script>
 </body>
