@@ -506,11 +506,11 @@
                 <h3 class="section-title">Opciones adicionales</h3>
                 <div class="service-list" style="margin-bottom: 0;">
                     <label class="service-item" style="border-color: rgba(203, 178, 106, 0.8);" onclick="toggleExtra(this, 'cafeCheck')">
-                        <span><input type="checkbox" id="cafeCheck" data-price="40"> Cafe expresso</span>
+                        <span><input type="checkbox" id="cafeCheck" data-price="40" data-name="Café expresso"> Cafe expresso</span>
                         <span>+$40</span>
                     </label>
                     <label class="service-item" style="border-color: rgba(203, 178, 106, 0.8);" onclick="toggleExtra(this, 'ponqueCheck')">
-                        <span><input type="checkbox" id="ponqueCheck" data-price="100"> Ponquecito casero</span>
+                        <span><input type="checkbox" id="ponqueCheck" data-price="100" data-name="Ponquecito casero"> Ponquecito casero</span>
                         <span>+$100</span>
                     </label>
                 </div>
@@ -525,7 +525,7 @@
             <div class="content-box">
                 <h3 class="section-title">Tus Datos</h3>
                 <div class="form-group">
-                    <input type="text" id="clientName" placeholder="Nombre" required maxlength="60" autocomplete="name">
+                    <input type="text" id="clientName" placeholder="Nombre completo" required maxlength="60" autocomplete="name">
                 </div>
                 <div class="form-group">
                     <input type="tel" id="clientPhone" placeholder="Teléfono (8 dígitos)" required pattern="[0-9]{8}" maxlength="8" inputmode="numeric" autocomplete="tel">
@@ -967,6 +967,31 @@
             const msg = `¡Hola Felix!%0AQuiero pedir una cita en%0A*Mono's Barberia Holguin*%0A%0A👤Nombre: ${encodeURIComponent(nombre)}%0A📱Telefono: ${encodeURIComponent(telefono)}%0A📍Direccion: Maceo 254 e/ Cables y Angel Guerra%0A📆Fecha: ${formattedDate}%0A🕙Horario: ${turnoTexto}%0A☕️Servicio: ${selected.join(', ')}%0A⌛️Duracion aprox: ${duration}%0A💰Total a pagar: $${total}`;
             window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
         }
+
+        // ---- Lista única de precios ----
+        // Los precios se leen de la tabla "precios" de Supabase. Si algo falla,
+        // la página se queda con los precios que ya tiene escritos arriba.
+        function normKey(s) {
+            return String(s || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+        async function cargarPrecios() {
+            try {
+                const { data, error } = await window.supabaseClient.from('precios').select('servicio,precio');
+                if (error || !data || !data.length) return;
+                const mapa = {};
+                data.forEach(r => { mapa[normKey(r.servicio)] = parseInt(r.precio); });
+                document.querySelectorAll('input[data-price]').forEach(inp => {
+                    const nombre = inp.getAttribute('data-name') || inp.value;
+                    const precio = mapa[normKey(nombre)];
+                    if (!Number.isFinite(precio)) return;
+                    inp.setAttribute('data-price', precio);
+                    const etiqueta = inp.closest('.service-item').querySelector(':scope > span:last-child');
+                    if (etiqueta) etiqueta.textContent = (inp.id ? '+$' : '$') + precio;
+                });
+                updateSummary();
+            } catch (e) { /* se queda con los precios actuales */ }
+        }
+        cargarPrecios();
     </script>
 </body>
 </html>
