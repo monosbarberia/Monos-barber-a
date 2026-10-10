@@ -9,76 +9,101 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
 <style>
-:root{--forest:#1c3823;--deep:#0f1d13;--night:#0a130c;--gold:#cbb26a;--gold-soft:#e3cf8c;--cream:#f2ecd9;--muted:#9fa594;--line:rgba(203,178,106,.16);--bad:#dc7b71;--ok:#86c595;--warn:#e3b76c;--serif:"Cormorant Garamond",Georgia,serif;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+/* PALETA (igual que la web de reservas):
+   fondo verde bosque, dorado para títulos/bordes/botones.
+   VERDE = ingresos · AZUL = ahorro · ROJO = egresos · ÁMBAR = pendientes/avisos */
+:root{
+  --forest:#1c3823;      /* texto sobre botones dorados */
+  --night:#1c3823;       /* fondo general (como reservas) */
+  --deep:#142a1a;        /* tarjetas */
+  --sheet:#23472c;       /* ventanas emergentes */
+  --input:#122416;       /* campos de texto */
+  --gold:#d4bc74;
+  --gold-soft:#efdc9f;
+  --cream:#f7f2e0;
+  --muted:#d2d6c3;
+  --line:rgba(203,178,106,.32);
+  --ok:#62e08c;          /* ingresos */
+  --save:#6db8ff;        /* ahorro */
+  --bad:#ff8174;         /* egresos */
+  --warn:#f5c96e;        /* pendientes */
+  --serif:"Cormorant Garamond",Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--night);color:var(--cream);font-family:var(--sans);font-size:15px;line-height:1.45}
+html,body{margin:0;background:var(--night);color:var(--cream);font-family:var(--sans);font-size:16px;line-height:1.5}
 button,input,select{font:inherit;color:inherit}button{cursor:pointer}
 .hidden{display:none!important}
-#login{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 0%,#24432b 0%,var(--night) 60%)}
+#login{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 0%,#2c5535 0%,var(--night) 65%)}
 .loginBox{width:100%;max-width:380px}
-.loginBrand{font-family:var(--serif);font-weight:700;font-size:44px;color:var(--gold);line-height:1;margin:0 0 4px}
-.loginSub{color:var(--muted);margin:0 0 28px}
-.field{margin-bottom:14px}.field label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
-.field input,.field select{width:100%;background:var(--deep);border:1px solid var(--line);border-radius:10px;padding:13px 14px;outline:none}
-.btn{width:100%;border:0;border-radius:10px;padding:14px;background:var(--gold);color:var(--forest);font-weight:700}
+.loginBrand{font-family:var(--serif);font-weight:700;font-size:46px;color:var(--gold);line-height:1;margin:0 0 4px}
+.loginSub{color:var(--muted);margin:0 0 28px;font-size:16px}
+.field{margin-bottom:14px}.field label{display:block;color:var(--muted);font-size:14px;margin-bottom:6px}
+.field input,.field select{width:100%;background:var(--input);border:1px solid var(--line);border-radius:10px;padding:13px 14px;outline:none;font-size:16px}
+.btn{width:100%;border:0;border-radius:10px;padding:14px;background:var(--gold);color:var(--forest);font-weight:700;font-size:16px}
 .btn:disabled{opacity:.55}
-.btnGhost{width:100%;border:1px solid var(--line);border-radius:10px;padding:13px;background:transparent;color:var(--gold);font-weight:600;margin-top:10px}
-.msg{margin-top:14px;padding:12px;border-radius:10px;font-size:13px}
-.msg.err{background:rgba(220,123,113,.12);border:1px solid rgba(220,123,113,.35);color:#ffc2bb}
+.btnGhost{width:100%;border:1px solid var(--line);border-radius:10px;padding:13px;background:transparent;color:var(--gold);font-weight:600;margin-top:10px;font-size:15px}
+.msg{margin-top:14px;padding:12px;border-radius:10px;font-size:14px}
+.msg.err{background:rgba(255,129,116,.14);border:1px solid rgba(255,129,116,.45);color:#ffd2cc}
 #app{min-height:100dvh;padding-bottom:calc(80px + env(safe-area-inset-bottom))}
-.top{position:sticky;top:0;z-index:20;background:rgba(10,19,12,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top) + 10px) 16px 10px}
+.top{position:sticky;top:0;z-index:20;background:rgba(28,56,35,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top) + 10px) 16px 10px}
 .topRow{display:flex;align-items:center;justify-content:space-between;max-width:760px;margin:0 auto}
-.brand{font-family:var(--serif);font-weight:700;font-size:24px;color:var(--gold)}
+.brand{font-family:var(--serif);font-weight:700;font-size:26px;color:var(--gold)}
 .topBtns{display:flex;gap:8px}
-.chip{border:1px solid var(--line);background:transparent;color:var(--gold);border-radius:9px;padding:7px 11px;font-size:13px}
+.chip{border:1px solid var(--line);background:transparent;color:var(--gold);border-radius:9px;padding:7px 11px;font-size:14px}
 .periods{display:flex;gap:6px;max-width:760px;margin:10px auto 0;overflow-x:auto}
-.period{white-space:nowrap;border:1px solid var(--line);background:var(--deep);border-radius:9px;padding:7px 14px;font-size:13px}
+.period{white-space:nowrap;border:1px solid var(--line);background:var(--deep);border-radius:9px;padding:7px 14px;font-size:14px}
 .period.on{background:var(--gold);color:var(--forest);border-color:var(--gold);font-weight:700}
 main{max-width:760px;margin:0 auto;padding:18px 16px 30px}
-h1{font-family:var(--serif);font-weight:700;font-size:30px;color:var(--gold);margin:4px 0 2px;line-height:1.1}
-.lead{color:var(--muted);margin:0 0 18px;font-size:14px}
-.note{color:var(--muted);font-size:12px;margin:6px 0 0}
+h1{font-family:var(--serif);font-weight:700;font-size:32px;color:var(--gold);margin:4px 0 2px;line-height:1.1}
+.lead{color:var(--muted);margin:0 0 18px;font-size:15px}
+.note{color:var(--muted);font-size:13px;margin:6px 0 0}
 .hero{padding:6px 0 18px;border-bottom:1px solid var(--line);margin-bottom:16px}
-.hero .big{font-family:var(--serif);font-weight:700;font-size:56px;line-height:1}
-.hero .cap{color:var(--muted);font-size:13px;margin-bottom:6px}
+.hero .big{font-family:var(--serif);font-weight:700;font-size:58px;line-height:1;color:var(--ok)}
+.hero .cap{color:var(--muted);font-size:14px;margin-bottom:6px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .card{background:var(--deep);border:1px solid var(--line);border-radius:12px;padding:14px}
+.card .value{font-family:var(--serif);font-weight:700;font-size:29px;line-height:1.05;color:var(--cream)}
 .card.gold .value{color:var(--gold-soft)}
-.card .label{color:var(--muted);font-size:12px;margin-bottom:6px}
-.card .value{font-family:var(--serif);font-weight:700;font-size:28px;line-height:1.05}
-.card .sub{color:var(--muted);font-size:12px;margin-top:5px}
+.card.ok .value{color:var(--ok)}
+.card.save .value{color:var(--save)}
+.card.bad .value{color:var(--bad)}
+.card.warn .value{color:var(--warn)}
+.card .label{color:var(--muted);font-size:13.5px;margin-bottom:6px}
+.card .sub{color:var(--muted);font-size:13px;margin-top:5px}
 .block{background:var(--deep);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:12px}
-.blockTitle{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--gold);margin-bottom:4px}
-.blockHelp{color:var(--muted);font-size:12.5px;margin-bottom:10px}
+.blockTitle{font-family:var(--serif);font-weight:700;font-size:22px;color:var(--gold);margin-bottom:4px}
+.blockHelp{color:var(--muted);font-size:13.5px;margin-bottom:10px}
 .chartBox{height:220px;position:relative}
-.row{padding:11px 0;border-bottom:1px solid rgba(255,255,255,.06)}.row:last-child{border-bottom:0}
+.row{padding:11px 0;border-bottom:1px solid rgba(255,255,255,.1)}.row:last-child{border-bottom:0}
 .rowTop{display:flex;justify-content:space-between;gap:12px}
-.rowTitle{font-weight:600;font-size:14px}.rowSub{color:var(--muted);font-size:12px;margin-top:2px}
-.rowVal{font-weight:700;white-space:nowrap;color:var(--gold-soft);text-align:right}
-.rowVal.bad{color:var(--bad)}.rowVal.warn{color:var(--warn)}.rowVal.ok{color:var(--ok)}
-.empty{color:var(--muted);font-size:13px;padding:6px 0}
-.bar{height:8px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;margin-top:6px}
-.bar>i{display:block;height:100%;background:var(--gold)}
+.rowTitle{font-weight:600;font-size:15px}.rowSub{color:var(--muted);font-size:13px;margin-top:2px}
+.rowVal{font-weight:700;white-space:nowrap;color:var(--gold-soft);text-align:right;font-size:15px}
+.rowVal.bad{color:var(--bad)}.rowVal.warn{color:var(--warn)}.rowVal.ok{color:var(--ok)}.rowVal.save{color:var(--save)}
+.empty{color:var(--muted);font-size:14px;padding:6px 0}
+.bar{height:8px;background:rgba(255,255,255,.14);border-radius:6px;overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;background:var(--ok)}
+.bar>i.r{background:var(--bad)}
+.bar>i.b{background:var(--save)}
 .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.act{border:1px solid var(--line);background:transparent;color:var(--gold);border-radius:8px;padding:6px 10px;font-size:12px}
+.act{border:1px solid var(--line);background:transparent;color:var(--gold);border-radius:8px;padding:6px 10px;font-size:13px}
 .act.good{background:var(--gold);color:var(--forest);border-color:var(--gold);font-weight:700}
-.act.red{color:var(--bad);border-color:rgba(220,123,113,.4)}
-.del{border:0;background:transparent;color:var(--bad);font-size:18px;padding:0 4px}
-nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;background:rgba(10,19,12,.97);border-top:1px solid var(--line);padding:6px 4px calc(env(safe-area-inset-bottom) + 6px)}
-nav.bottom button{flex:1;border:0;background:transparent;color:var(--muted);font-size:11px;padding:6px 2px}
-nav.bottom button.on{color:var(--gold)}nav.bottom span{display:block;font-size:18px}
+.act.red{color:var(--bad);border-color:rgba(255,129,116,.5)}
+.del{border:0;background:transparent;color:var(--bad);font-size:20px;padding:0 4px}
+nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;background:rgba(20,42,26,.98);border-top:1px solid var(--line);padding:6px 4px calc(env(safe-area-inset-bottom) + 6px)}
+nav.bottom button{flex:1;border:0;background:transparent;color:var(--muted);font-size:12px;padding:6px 2px}
+nav.bottom button.on{color:var(--gold);font-weight:700}nav.bottom span{display:block;font-size:19px}
 .modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center}
-.sheet{width:100%;max-width:560px;max-height:90dvh;overflow-y:auto;background:var(--forest);border-radius:18px 18px 0 0;padding:20px 18px calc(24px + env(safe-area-inset-bottom))}
-.sheet h2{font-family:var(--serif);font-size:24px;color:var(--gold);margin:0 0 16px}
-.sheet .field input,.sheet .field select{background:var(--night)}
-.spin{width:28px;height:28px;border:3px solid rgba(203,178,106,.2);border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite;margin:40px auto 12px}
+.sheet{width:100%;max-width:560px;max-height:90dvh;overflow-y:auto;background:var(--sheet);border-top:1px solid var(--line);border-radius:18px 18px 0 0;padding:20px 18px calc(24px + env(safe-area-inset-bottom))}
+.sheet h2{font-family:var(--serif);font-size:26px;color:var(--gold);margin:0 0 16px}
+.sheet .field input,.sheet .field select{background:var(--input)}
+.spin{width:28px;height:28px;border:3px solid rgba(203,178,106,.25);border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite;margin:40px auto 12px}
 @keyframes sp{to{transform:rotate(360deg)}}
-.info{width:18px;height:18px;border-radius:50%;border:1px solid var(--muted);background:transparent;color:var(--muted);font-size:11px;line-height:1;padding:0;flex-shrink:0;margin-left:6px}
-.help{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);color:#c9cdbf;font-size:12.5px;line-height:1.5}
+.info{width:20px;height:20px;border-radius:50%;border:1px solid var(--muted);background:transparent;color:var(--muted);font-size:12px;line-height:1;padding:0;flex-shrink:0;margin-left:6px}
+.help{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line);color:#e8ebdb;font-size:13.5px;line-height:1.55}
 .card .label{display:flex;align-items:center}
 .blockHead{display:flex;align-items:center;margin-bottom:4px}.blockHead .blockTitle{margin-bottom:0}
 .sep{height:1px;background:var(--line);margin:8px 0}
-.subTitle{color:var(--gold);font-size:13px;font-weight:700;margin:10px 0 2px}
+.subTitle{color:var(--gold);font-size:14px;font-weight:700;margin:10px 0 2px}
 </style>
 </head>
 <body>
@@ -162,7 +187,7 @@ try{ sb = window.supabase.createClient(SB_URL, SB_KEY, {auth:{persistSession:fal
 catch(e){ document.getElementById("loginMsg").innerHTML = '<div class="msg err">No se pudo cargar Supabase. Recarga la página.</div>'; }
 // Si el navegador restaura la página desde memoria (botón atrás), forzar recarga limpia
 window.addEventListener("pageshow", e => { if(e.persisted) location.reload(); });
-if(window.Chart){ Chart.defaults.color = "#9fa594"; }
+if(window.Chart){ Chart.defaults.color = "#d2d6c3"; Chart.defaults.font.size = 13; }
 
 /* ---------- Utilidades ---------- */
 const $ = id => document.getElementById(id);
@@ -417,7 +442,8 @@ function purchaseAdvice(){
     return a;
   });
 }
-const LEVEL_CLS = {buy:"ok", urgent:"bad", wait:"warn", ok:"", learn:""};
+// Compras de productos = egreso (rojo)
+const LEVEL_CLS = {buy:"bad", urgent:"bad", wait:"warn", ok:"", learn:""};
 
 /* ---------- Componentes ---------- */
 const HELP = {
@@ -462,16 +488,19 @@ function row(title, sub, val, cls, acts){
 const empty = t => '<div class="empty">'+t+'</div>';
 const canvas = id => '<div class="chartBox"><canvas id="'+id+'"></canvas></div>';
 function btn(a, r, label, cls){ return '<button class="act '+(cls||"")+'" data-a="'+a+'" data-k="'+esc(r.key)+'">'+label+'</button>'; }
-const PALETTE = ["#cbb26a","#86c595","#7fa6c9","#d98f6a","#b58fc7","#e3cf8c","#8fb8a8","#c9a0a0"];
+// Paletas: verde = ingresos, rojo = egresos
+const PALETTE = ["#62e08c","#9bedb6","#3fbf6a","#c4f4d3","#2f9e55","#e0f9e8"];
+const PALETTE_RED = ["#ff8174","#ffa89e","#e65f52","#ffc7c0","#c9473c","#ffe0dc"];
+const C_OK = "#62e08c", C_BAD = "#ff8174", C_SAVE = "#6db8ff", C_BG = "#1c3823";
 
 function drawChart(id, type, labels, data, opt){
   opt = opt || {}; if(!window.Chart) return;
   const el = $(id); if(!el) return; if(charts[id]) charts[id].destroy();
-  const round = type==="doughnut";
-  charts[id] = new Chart(el, {type, data:{labels, datasets:[{data, backgroundColor: round?PALETTE:"#cbb26a", borderWidth:0, borderRadius: type==="bar"?5:0}]},
+  const round = type==="doughnut", pal = opt.palette==="red" ? PALETTE_RED : PALETTE;
+  charts[id] = new Chart(el, {type, data:{labels, datasets:[{data, backgroundColor: round?pal:(opt.color||C_OK), borderWidth:0, borderRadius: type==="bar"?5:0}]},
     options:{responsive:true, maintainAspectRatio:false, indexAxis: opt.horizontal?"y":"x",
       plugins:{legend:{display:round,position:"bottom",labels:{boxWidth:12}}, tooltip:{callbacks:{label:c => opt.money?money(c.raw):String(c.raw)}}},
-      scales: round?{}:{x:{grid:{color:"rgba(255,255,255,.05)"},beginAtZero:true,ticks:{precision:0}},y:{grid:{color:"rgba(255,255,255,.05)"},beginAtZero:true,ticks:{precision:0}}}}});
+      scales: round?{}:{x:{grid:{color:"rgba(255,255,255,.08)"},beginAtZero:true,ticks:{precision:0}},y:{grid:{color:"rgba(255,255,255,.08)"},beginAtZero:true,ticks:{precision:0}}}}});
 }
 function killCharts(){ Object.keys(charts).forEach(k => { try{charts[k].destroy();}catch(e){} delete charts[k]; }); }
 
@@ -527,14 +556,14 @@ function renderResumen(){
     "Calculado con tus compras anteriores, el fondo de la barbería y cómo va la semana.");
 
   h += '<div class="grid" style="margin-top:12px">' +
-    card("Ganancia neta", money(profit), "Cobrado + propinas − gastos ("+money(g)+")", "gold") +
+    card("Ganancia neta", money(profit), "Cobrado + propinas − gastos ("+money(g)+")", "ok") +
     card("Clientes atendidos", s.cobradas.length, "Solo los cobrados") +
-    card("Ticket promedio", money(s.ticket), "Por cliente cobrado") +
+    card("Ticket promedio", money(s.ticket), "Por cliente cobrado", "ok") +
     card("Servicios realizados", s.svcTotal, topSvc ? "Más pedido: "+esc(topSvc.label) : "Sin datos todavía") +
-    card("Por cobrar", money(s.pendAmount), s.pend.length+" pendiente(s)"+(s.pendUnknown?" · "+s.pendUnknown+" sin monto":"")) +
+    card("Por cobrar", money(s.pendAmount), s.pend.length+" pendiente(s)"+(s.pendUnknown?" · "+s.pendUnknown+" sin monto":""), "warn") +
     card("No-shows", s.noshows.length, pct(due ? s.noshows.length/due*100 : 0)+" de las citas") +
     card("Ocupación", pct(occ.pct), occ.used+" de "+occ.avail+" turnos") +
-    card("Propinas", money(s.tips), esc(p.label)) + '</div>';
+    card("Propinas", money(s.tips), esc(p.label), "ok") + '</div>';
 
   const byDay = {}; s.cobradas.forEach(r => { byDay[r.fecha] = (byDay[r.fecha]||0) + r.charged; });
   const dayKeys = Object.keys(byDay).sort();
@@ -558,7 +587,7 @@ function renderResumen(){
 
   h += block("Meta del mes", goalHtml());
   $("pg-resumen").innerHTML = h;
-  if(dayKeys.length) drawChart("chDay","bar",dayKeys.map(shortDate),dayKeys.map(k => byDay[k]),{money:true});
+  if(dayKeys.length) drawChart("chDay","bar",dayKeys.map(shortDate),dayKeys.map(k => byDay[k]),{money:true, color:C_OK});
 }
 
 function occupancy(list, p){
@@ -580,7 +609,7 @@ function goalHtml(){
     const f = monthFin(month), rev = f.ing, profit = rev - f.gReg;
     const gr = num(g.objetivo_ingresos), gp = num(g.objetivo_ganancia);
     const pr = gr>0 ? Math.min(100,rev/gr*100) : 0, pp = gp>0 ? Math.min(100,profit/gp*100) : 0;
-    const line = (t,a,b,pc) => '<div class="row"><div class="rowTop"><div><div class="rowTitle">'+t+'</div><div class="rowSub">'+money(a)+' de '+money(b)+(b>a?' · faltan '+money(b-a):' · ¡meta lograda!')+'</div></div><div class="rowVal">'+pct(pc)+'</div></div><div class="bar"><i style="width:'+pc+'%"></i></div></div>';
+    const line = (t,a,b,pc) => '<div class="row"><div class="rowTop"><div><div class="rowTitle">'+t+'</div><div class="rowSub">'+money(a)+' de '+money(b)+(b>a?' · faltan '+money(b-a):' · ¡meta lograda!')+'</div></div><div class="rowVal ok">'+pct(pc)+'</div></div><div class="bar"><i style="width:'+pc+'%"></i></div></div>';
     body = line("Dinero cobrado",rev,gr,pr) + line("Ganancia neta",profit,gp,pp);
   }
   return body + '<button class="btnGhost" onclick="openGoal()">'+(g?"Cambiar meta":"Configurar meta")+'</button>';
@@ -604,25 +633,25 @@ function weeksBlock(){
   const body = ws.slice().reverse().slice(0,8).map(x => {
     const end = new Date(parseD(x.k)); end.setDate(end.getDate()+5);
     const tag = x.k===cur ? " · en curso" : (base.length>1 && x.k===best.k ? " · 🏆 mejor" : (base.length>1 && x.k===worst.k ? " · más floja" : ""));
-    return '<div class="row"><div class="rowTop"><div><div class="rowTitle">'+shortDate(x.k)+' al '+shortDate(fmt(end))+esc(tag)+'</div><div class="rowSub">'+x.n+' clientes · ticket '+money(x.ticket)+'</div></div><div class="rowVal">'+money(x.rev)+'</div></div><div class="bar"><i style="width:'+(x.rev/max*100)+'%"></i></div></div>';
+    return '<div class="row"><div class="rowTop"><div><div class="rowTitle">'+shortDate(x.k)+' al '+shortDate(fmt(end))+esc(tag)+'</div><div class="rowSub">'+x.n+' clientes · ticket '+money(x.ticket)+'</div></div><div class="rowVal ok">'+money(x.rev)+'</div></div><div class="bar"><i style="width:'+(x.rev/max*100)+'%"></i></div></div>';
   }).join("");
   return block("Mejor y peor semana", body, "Lunes a sábado, con propinas. Las semanas terminadas se comparan entre sí.");
 }
 function savingsBlock(){
   const t = todayStr(), f = monthFin(t.slice(0,7)), d = dayFin(t), fondo = fundTotal();
   const r = f.rate*100, ah = (100-r)*SAVE_PCT/100, tuyo = 100-r-ah;
-  let body = '<div class="note" style="margin:0 0 6px"><b>Por cada $100 que entran: $'+r.toFixed(0)+' a la barbería, $'+ah.toFixed(0)+' a ahorro y $'+tuyo.toFixed(0)+' son para ti.</b></div>';
+  let body = '<div class="note" style="margin:0 0 6px"><b>Por cada $100 que entran: <span style="color:var(--bad)">$'+r.toFixed(0)+' a la barbería</span>, <span style="color:var(--save)">$'+ah.toFixed(0)+' a ahorro</span> y <span style="color:var(--ok)">$'+tuyo.toFixed(0)+' son para ti</span>.</b></div>';
   body += '<div class="subTitle">De lo que entró hoy</div>' +
-    row("Entró hoy","cobrado + propinas",money(d.ing)) +
+    row("Entró hoy","cobrado + propinas",money(d.ing),"ok") +
     row("Para la barbería","gastos e insumos",money(d.reserve),"bad") +
-    row("Ahorro ("+SAVE_PCT+"% del resto)","no lo toques",money(d.ahorro),"ok") +
+    row("Ahorro ("+SAVE_PCT+"% del resto)","no lo toques",money(d.ahorro),"save") +
     row("Para ti hoy","puedes retirarlo",money(d.libre),"ok");
   body += '<div class="sep"></div><div class="subTitle">Acumulado del mes</div>' +
-    row("Ingresos del mes","cobrado + propinas",money(f.ing)) +
+    row("Ingresos del mes","cobrado + propinas",money(f.ing),"ok") +
     row("Reservado para la barbería","tope mensual "+money(BARBER_BUDGET),money(f.reserve),"bad") +
     row("Gastado (registrado)","lo que anotaste en Gastos",money(f.gReg),"bad") +
-    row("Fondo de la barbería","reservado − gastado, acumulado",money(fondo), fondo<0?"bad":"ok") +
-    row("Ahorro del mes",SAVE_PCT+"% de lo que queda",money(f.ahorro),"ok") +
+    row("Fondo de la barbería","reservado − gastado, acumulado",money(fondo),"bad") +
+    row("Ahorro del mes",SAVE_PCT+"% de lo que queda",money(f.ahorro),"save") +
     row("Disponible para retirar este mes","ya descontado barbería y ahorro",money(f.libre),"ok");
   if(f.deficit>0) body += '<div class="note" style="margin-top:8px;color:var(--bad)">Gastaste '+money(f.deficit)+' más de lo reservado este mes; ya se descontó de tu retiro.</div>';
   body += '<div class="note" style="margin-top:8px">El % para la barbería se ajusta solo según '+(f.source==="meta"?"tu meta del mes ("+money(f.expected)+")":"tu ritmo actual (proyección ≈ "+money(f.expected)+" al mes)")+'. Registra la renta y demás gastos fijos en Gastos para que el fondo sea real.</div>';
@@ -642,10 +671,10 @@ function renderDinero(){
   const profit = s.revenue + s.tips - g, total = s.revenue + s.tips;
   let h = '<h1>Dinero</h1><p class="lead">Ingresos, ahorro y gastos '+esc(p.label)+'.</p>';
   h += '<div class="grid">' +
-    card("Precio normal", money(s.expected), "Servicios cobrados") + card("Descuentos", money(s.disc), "Cobrado de menos") +
-    card("Extras", money(s.extra), "Cobrado sobre el precio") + card("Propinas", money(s.tips), esc(p.label)) +
-    card("Dinero cobrado", money(s.revenue), "Lo que entró por servicios", "gold") + card("Gastos", money(g), gl.length+" registro(s)") +
-    card("Ganancia neta", money(profit), "Margen: "+pct(total>0 ? profit/total*100 : 0), "gold") + '</div>';
+    card("Precio normal", money(s.expected), "Servicios cobrados", "ok") + card("Descuentos", money(s.disc), "Cobrado de menos", "bad") +
+    card("Extras", money(s.extra), "Cobrado sobre el precio", "ok") + card("Propinas", money(s.tips), esc(p.label), "ok") +
+    card("Dinero cobrado", money(s.revenue), "Lo que entró por servicios", "ok") + card("Gastos", money(g), gl.length+" registro(s)", "bad") +
+    card("Ganancia neta", money(profit), "Margen: "+pct(total>0 ? profit/total*100 : 0), "ok") + '</div>';
   h += savingsBlock() + productsBlock() + weeksBlock();
 
   const byCat = {}; gl.forEach(x => { const k = x.categoria||"otros"; byCat[k] = (byCat[k]||0) + num(x.monto); });
@@ -657,7 +686,7 @@ function renderDinero(){
     row(esc(x.descripcion||x.categoria||"Gasto"), niceDate(String(x.fecha))+" · "+esc(x.categoria||"otros"),
       money(x.monto)+' <button class="del" onclick="delExpense('+Number(x.id)+')" aria-label="Borrar">×</button>', "bad")).join("") : empty("Todavía no hay gastos."));
   $("pg-dinero").innerHTML = h;
-  if(cats.length) drawChart("chCat","doughnut",cats,cats.map(k => byCat[k]));
+  if(cats.length) drawChart("chCat","doughnut",cats,cats.map(k => byCat[k]),{palette:"red", money:true});
 }
 
 /* ---------- CLIENTES ---------- */
@@ -671,7 +700,7 @@ function renderClientes(){
   h += '<div class="grid">'+card("Clientes del período",active.length,"Vinieron "+esc(p.label))+card("Nuevos",nuevos.length,"Primera visita en el período")+
     card("Recurrentes",recurrentes.length,"2 visitas o más")+card("Desaparecidos",perdidos.length,"30 días o más sin venir")+'</div>';
   const top = active.slice().sort((a,b) => b.pRevenue-a.pRevenue || b.pVisits-a.pVisits).slice(0,10);
-  h += block("Quién te deja más dinero", top.length ? top.map((c,i) => row((i+1)+". "+esc(c.nombre), c.pVisits+" visita(s) · "+c.visits+" en total", money(c.pRevenue))).join("") : empty("Todavía no hay clientes."));
+  h += block("Quién te deja más dinero", top.length ? top.map((c,i) => row((i+1)+". "+esc(c.nombre), c.pVisits+" visita(s) · "+c.visits+" en total", money(c.pRevenue), "ok")).join("") : empty("Todavía no hay clientes."));
   h += block("Clientes desaparecidos", perdidos.length ? perdidos.slice(0,20).map(c => row(esc(c.nombre),
     "Última visita: "+niceDate(c.last)+" · "+c.visits+" visita(s)"+(c.telefono?" · "+esc(c.telefono):""), daysBetween(c.last,t)+" días","warn")).join("")
     : empty("Nadie lleva 30 días sin venir."), "Escríbeles: recuperar un cliente cuesta menos que conseguir uno nuevo.");
@@ -700,8 +729,8 @@ function renderAgenda(){
   $("pg-agenda").innerHTML = h;
   if(svc.length) drawChart("chSvc","bar",svc.map(x => x.label),svc.map(x => x.n),{horizontal:true});
   if(hasHist){
-    drawChart("chWd","bar",order.map(d => DAYS[d].slice(0,3)),order.map(d => wdRev[d]),{money:true});
-    drawChart("chHr","bar",SLOTS.map(t => t.replace(":00","").replace(" ","")),SLOTS.map(t => hourN[t]));
+    drawChart("chWd","bar",order.map(d => DAYS[d].slice(0,3)),order.map(d => wdRev[d]),{money:true, color:C_OK});
+    drawChart("chHr","bar",SLOTS.map(t => t.replace(":00","").replace(" ","")),SLOTS.map(t => hourN[t]), {color:C_OK});
   }
 }
 
@@ -716,8 +745,8 @@ function renderNoShows(){
   const clients = buildClients().filter(c => c.noshows>0).sort((a,b) => b.noshows-a.noshows).slice(0,10);
   let h = '<h1>No-shows</h1><p class="lead">Quién falta y cuánto te deben por eso.</p>';
   h += '<div class="grid">'+card("No-shows",s.noshows.length,esc(p.label))+card("Porcentaje",pct(due ? s.noshows.length/due*100 : 0),"De las citas que debían venir")+
-    card("Te deben",money(owedAmount),owed.length+" sin cobrar"+(owedUnknown?" · "+owedUnknown+" sin monto":""),owed.length?"gold":"")+
-    card("Ya cobrados",paid.length,"No-shows pagados")+'</div>';
+    card("Te deben",money(owedAmount),owed.length+" sin cobrar"+(owedUnknown?" · "+owedUnknown+" sin monto":""),owed.length?"bad":"")+
+    card("Ya cobrados",paid.length,"No-shows pagados","ok")+'</div>';
   h += block("Debes cobrarles", owed.length ? owed.map(r => row(esc(r.nombre),
     "Faltó el "+niceDate(r.fecha)+" · "+esc(r.turno)+(r.telefono?" · "+esc(r.telefono):""),
     (r.total||r.expected)?money(r.total||r.expected):"sin monto","bad",
@@ -883,37 +912,40 @@ const isProdGasto = g => norm(g.categoria) !== "otros" && num(g.monto) > 0;
 function conf(n){ return n < 4 ? "poca" : (n < 12 ? "media" : "alta"); }
 function median(a){ const s = a.slice().sort((x,y) => x-y), m = Math.floor(s.length/2); return s.length % 2 ? s[m] : (s[m-1]+s[m])/2; }
 const sgn = v => (v >= 0 ? "+" : "") + money(v);
-const barRow = (t, sub, val, pc) => '<div class="row"><div class="rowTop"><div><div class="rowTitle">'+t+'</div><div class="rowSub">'+sub+'</div></div><div class="rowVal">'+val+'</div></div><div class="bar"><i style="width:'+Math.max(0,Math.min(100,pc))+'%"></i></div></div>';
+const barRow = (t, sub, val, pc, cls, bcls) => '<div class="row"><div class="rowTop"><div><div class="rowTitle">'+t+'</div><div class="rowSub">'+sub+'</div></div><div class="rowVal '+(cls||"")+'">'+val+'</div></div><div class="bar"><i class="'+(bcls||"")+'" style="width:'+Math.max(0,Math.min(100,pc))+'%"></i></div></div>';
 
 /* =====================================================================
-   GRÁFICAS: líneas con puntos (y círculos). Reemplaza las barras de antes.
+   GRÁFICAS: líneas con puntos (y círculos).
+   Verde = ingresos · Rojo = egresos · Azul = ahorro/meta
    ===================================================================== */
 window.drawChart = function(id, type, labels, data, opt){
   opt = opt || {}; if(!window.Chart) return;
   const el = $(id); if(!el) return; if(charts[id]) charts[id].destroy();
+  const color = opt.color || C_OK;
   if(type === "doughnut" || (type === "bar" && opt.horizontal)){
-    charts[id] = new Chart(el, {type:"doughnut", data:{labels, datasets:[{data, backgroundColor:PALETTE, borderWidth:0}]},
+    const pal = opt.palette === "red" ? PALETTE_RED : PALETTE;
+    charts[id] = new Chart(el, {type:"doughnut", data:{labels, datasets:[{data, backgroundColor:pal, borderColor:C_BG, borderWidth:2}]},
       options:{responsive:true, maintainAspectRatio:false, cutout:"62%",
         plugins:{legend:{position:"bottom", labels:{boxWidth:12}}, tooltip:{callbacks:{label:c => c.label+": "+(opt.money?money(c.raw):c.raw)}}}}});
     return;
   }
-  charts[id] = new Chart(el, {type:"line", data:{labels, datasets:[{data, borderColor:"#cbb26a", backgroundColor:"rgba(203,178,106,.12)", fill:true, tension:.35,
-      pointRadius:4, pointHoverRadius:6, pointBackgroundColor:"#0f1d13", pointBorderColor:"#cbb26a", pointBorderWidth:2, borderWidth:2.5}]},
+  charts[id] = new Chart(el, {type:"line", data:{labels, datasets:[{data, borderColor:color, backgroundColor:color+"24", fill:true, tension:.35,
+      pointRadius:4, pointHoverRadius:6, pointBackgroundColor:C_BG, pointBorderColor:color, pointBorderWidth:2, borderWidth:2.5}]},
     options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}, tooltip:{callbacks:{label:c => opt.money?money(c.raw):String(c.raw)}}},
-      scales:{x:{grid:{display:false}}, y:{beginAtZero:true, grid:{color:"rgba(255,255,255,.05)"}, ticks:{precision:0, callback:v => opt.money?money(v):v}}}}});
+      scales:{x:{grid:{display:false}}, y:{beginAtZero:true, grid:{color:"rgba(255,255,255,.08)"}, ticks:{precision:0, callback:v => opt.money?money(v):v}}}}});
 };
 function multiLine(id, labels, sets, opt){
   opt = opt || {}; if(!window.Chart) return;
   const el = $(id); if(!el) return; if(charts[id]) charts[id].destroy();
   charts[id] = new Chart(el, {type:"line", data:{labels, datasets:sets.map(s => ({
-      label:s.label, data:s.data, borderColor:s.color, backgroundColor:s.fill ? s.color+"22" : "transparent", fill:!!s.fill,
+      label:s.label, data:s.data, borderColor:s.color, backgroundColor:s.fill ? s.color+"24" : "transparent", fill:!!s.fill,
       tension:s.tension === undefined ? .3 : s.tension, borderDash:s.dash || [], pointRadius:s.r === undefined ? 4 : s.r, pointHoverRadius:6,
-      pointBackgroundColor:"#0f1d13", pointBorderColor:s.color, pointBorderWidth:2, borderWidth:2.5, spanGaps:false}))},
+      pointBackgroundColor:C_BG, pointBorderColor:s.color, pointBorderWidth:2, borderWidth:2.5, spanGaps:false}))},
     options:{responsive:true, maintainAspectRatio:false, interaction:{mode:"index", intersect:false},
       plugins:{legend:{display:sets.length > 1, position:"bottom", labels:{boxWidth:12}},
         tooltip:{callbacks:{label:c => (c.dataset.label ? c.dataset.label+": " : "")+(opt.money ? money(c.raw) : c.raw)}}},
       scales:{x:{grid:{display:false}, ticks:{maxTicksLimit:opt.maxX || 10}},
-        y:{beginAtZero:opt.beginZero !== false, grid:{color:"rgba(255,255,255,.05)"}, ticks:{callback:v => opt.money ? money(v) : v}}}}});
+        y:{beginAtZero:opt.beginZero !== false, grid:{color:"rgba(255,255,255,.08)"}, ticks:{callback:v => opt.money ? money(v) : v}}}}});
 }
 
 /* =====================================================================
@@ -1071,7 +1103,7 @@ aprender(x => { const {m, G, P} = x;
   let t = "Para cubrir la barbería del mes te faltan "+money(falta)+(n ? " (unos "+n+" clientes)" : "")+".";
   t += P.eqDay ? " Al ritmo actual lo logras el día "+P.eqDay+"." : " Al ritmo actual no llegarías este mes: toca más clientes o más ticket.";
   return [{p:P.eqDay ? 5 : 9, tone:P.eqDay ? "" : "bad", t}]; });
-aprender(x => purchaseAdvice().filter(a => a.level === "buy" || a.level === "urgent").map(a => ({p:8, tone:a.level === "urgent" ? "bad" : "ok",
+aprender(x => purchaseAdvice().filter(a => a.level === "buy" || a.level === "urgent").map(a => ({p:8, tone:"bad",
   t:a.level === "urgent" ? a.name+" ya te tocaba y el fondo no alcanza: cómpralo con los próximos cobros." : "Es hora de abastecer "+a.name+": el fondo lo cubre."})));
 aprender(x => { const n = x.CY.risk.length;
   return n ? [{p:8, tone:"warn", t:n+" cliente(s) ya pasaron su ritmo normal de visitas. Escríbeles desde Clientes: es la forma más barata de llenar la agenda."}] : []; });
@@ -1095,7 +1127,7 @@ function adminBlock(X){
   INSIGHTS.forEach(fn => { try{ (fn(X) || []).forEach(i => all.push(i)); }catch(e){ console.error(e); } });
   all.sort((a,b) => b.p - a.p);
   const top = all.slice(0,5);
-  const body = top.length ? top.map(i => '<div class="row"><div class="rowTitle" style="font-weight:500;line-height:1.45"><span style="color:'+(TONE_COLOR[i.tone] || TONE_COLOR[""])+'">●</span> '+esc(i.t)+'</div></div>').join("")
+  const body = top.length ? top.map(i => '<div class="row"><div class="rowTitle" style="font-weight:500;line-height:1.5"><span style="color:'+(TONE_COLOR[i.tone] || TONE_COLOR[""])+'">●</span> '+esc(i.t)+'</div></div>').join("")
     : empty("Todavía no tengo suficientes datos. Con cada cobro que anotes voy aprendiendo.");
   return block("Tu administrador", body, "Resume lo más importante del momento. Aprende solo de tus cobros, gastos y clientes: mientras más datos, más acertado.");
 }
@@ -1109,21 +1141,21 @@ function renderPlan(X){
   if(G.todayWd === 0) b += empty("Hoy es domingo.");
   else if(G.daily){
     const pc = m.todayIng/G.daily*100;
-    b += barRow("Meta de hoy", money(m.todayIng)+" de "+money(G.daily)+(m.todayIng >= G.daily ? " · ¡lograda!" : " · faltan "+money(G.daily - m.todayIng)), pct(Math.min(100,pc)), pc);
+    b += barRow("Meta de hoy", money(m.todayIng)+" de "+money(G.daily)+(m.todayIng >= G.daily ? " · ¡lograda!" : " · faltan "+money(G.daily - m.todayIng)), pct(Math.min(100,pc)), pc, "ok", "");
     b += '<div class="note">'+(G.src === "meta" ? "Sale de tu meta del mes repartida entre los días de trabajo." : "Es lo que sueles hacer los "+DAYS[G.todayWd].toLowerCase()+"s.")+'</div>';
   }else b += empty("Aún no sé cuánto sueles hacer los "+DAYS[G.todayWd].toLowerCase()+"s. Configura una meta del mes o espera unos días de datos.");
   const eqpc = m.monthIng/G.eq*100;
-  b += barRow("Barbería del mes cubierta", money(m.monthIng)+" de "+money(G.eq)+(m.monthIng >= G.eq ? " · ¡cubierta!" : " · faltan "+money(G.eq - m.monthIng)), pct(Math.min(100,eqpc)), eqpc);
+  b += barRow("Barbería del mes cubierta", money(m.monthIng)+" de "+money(G.eq)+(m.monthIng >= G.eq ? " · ¡cubierta!" : " · faltan "+money(G.eq - m.monthIng)), pct(Math.min(100,eqpc)), eqpc, "bad", "r");
   h += block("Hoy y punto de equilibrio", b, "El punto de equilibrio es lo que necesitas cobrar para pagar la barbería del mes (el tope que fijaste o tus gastos anotados, lo que sea mayor). Pasado ese punto, lo demás es ganancia.");
 
   // Proyección
   let pj = '<div class="chartBox"><canvas id="chProj"></canvas></div>';
   pj += row("Cierre estimado del mes", G.meta > 0 ? (P.end >= G.meta ? "Vas a superar tu meta de "+money(G.meta) : "Te faltarían "+money(G.meta - P.end)+" para tu meta de "+money(G.meta)) : "Configura una meta del mes para compararlo", money(P.end), P.end >= (G.meta || 0) ? "ok" : "warn");
-  h += block("¿Cómo vas a cerrar el mes?", pj, "La línea sólida es lo cobrado hasta hoy. La punteada es lo que pasaría si los días que faltan se parecen a lo que sueles hacer cada día de la semana (cuenta tus citas ya reservadas). Se corrige sola con cada cobro.");
+  h += block("¿Cómo vas a cerrar el mes?", pj, "La línea sólida verde es lo cobrado hasta hoy. La punteada es lo que pasaría si los días que faltan se parecen a lo que sueles hacer cada día de la semana (cuenta tus citas ya reservadas). La roja es el punto de equilibrio y la azul tu meta. Se corrige sola con cada cobro.");
   after.push(() => {
-    const sets = [{label:"Cobrado", data:P.act, color:"#cbb26a", fill:true, r:2}, {label:"Proyección", data:P.pro, color:"#86c595", dash:[6,5], r:2},
-      {label:"Equilibrio", data:P.labels.map(() => Math.round(G.eq)), color:"#dc7b71", dash:[2,4], r:0, tension:0}];
-    if(G.meta > 0) sets.push({label:"Meta", data:P.labels.map(() => Math.round(G.meta)), color:"#7fa6c9", dash:[2,4], r:0, tension:0});
+    const sets = [{label:"Cobrado", data:P.act, color:C_OK, fill:true, r:2}, {label:"Proyección", data:P.pro, color:"#b7f2cb", dash:[6,5], r:2},
+      {label:"Equilibrio", data:P.labels.map(() => Math.round(G.eq)), color:C_BAD, dash:[2,4], r:0, tension:0}];
+    if(G.meta > 0) sets.push({label:"Meta", data:P.labels.map(() => Math.round(G.meta)), color:C_SAVE, dash:[2,4], r:0, tension:0});
     multiLine("chProj", P.labels, sets, {money:true, maxX:8});
   });
 
@@ -1132,10 +1164,10 @@ function renderPlan(X){
   const nsList = mr.filter(r => r.status === "noshow" && !r.noShowPaid), nsLost = nsList.reduce((a,r) => a + (r.total || r.expected || 0), 0);
   const gm = gastos.filter(g => mon(String(g.fecha)) === m.month), gProd = sumGastos(gm.filter(isProdGasto)), gOtros = sumGastos(gm) - gProd;
   const reinc = buildClients().filter(c => c.noshows >= 2).sort((a,c) => c.noshows - a.noshows);
-  let fg = row("Descuentos", "Lo que dejaste de cobrar este mes", money(s.disc), s.disc > 0 ? "warn" : "") +
-    row("No-shows sin cobrar", nsList.length+" cliente(s) faltaron este mes", money(nsLost), nsLost > 0 ? "bad" : "") +
-    row("Productos y materiales", "Gastado este mes", money(gProd), "") +
-    row("Otros gastos", "Renta, luz u otros que anotaste", money(gOtros), "");
+  let fg = row("Descuentos", "Lo que dejaste de cobrar este mes", money(s.disc), "bad") +
+    row("No-shows sin cobrar", nsList.length+" cliente(s) faltaron este mes", money(nsLost), "bad") +
+    row("Productos y materiales", "Gastado este mes", money(gProd), "bad") +
+    row("Otros gastos", "Renta, luz u otros que anotaste", money(gOtros), "bad");
   if(reinc.length) fg += row("Los que más faltan", reinc.slice(0,3).map(c => esc(c.nombre)+" ("+c.noshows+")").join(", "), "Pide adelanto", "warn");
   h += block("Por dónde se te va el dinero", fg, "Resume el mes en curso: cuánto regalas en descuentos, cuánto pierdes por clientes que no vienen y en qué gastas. Si alguien falta 2 veces o más, conviene pedirle un adelanto para reservar.");
 
@@ -1144,8 +1176,8 @@ function renderPlan(X){
   if(K.pts.length >= 2){
     cs += '<div class="chartBox"><canvas id="chCost"></canvas></div>';
     cs += K.alert ? row("Ojo", "Esta semana cada cliente cuesta más en productos que tu promedio ("+money(K.alert.avg)+")", "+"+K.alert.pct.toFixed(0)+"%", "bad")
-      : row("Todo normal", "El costo de productos por cliente está dentro de lo habitual", money(K.pts[K.pts.length-1].v), "ok");
-    after.push(() => multiLine("chCost", K.pts.map(p => shortDate(p.k)), [{label:"Productos por cliente", data:K.pts.map(p => Math.round(p.v)), color:"#d98f6a", fill:true}], {money:true}));
+      : row("Todo normal", "El costo de productos por cliente está dentro de lo habitual", money(K.pts[K.pts.length-1].v), "bad");
+    after.push(() => multiLine("chCost", K.pts.map(p => shortDate(p.k)), [{label:"Productos por cliente", data:K.pts.map(p => Math.round(p.v)), color:C_BAD, fill:true}], {money:true}));
   }else cs += empty("Aprendiendo: necesito al menos 2 semanas cerradas y compras de productos anotadas.");
   h += block("Cuánto te cuesta cada cliente en productos", cs, "Suma lo que gastaste en productos de las últimas 4 semanas y lo divide entre los clientes cobrados. Si sube mucho, algún producto subió de precio o estás gastando de más.");
 
@@ -1153,7 +1185,7 @@ function renderPlan(X){
   let sv = "";
   if(CB.list.length){
     sv += '<div class="chartBox"><canvas id="chCombo"></canvas></div>';
-    if(CB.ranked.length) sv += '<div class="subTitle">Lo que mejor te paga por hora</div>' + CB.ranked.slice(0,6).map(o => row(esc(o.label), o.n+" vez/veces · cobras "+money(o.avg)+" en promedio · confianza "+conf(o.n), money(o.perHour)+"/h", o === CB.ranked[0] ? "ok" : "")).join("");
+    if(CB.ranked.length) sv += '<div class="subTitle">Lo que mejor te paga por hora</div>' + CB.ranked.slice(0,6).map(o => row(esc(o.label), o.n+" vez/veces · cobras "+money(o.avg)+" en promedio · confianza "+conf(o.n), money(o.perHour)+"/h", "ok")).join("");
     else sv += '<div class="note">Cuando un servicio se repita 2 veces te digo cuál paga mejor por hora.</div>';
     after.push(() => drawChart("chCombo", "doughnut", CB.byRev.slice(0,6).map(o => o.label), CB.byRev.slice(0,6).map(o => Math.round(o.rev)), {money:true}));
   }else sv += empty("Aún no hay servicios cobrados con su nombre.");
@@ -1205,12 +1237,12 @@ function renderSim(X){
   const d = simDefaults(X.m);
   ["N","T","C"].forEach(k => { if(!SIM.touched[k]) SIM[k] = d[k]; });
   let h = '<h1>Simula</h1><p class="lead">Prueba cambiar tus precios y mira cómo te iría.</p>';
-  h += '<div class="msg" style="margin:0 0 12px;background:rgba(203,178,106,.1);border:1px solid var(--line);color:var(--gold-soft)">Esto es solo una simulación: nada de lo que escribas aquí se guarda ni cambia tus cifras reales.</div>';
+  h += '<div class="msg" style="margin:0 0 12px;background:rgba(203,178,106,.12);border:1px solid var(--line);color:var(--gold-soft)">Esto es solo una simulación: nada de lo que escribas aquí se guarda ni cambia tus cifras reales.</div>';
   h += '<div class="block">' + simField("N","Clientes que atiendes al mes",SIM.N) + simField("T","Cuánto cobras en promedio por cliente",SIM.T) + simField("C","Lo que gastas en productos por cliente",SIM.C) +
     simField("X","Cuánto subirías el precio (por cliente)",SIM.X) + simField("L","Clientes que crees que podrías perder (%)",SIM.L) +
     '<div class="note">Los 3 primeros los calculé con tus últimos 28 días. Cámbialos si quieres probar otra situación.</div></div>';
   h += '<div class="block"><div class="blockTitle">Resultado</div><div id="simOut"></div><div class="chartBox" style="margin-top:12px"><canvas id="chSim"></canvas></div>' +
-    '<div class="note">La línea muestra cuánto ganas de más (o de menos) al mes según el % de clientes que pierdas. Donde cruza el cero está tu punto seguro.</div></div>';
+    '<div class="note">La línea verde muestra cuánto ganas de más (o de menos) al mes según el % de clientes que pierdas. Donde cruza la línea roja (cero) está tu punto seguro.</div></div>';
   $("pg-sim").innerHTML = h;
   simOut();
 }
@@ -1220,13 +1252,13 @@ function simOut(){
   if(!(N > 0) || !(T > 0)){ box.innerHTML = empty("Escribe cuántos clientes atiendes al mes y cuánto cobras en promedio."); if(charts.chSim){ charts.chSim.destroy(); delete charts.chSim; } return; }
   const base = N*(T - c), prof = l => N*(1 - l)*(T + X - c), extra = l => prof(l) - base;
   const brk = (X > 0 && (T + X - c) > 0) ? X/(T + X - c)*100 : null;
-  let h = row("Hoy ganas al mes", "Clientes × (lo que cobras − productos)", money(base), "") +
+  let h = row("Hoy ganas al mes", "Clientes × (lo que cobras − productos)", money(base), "ok") +
     row("Subes "+money(X)+" y no pierdes a nadie", "Lo mismo, con el precio nuevo", sgn(extra(0)), extra(0) >= 0 ? "ok" : "bad") +
     row("Subes "+money(X)+" y pierdes "+(SIM.L || 0)+"% de clientes", "Con menos clientes pero más caros", sgn(extra(L)), extra(L) >= 0 ? "ok" : "bad");
   if(brk !== null) h += row("Tu punto seguro", "Puedes perder hasta este % de clientes y ganar igual que hoy", brk.toFixed(0)+"%", "warn");
   box.innerHTML = h;
   const xs = [], ys = []; for(let l = 0; l <= 20; l += 2){ xs.push(l+"%"); ys.push(Math.round(extra(l/100))); }
-  multiLine("chSim", xs, [{label:"Ganancia de más al mes", data:ys, color:"#cbb26a", fill:true}, {label:"Igual que hoy", data:xs.map(() => 0), color:"#dc7b71", dash:[2,4], r:0, tension:0}], {money:true, beginZero:false});
+  multiLine("chSim", xs, [{label:"Ganancia de más al mes", data:ys, color:C_OK, fill:true}, {label:"Igual que hoy", data:xs.map(() => 0), color:C_BAD, dash:[2,4], r:0, tension:0}], {money:true, beginZero:false});
 }
 
 /* ---------- Avisos a clientes (en la pantalla Clientes) ---------- */
@@ -1278,7 +1310,7 @@ const main = document.querySelector("main");
 const nav = document.querySelector("nav.bottom");
 nav.insertAdjacentHTML("beforeend", '<button data-pg="plan"><span>↗</span>Plan</button><button data-pg="sim"><span>≈</span>Simula</button>');
 const st = document.createElement("style");
-st.textContent = "nav.bottom button{font-size:10px}nav.bottom span{font-size:17px}a.act{display:inline-block;text-decoration:none}";
+st.textContent = "nav.bottom button{font-size:11px}nav.bottom span{font-size:18px}a.act{display:inline-block;text-decoration:none}";
 document.head.appendChild(st);
 const PAGES = ["resumen","dinero","clientes","agenda","noshows","plan","sim"];
 nav.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
