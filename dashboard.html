@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Mono's Barbería | Panel</title>
+<link rel="icon" type="image/png" sizes="520x520" href="favicon.jpg">
+<link rel="apple-touch-icon" sizes="520x520" href="favicon.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
@@ -107,6 +109,8 @@ nav.bottom button.on{color:var(--gold);font-weight:700}nav.bottom span{display:b
 .loginLogo{display:block;width:300px;max-width:85%;height:auto;margin:0 auto 12px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.45))}
 .loginSub{text-align:center}
 .brandLogo{display:block;height:38px;width:auto}
+#refreshBtn{min-width:118px;text-align:center}
+#refreshBtn.spinning::before{content:"";display:inline-block;width:11px;height:11px;margin-right:6px;border:2px solid rgba(203,178,106,.35);border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite;vertical-align:-1px}
 </style>
 </head>
 <body>
@@ -845,7 +849,16 @@ function leave(){
 $("loginBtn").addEventListener("click", login);
 $("password").addEventListener("keydown", e => { if(e.key==="Enter") login(); });
 $("logoutBtn").addEventListener("click", async () => { await sb.auth.signOut(); });
-$("refreshBtn").addEventListener("click", loadData);
+$("refreshBtn").addEventListener("click", async () => {
+  const b = $("refreshBtn"); if(b.disabled) return;
+  b.disabled = true; b.classList.add("spinning"); b.textContent = "Actualizando";
+  const t0 = Date.now();
+  await loadData();
+  const wait = 700 - (Date.now() - t0);
+  if(wait > 0) await new Promise(r => setTimeout(r, wait));
+  b.classList.remove("spinning"); b.textContent = "Listo ✓";
+  setTimeout(() => { b.textContent = "Actualizar"; b.disabled = false; }, 900);
+});
 $("saveExpense").addEventListener("click", saveExpense);
 $("saveGoal").addEventListener("click", saveGoal);
 document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => closeModal(b.dataset.close)));
