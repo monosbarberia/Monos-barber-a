@@ -1335,24 +1335,30 @@ const fld = (id,label,type,val,extra) => '<div class="field"><label for="'+id+'"
 const owedOf = r => r.total || r.expected || 0;
 
 /* ---------- Guardado de ajustes (Supabase tabla "ajustes"; si no existe, en este teléfono) ---------- */
+let DBERR = "";
+const pend = (k, on) => { try{ if(on === undefined) return localStorage.getItem("monos_pend_"+k) === "1"; if(on) localStorage.setItem("monos_pend_"+k,"1"); else localStorage.removeItem("monos_pend_"+k); }catch(e){} return false; };
 async function kvGet(k, def){
-  if(useDB){
-    try{
-      const {data, error} = await sb.from("ajustes").select("valor").eq("clave", k).maybeSingle();
-      if(error) throw error;
-      return data ? data.valor : def;
-    }catch(e){ useDB = false; console.warn("ajustes no disponible:", e.message || e); }
-  }
-  try{ const v = localStorage.getItem("monos_"+k); return v ? JSON.parse(v) : def; }catch(e){ return def; }
+  let local = def;
+  try{ const v = localStorage.getItem("monos_"+k); if(v) local = JSON.parse(v); }catch(e){}
+  if(pend(k)) return local;
+  try{
+    const {data, error} = await sb.from("ajustes").select("valor").eq("clave", k).limit(1);
+    if(error) throw error;
+    if(data && data.length) return data[0].valor;
+  }catch(e){ DBERR = e.message || String(e); }
+  return local;
 }
 async function kvSet(k, v){
-  if(useDB){
-    try{
-      const {error} = await sb.from("ajustes").upsert({clave:k, valor:v, updated_at:new Date().toISOString()});
-      if(error) throw error; return;
-    }catch(e){ useDB = false; console.warn("ajustes no disponible:", e.message || e); }
-  }
   try{ localStorage.setItem("monos_"+k, JSON.stringify(v)); }catch(e){}
+  try{
+    let r = await sb.from("ajustes").update({valor:v}).eq("clave", k).select("clave");
+    if(r.error) throw r.error;
+    if(!r.data || !r.data.length){
+      r = await sb.from("ajustes").insert({clave:k, valor:v}).select("clave");
+      if(r.error) throw r.error;
+    }
+    pend(k, false); DBERR = ""; return true;
+  }catch(e){ pend(k, true); DBERR = e.message || String(e); return false; }
 }
 function applyCfg(){
   if(CFG.start_date && ISO.test(CFG.start_date)) START_DATE = CFG.start_date;
@@ -1530,6 +1536,7 @@ function cierreTexto(day){
   L.push("👥 Atendidos: *"+cob.length+"*"+(svc ? " ("+svc+" servicios)" : ""));
   L.push("💵 Cobrado: *"+money(rev)+"*");
   L.push("🙌 Propinas: *"+money(tips)+"*");
+  L.push("🔴 Dejado de ganar por descuentos: *"+money(resumen(cob).disc)+"*");
   L.push("➕ Total del día: *"+money(rev+tips)+"*");
   if(cob.length) L.push("🎟️ Ticket promedio: "+money(rev/cob.length));
   if(ns.length) L.push("🚫 No-shows: "+ns.length+" ("+ns.slice(0,3).map(r => r.nombre).join(", ")+")");
@@ -1763,7 +1770,7 @@ async function liberarDia(f){
 function renderAjustes(){
   if(DIRTY["pg-ajustes"]) return;
   let h = '<h1>Ajustes</h1><p class="lead">Lo que antes cambiabas en el código ahora se cambia aquí.</p>';
-  if(!useDB) h += '<div class="msg err" style="margin:0 0 12px">No encontré la tabla de ajustes en Supabase, así que guardo todo solo en este teléfono. Corre el SQL que te dejé en el chat para que se guarde en la nube.</div>';
+  if(DBERR) h += '<div class="msg err" style="margin:0 0 12px">Supabase no está guardando tus ajustes ('+esc(DBERR)+'). Por ahora quedan solo en este teléfono.</div>';
   h += '<div class="block"><div class="blockTitle">Negocio</div>'+
     fld("ajStart","Día desde el que cuenta el panel","date",START_DATE)+'<div class="note" style="margin:-8px 0 12px">Pon aquí el día que vuelvas a trabajar: lo anterior se ignora y las citas fijas dejan de salir como pendientes.</div>'+
     fld("ajBudget","Gastos fijos de la barbería por mes","number",BARBER_BUDGET)+
@@ -1786,8 +1793,8 @@ async function guardarAjustes(){
   CFG = Object.assign({}, CFG, {start_date:start, barber_budget:budget, save_pct:save, ahorro_meta:num($("ajAhorro").value),
     mi_numero:digits($("ajNum").value), bot_url:$("ajBot").value.trim(), auto_cierre:$("ajAuto").value === "1"});
   if(CFG.bot_url && CFG.bot_url.indexOf("{texto}") < 0){ toast("Falta {texto} en la dirección del bot."); return; }
-  await kvSet("config", CFG); DIRTY["pg-ajustes"] = false; applyCfg();
-  toast("Ajustes guardados"); await loadData();
+  const okc = await kvSet("config", CFG); DIRTY["pg-ajustes"] = false; applyCfg();
+  toast(okc ? "Ajustes guardados" : "Guardado solo en este teléfono: "+DBERR, 7000); await loadData();
 }
 function renderMensajes(){
   if(DIRTY["pg-mensajes"]) return;
@@ -1802,7 +1809,10 @@ function renderMensajes(){
 }
 async function guardarMensajes(){
   MSGS = {riesgo:$("msRiesgo").value.trim(), recuperar:$("msRecup").value.trim(), noshow:$("msNs").value.trim(), link:$("msLink").value.trim(), pais:digits($("msPais").value)};
-  window.setMsgs(MSGS); await kvSet("mensajes", MSGS); DIRTY["pg-mensajes"] = false; toast("Mensajes guardados"); renderAll();
+  window.setMsgs(MSGS);
+  const ok = await kvSet("mensajes", MSGS); DIRTY["pg-mensajes"] = false;
+  toast(ok ? "Mensajes guardados" : "Guardado solo en este teléfono: "+DBERR, 7000);
+  renderAll();
 }
 
 /* ---------- RESPALDO ---------- */
