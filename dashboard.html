@@ -1536,7 +1536,7 @@ function cierreTexto(day){
   L.push("👥 Atendidos: *"+cob.length+"*"+(svc ? " ("+svc+" servicios)" : ""));
   L.push("💵 Cobrado: *"+money(rev)+"*");
   L.push("🙌 Propinas: *"+money(tips)+"*");
-  L.push("🔴 Dejado de ganar por descuentos: *"+money(resumen(cob).disc)+"*");
+  L.push("🔴 Descuentos: *"+money(resumen(cob).disc)+"*");
   L.push("➕ Total del día: *"+money(rev+tips)+"*");
   if(cob.length) L.push("🎟️ Ticket promedio: "+money(rev/cob.length));
   if(ns.length) L.push("🚫 No-shows: "+ns.length+" ("+ns.slice(0,3).map(r => r.nombre).join(", ")+")");
