@@ -111,6 +111,14 @@ nav.bottom button.on{color:var(--gold);font-weight:700}nav.bottom span{display:b
 .brandLogo{display:block;height:38px;width:auto}
 #refreshBtn{min-width:118px;text-align:center}
 #refreshBtn.spinning::before{content:"";display:inline-block;width:11px;height:11px;margin-right:6px;border:2px solid rgba(203,178,106,.35);border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite;vertical-align:-1px}
+nav.bottom svg{width:23px;height:23px;display:block;margin:0 auto 3px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+button,.act,.chip,.period{transition:transform .08s,filter .08s}
+button:active,.act:active,.chip:active,.period:active{transform:scale(.95);filter:brightness(1.3)}
+#xBusy{position:fixed;top:0;left:0;right:0;height:3px;z-index:300;pointer-events:none;opacity:0;transition:opacity .15s;background:linear-gradient(90deg,transparent,var(--gold),transparent) no-repeat;background-size:40% 100%;animation:xb 1s linear infinite}
+#xBusy.on{opacity:1}
+@keyframes xb{from{background-position:-40% 0}to{background-position:140% 0}}
+body #xToast{top:calc(env(safe-area-inset-top) + 70px);bottom:auto;left:auto;right:12px;margin:0;max-width:300px;background:var(--sheet);color:var(--cream);font-weight:500;font-size:14px;text-align:left;border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:8px;padding:11px 14px;box-shadow:0 8px 24px rgba(0,0,0,.45);transform:translateY(-8px);transition:opacity .25s,transform .25s}
+body #xToast.show{transform:none}
 </style>
 </head>
 <body>
@@ -1860,10 +1868,10 @@ function decorateNoShows(){
 const PAGES = ["hoy","resumen","dinero","clientes","agenda","noshows","plan","sim","precios","gastos","metas","compras","bloqueos","ajustes","mensajes","respaldo"];
 const STATS = ["resumen","dinero","clientes","agenda","noshows","plan","sim"];
 const GROUPS = {
-  hoy:{label:"Hoy", icon:"☀", page:"hoy"},
-  stats:{label:"Estadísticas", icon:"▦", items:[["resumen","Resumen"],["dinero","Dinero"],["clientes","Clientes"],["agenda","Agenda"],["noshows","No-shows"],["plan","Plan"],["sim","Simula"]]},
-  negocio:{label:"Negocio", icon:"✂", items:[["precios","Precios"],["gastos","Gastos y retiros"],["metas","Metas"],["compras","Compras"],["bloqueos","Bloquear días"]]},
-  mas:{label:"Más", icon:"≡", items:[["ajustes","Ajustes"],["mensajes","Mensajes"],["respaldo","Respaldo"],["salir","Salir"]]}
+  hoy:{label:"Hoy", icon:"'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>'", page:"hoy"},
+  stats:{label:"Estadísticas", icon:"'<svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V4M19 20v-6"/></svg>'", items:[["resumen","Resumen"],["dinero","Dinero"],["clientes","Clientes"],["agenda","Agenda"],["noshows","No-shows"],["plan","Plan"],["sim","Simula"]]},
+  negocio:{label:"Negocio", icon:"'<svg viewBox="0 0 24 24"><rect x="3.5" y="7.5" width="17" height="12" rx="2"/><path d="M9 7.5v-2h6v2M3.5 13h17"/></svg>'", items:[["precios","Precios"],["gastos","Gastos y retiros"],["metas","Metas"],["compras","Compras"],["bloqueos","Bloquear días"]]},
+  mas:{label:"Más", icon:"'<svg viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></svg>'", items:[["ajustes","Ajustes"],["mensajes","Mensajes"],["respaldo","Respaldo"],["salir","Salir"]]}
 };
 const main = document.querySelector("main");
 ["hoy","precios","gastos","metas","compras","bloqueos","ajustes","mensajes","respaldo"].forEach(n => {
@@ -1953,9 +1961,18 @@ window.renderAll = function(){
     $("globalMsg").insertAdjacentHTML("beforeend", '<div class="msg err">Las pantallas nuevas tuvieron un problema: '+esc(e.message || e)+'</div>');
   }
 };
+document.addEventListener("touchstart",function(){},{passive:true});
 go("hoy");
 if(typeof appShown !== "undefined" && appShown && turnos.length) window.renderAll();
 })();
+function busy(on){ let el=$("xBusy"); if(!el){ el=document.createElement("div"); el.id="xBusy"; document.body.appendChild(el); } el.className=on?"on":""; }
+const _ld = window.loadData;
+window.loadData = async function(){
+  busy(1);
+  try{ await loadAll(); }catch(e){ console.error(e); }
+  try{ await _ld(); }finally{ busy(0); }
+  try{ maybeAutoCierre(); }catch(e){ console.error(e); }
+};
 </script>
 </body>
 </html>
