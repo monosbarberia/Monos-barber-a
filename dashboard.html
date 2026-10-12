@@ -385,6 +385,19 @@ function dayFin(day){
   const f = monthFin(day.slice(0,7)), s = f.split[day] || {ing:0, reserve:0, ahorro:0, libre:0};
   return {ing:s.ing, reserve:s.reserve, ahorro:s.ahorro, libre:s.libre, rate:f.rate};
 }
+// Fondo acumulado de la barbería (lo reservado menos lo gastado, de todos los meses)
+function fundTotal(){
+  let y = +START_DATE.slice(0,4), m = +START_DATE.slice(5,7), sum = 0;
+  const cur = todayStr().slice(0,7);
+  for(let i=0;i<120;i++){
+    const k = y+"-"+String(m).padStart(2,"0");
+    sum += monthFin(k).fondo;
+    if(k >= cur) break;
+    m++; if(m>12){ m = 1; y++; }
+  }
+  return sum;
+}
+
 
 
 /* ---------- Compras inteligentes ----------
