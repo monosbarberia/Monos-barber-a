@@ -1009,9 +1009,6 @@ function projection(m, G){
   }
   return {labels, act, pro, end:pcum, eqDay, bookedFut, nFut};
 }
-  if(m.t === G.b.last) cum += remain;
-  return {labels, act, pro, end:cum, eqDay};
-}
 function costModel(m){
   const cur = weekStart(m.t), cl = {}, sp = {};
   m.C.forEach(r => { const k = weekStart(r.fecha); cl[k] = (cl[k] || 0) + 1; });
@@ -1159,7 +1156,8 @@ function renderPlan(X){
 
   // Proyección
   let pj = '<div class="chartBox"><canvas id="chProj"></canvas></div>';
-    pj += row("Ya reservado para los días que faltan", P.nFut+" cliente(s) agendados. Los días cercanos pesan según sus reservas y los lejanos según tu ritmo normal", money(P.bookedFut), "ok");
+     pj += row("Cierre estimado del mes", G.meta > 0 ? (P.end >= G.meta ? "Vas a superar tu meta de "+money(G.meta) : "Te faltarían "+money(G.meta - P.end)+" para tu meta de "+money(G.meta)) : "Configura una meta del mes para compararlo", money(P.end), P.end >= (G.meta || 0) ? "ok" : "warn");
+     pj += row("Ya reservado para los días que faltan", P.nFut+" cliente(s) agendados. Los días cercanos pesan según sus reservas y los lejanos según tu ritmo normal", money(P.bookedFut), "ok");
   h += block("¿Cómo vas a cerrar el mes?", pj, "La línea sólida verde es lo cobrado hasta hoy. La punteada es lo que pasaría si los días que faltan se parecen a lo que sueles hacer cada día de la semana (cuenta tus citas ya reservadas). La roja es el punto de equilibrio y la azul tu meta. Se corrige sola con cada cobro.");
   after.push(() => {
     const sets = [{label:"Cobrado", data:P.act, color:C_OK, fill:true, r:2}, {label:"Proyección", data:P.pro, color:"#b7f2cb", dash:[6,5], r:2},
@@ -1390,10 +1388,12 @@ async function loadAll(){
     if(!q.error) BLK = q.data || [];
   }catch(e){}
 }
+function busy(on){ let el=$("xBusy"); if(!el){ el=document.createElement("div"); el.id="xBusy"; document.body.appendChild(el); } el.className=on?"on":""; }
 const _ld = window.loadData;
 window.loadData = async function(){
+  busy(1);
   try{ await loadAll(); }catch(e){ console.error(e); }
-  await _ld();
+  try{ await _ld(); }finally{ busy(0); }
   try{ maybeAutoCierre(); }catch(e){ console.error(e); }
 };
 
@@ -1420,7 +1420,6 @@ function sheet(title, html, okLabel, getVals, onOpen){
 async function ask(title, text, okLabel){ return !!(await sheet(esc(title), '<p class="lead" style="margin-bottom:6px">'+esc(text)+'</p>', okLabel || "Aceptar")); }
 
 /* ---------- Acciones sobre reservas (reemplazan a las anteriores) ---------- */
-window.act = async function(a, key){
   function waNum(phone){
   let p = digits(phone); if(!p) return "";
   const pais = window.getMsgs().pais || "";
@@ -2012,14 +2011,7 @@ document.addEventListener("touchstart",function(){},{passive:true});
 go("hoy");
 if(typeof appShown !== "undefined" && appShown && turnos.length) window.renderAll();
 })();
-function busy(on){ let el=$("xBusy"); if(!el){ el=document.createElement("div"); el.id="xBusy"; document.body.appendChild(el); } el.className=on?"on":""; }
-const _ld = window.loadData;
-window.loadData = async function(){
-  busy(1);
-  try{ await loadAll(); }catch(e){ console.error(e); }
-  try{ await _ld(); }finally{ busy(0); }
-  try{ maybeAutoCierre(); }catch(e){ console.error(e); }
-};  
+</script>  
 <script>
 (function(){
   const st = document.createElement("style");
