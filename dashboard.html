@@ -1327,14 +1327,6 @@ window.renderAll = function(){
 };
 if(typeof appShown !== "undefined" && appShown && turnos.length) window.renderAll();   // por si los datos ya estaban cargados
 })();
-function busy(on){ let el=$("xBusy"); if(!el){ el=document.createElement("div"); el.id="xBusy"; document.body.appendChild(el); } el.className=on?"on":""; }
-const _ld = window.loadData;
-window.loadData = async function(){
-  busy(1);
-  try{ await loadAll(); }catch(e){ console.error(e); }
-  try{ await _ld(); }finally{ busy(0); }
-  try{ maybeAutoCierre(); }catch(e){ console.error(e); }
-};
 </script>
 <script>
 /* =====================================================================
