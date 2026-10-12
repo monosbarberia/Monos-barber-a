@@ -184,6 +184,8 @@ let START_DATE = "2026-10-08";   // se cambia en Ajustes
 
 let BARBER_BUDGET = 12000;  // gastos fijos de la barbería por mes (se cambia en Ajustes)
 let SAVE_PCT = 10;          // % de ahorro sobre lo que queda después de la barbería (se cambia en Ajustes)
+let ROUND_STEP = 10;  // redondeo del reparto a billetes (se cambia en Ajustes)
+const rd = v => ROUND_STEP > 1 ? Math.round(v / ROUND_STEP) * ROUND_STEP : v;
 
 const SB_URL = "https://ldxxflhwpyzldisydhmd.supabase.co";
 const SB_KEY = "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
@@ -360,33 +362,30 @@ function monthFin(month){
     const total = Math.max(1, workdaysBetween(startEff, mb.last));
     expected = ing / elapsed * total; source = "ritmo";
   }
-  expected = Math.max(expected, BARBER_BUDGET*1.5);          // nunca reserva más de ~2/3 de cada cobro
+  expected = Math.max(expected, BARBER_BUDGET*1.5);
   const rate = Math.min(0.67, BARBER_BUDGET / expected);
-  const reserve = Math.min(BARBER_BUDGET, ing * rate);       // reservado para la barbería este mes
+  // Reparto día por día, redondeado a billetes
+  const perDay = {};
+  rs.forEach(r => { perDay[r.fecha] = (perDay[r.fecha]||0) + r.charged + r.tip; });
+  const split = {}; let reserve = 0, ahorro = 0;
+  Object.keys(perDay).sort().forEach(d => {
+    const di = perDay[d];
+    const res = Math.max(0, Math.min(rd(di*rate), di, BARBER_BUDGET - reserve));
+    const rest = di - res;
+    const ah = Math.min(rd(rest*SAVE_PCT/100), rest);
+    split[d] = {ing:di, reserve:res, ahorro:ah, libre:rest-ah};
+    reserve += res; ahorro += ah;
+  });
   const resto = ing - reserve;
-  const ahorro = resto * SAVE_PCT / 100;
-  const deficit = Math.max(0, gReg - reserve);               // gastos que pasaron lo reservado (salen de tu retiro)
+  const deficit = Math.max(0, gReg - reserve);
   const libre = Math.max(0, resto - ahorro - deficit);
-  return {ing, gReg, rate, expected, source, reserve, resto, ahorro, deficit, libre, fondo: reserve - gReg};
+  return {ing, gReg, rate, expected, source, reserve, resto, ahorro, deficit, libre, fondo: reserve - gReg, split};
 }
 function dayFin(day){
-  const f = monthFin(day.slice(0,7));
-  const ing = reservas.filter(r => r.status==="cobrada" && r.fecha===day).reduce((s,r) => s + r.charged + r.tip, 0);
-  const reserve = ing * f.rate, resto = ing - reserve, ahorro = resto * SAVE_PCT / 100;
-  return {ing, reserve, ahorro, libre: resto - ahorro, rate: f.rate};
+  const f = monthFin(day.slice(0,7)), s = f.split[day] || {ing:0, reserve:0, ahorro:0, libre:0};
+  return {ing:s.ing, reserve:s.reserve, ahorro:s.ahorro, libre:s.libre, rate:f.rate};
 }
-// Fondo acumulado de la barbería (lo reservado menos lo gastado, de todos los meses)
-function fundTotal(){
-  let y = +START_DATE.slice(0,4), m = +START_DATE.slice(5,7), sum = 0;
-  const cur = todayStr().slice(0,7);
-  for(let i=0;i<120;i++){
-    const k = y+"-"+String(m).padStart(2,"0");
-    sum += monthFin(k).fondo;
-    if(k >= cur) break;
-    m++; if(m>12){ m = 1; y++; }
-  }
-  return sum;
-}
+
 
 /* ---------- Compras inteligentes ----------
    Aprende de TUS gastos: agrupa por nombre del producto, calcula cada cuántos días lo compras
@@ -978,23 +977,38 @@ function goals(m){
   return {meta, daily, src, eq:Math.max(BARBER_BUDGET, gMonth), gMonth, b, todayWd};
 }
 function projection(m, G){
-  const last = +G.b.last.slice(8,10), booked = {};
-  reservas.forEach(r => { if(r.status === "futura" && mon(r.fecha) === m.month) booked[r.fecha] = (booked[r.fecha] || 0) + (r.total || r.expected || 0); });
-  const todayProj = G.todayWd === 0 ? m.todayIng : Math.max(m.todayIng + (booked[m.t] || 0), m.wdAvg(G.todayWd));
-  const remain = Math.max(0, todayProj - m.todayIng), tomorrow = addDays(m.t, 1);
-  const labels = [], act = [], pro = []; let cum = 0, eqDay = null;
+  const last = +G.b.last.slice(8,10), booked = {}, cnt = {};
+  reservas.forEach(r => {
+    if(mon(r.fecha) !== m.month) return;
+    if(!(r.status === "futura" || (r.status === "pendiente" && r.fecha === m.t))) return;
+    const a = r.total || r.expected || 0;
+    booked[r.fecha] = (booked[r.fecha] || 0) + (a > 0 ? a : m.ticketAll);   // sin monto: usa tu ticket promedio
+    cnt[r.fecha] = (cnt[r.fecha] || 0) + 1;
+  });
+  // Estimado de un día = lo ya reservado + lo que suele faltar para tu promedio.
+  // Mañana casi todo lo da la reserva; mientras más lejos, más pesa tu ritmo normal (llegan reservas nuevas).
+  const dayEst = (f, base) => {
+    const w = parseD(f).getDay(), bk = base + (booked[f] || 0);
+    if(w === 0) return bk;
+    const gap = Math.max(0, m.wdAvg(w) - bk), ahead = daysBetween(m.t, f);
+    return bk + gap * (ahead <= 0 ? 0.1 : Math.min(1, 0.15 + 0.85*(ahead-1)/6));
+  };
+  const remain = Math.max(0, dayEst(m.t, m.todayIng) - m.todayIng);
+  const labels = [], act = [], pro = [];
+  let cum = 0, pcum = 0, eqDay = null, bookedFut = 0, nFut = 0;
   for(let i = 1; i <= last; i++){
-    const f = m.month+"-"+String(i).padStart(2,"0"), w = parseD(f).getDay(); labels.push(String(i));
+    const f = m.month+"-"+String(i).padStart(2,"0"); labels.push(String(i));
     if(f <= m.t){
-      cum += (m.byDay[f] || 0); act.push(Math.round(cum)); pro.push(f === m.t ? Math.round(cum) : null);
-      if(eqDay === null && cum >= G.eq) eqDay = i;
+      cum += (m.byDay[f] || 0); act.push(Math.round(cum));
+      if(f === m.t){ pcum = cum + remain; pro.push(Math.round(pcum)); } else { pcum = cum; pro.push(null); }
     }else{
-      act.push(null);
-      cum += (f === tomorrow ? remain : 0) + Math.max(w === 0 ? 0 : m.wdAvg(w), booked[f] || 0);
-      pro.push(Math.round(cum));
-      if(eqDay === null && cum >= G.eq) eqDay = i;
+      act.push(null); pcum += dayEst(f, 0); pro.push(Math.round(pcum));
+      bookedFut += booked[f] || 0; nFut += cnt[f] || 0;
     }
+    if(eqDay === null && pcum >= G.eq) eqDay = i;
   }
+  return {labels, act, pro, end:pcum, eqDay, bookedFut, nFut};
+}
   if(m.t === G.b.last) cum += remain;
   return {labels, act, pro, end:cum, eqDay};
 }
@@ -1145,7 +1159,7 @@ function renderPlan(X){
 
   // Proyección
   let pj = '<div class="chartBox"><canvas id="chProj"></canvas></div>';
-  pj += row("Cierre estimado del mes", G.meta > 0 ? (P.end >= G.meta ? "Vas a superar tu meta de "+money(G.meta) : "Te faltarían "+money(G.meta - P.end)+" para tu meta de "+money(G.meta)) : "Configura una meta del mes para compararlo", money(P.end), P.end >= (G.meta || 0) ? "ok" : "warn");
+    pj += row("Ya reservado para los días que faltan", P.nFut+" cliente(s) agendados. Los días cercanos pesan según sus reservas y los lejanos según tu ritmo normal", money(P.bookedFut), "ok");
   h += block("¿Cómo vas a cerrar el mes?", pj, "La línea sólida verde es lo cobrado hasta hoy. La punteada es lo que pasaría si los días que faltan se parecen a lo que sueles hacer cada día de la semana (cuenta tus citas ya reservadas). La roja es el punto de equilibrio y la azul tu meta. Se corrige sola con cada cobro.");
   after.push(() => {
     const sets = [{label:"Cobrado", data:P.act, color:C_OK, fill:true, r:2}, {label:"Proyección", data:P.pro, color:"#b7f2cb", dash:[6,5], r:2},
@@ -1364,6 +1378,7 @@ function applyCfg(){
   if(CFG.start_date && ISO.test(CFG.start_date)) START_DATE = CFG.start_date;
   if(num(CFG.barber_budget) > 0) BARBER_BUDGET = num(CFG.barber_budget);
   if(CFG.save_pct !== undefined && CFG.save_pct !== "" && num(CFG.save_pct) >= 0 && num(CFG.save_pct) <= 100) SAVE_PCT = num(CFG.save_pct);
+  if(CFG.round_step !== undefined && CFG.round_step !== "" && num(CFG.round_step) >= 1) ROUND_STEP = num(CFG.round_step);
 }
 async function loadAll(){
   const r = await Promise.all([kvGet("config",{}), kvGet("precios",[]), kvGet("notas",{}), kvGet("mensajes",{}), kvGet("estado",{})]);
@@ -1406,8 +1421,26 @@ async function ask(title, text, okLabel){ return !!(await sheet(esc(title), '<p 
 
 /* ---------- Acciones sobre reservas (reemplazan a las anteriores) ---------- */
 window.act = async function(a, key){
+  function waNum(phone){
+  let p = digits(phone); if(!p) return "";
+  const pais = window.getMsgs().pais || "";
+  if(pais && p.length <= 10 && p.indexOf(pais) !== 0) p = pais + p;
+  return p;
+}
+async function enviarNoShow(r){
+  if(!digits(r.telefono)){ toast("No-show marcado. Este cliente no tiene teléfono para avisarle.", 5000); return; }
+  const txt = fillNs(r), url = String(CFG.ns_bot_url || "").trim();
+  if(url){
+    const full = url.replace(/\{texto\}/g, encodeURIComponent(txt)).replace(/\{numero\}/g, waNum(r.telefono));
+    try{ await fetch(full, {mode:"no-cors"}); toast("Mensaje de no-show enviado a "+r.nombre, 5000); return; }catch(e){}
+  }
+  const link = waTo(r.telefono, txt);
+  await sheet("No-show de "+esc(r.nombre), '<div class="block" style="margin:0 0 12px;white-space:pre-wrap;font-size:14px;line-height:1.5">'+esc(txt)+'</div>'+
+    '<div class="acts"><a class="act good" target="_blank" rel="noopener" href="'+link+'">Enviar por WhatsApp</a></div>', null);
+}
+window.act = async function(a, key){
   const r = reservas.find(x => x.key === key); if(!r) return;
-  const ids = r.rows.map(x => x.id); let ok = false;
+  const ids = r.rows.map(x => x.id); let ok = false, avisar = false;
   if(a === "cobrar"){ return openCobrar(r); }
   else if(a === "propina"){
     const v = await sheet("Propina de "+esc(r.nombre), fld("xTip","Propina (reemplaza la anterior)","number",r.tip||""), "Guardar", m => ({tip:num(m.querySelector("#xTip").value)}));
@@ -1415,12 +1448,12 @@ window.act = async function(a, key){
     ok = await updRows([ids[0]], {propina:v.tip});
     if(ok && ids.length > 1) ok = await updRows(ids.slice(1), {propina:0});
   }else if(a === "noshow"){
-    if(!(await ask("Marcar no-show", r.nombre+" no vino. Quedará como no-show y te debe el turno.", "Marcar no-show"))) return;
-    ok = await updRows(ids, {no_show:true});
+    if(!(await ask("Marcar no-show", r.nombre+" no vino. Quedará como no-show, te debe el turno y se le preparará el mensaje de cobro.", "Marcar no-show"))) return;
+    ok = await updRows(ids, {no_show:true}); avisar = ok;
   }else if(a === "cancelar"){
     if(!(await ask("Cancelar y liberar turno", "Se libera el turno de "+r.nombre+" en la web para que otro cliente lo reserve. No cuenta como no-show.", "Cancelar y liberar"))) return;
-    const {error} = await sb.from("turnos").delete().in("id", ids);
-    if(error){
+    const q = await sb.from("turnos").delete().in("id", ids).select("id");
+    if(q.error || !q.data || !q.data.length){
       await sb.from("turnos").update({cancelado:true}).in("id", ids);
       alert("No pude liberar el turno en la web (falta el permiso de borrar en Supabase: corre el SQL que te dejé). Solo quedó marcada como cancelada.");
       ok = true;
@@ -1431,7 +1464,7 @@ window.act = async function(a, key){
     if(!(await ask("Quitar no-show", "¿Quitar la marca de no-show de "+r.nombre+"?", "Quitar"))) return;
     ok = await updRows(ids, {no_show:false, no_show_cobrado:false});
   }
-  if(ok) await loadData();
+  if(ok){ await loadData(); if(avisar) await enviarNoShow(r); }
 };
 
 /* ---------- Cobrar mejorado ---------- */
@@ -1543,11 +1576,11 @@ function cierreTexto(day){
   if(pend.length) L.push("⏳ Sin cobrar: "+pend.length+(pendAmt ? " (≈ "+money(pendAmt)+")" : ""));
   L.push("", "*Reparto de hoy*", "🏠 Barbería: "+money(d.reserve), "🔵 Ahorro: "+money(d.ahorro), "🟢 Para ti: *"+money(d.libre)+"*");
   L.push("", "*Barbería y ahorro del mes*");
-  const prevIng = Math.max(0, f.ing - d.ing), prevRes = Math.min(BARBER_BUDGET, prevIng * f.rate), covered = f.reserve >= BARBER_BUDGET - 0.5;
+  const prevIng = Math.max(0, f.ing - d.ing), prevRes = f.reserve - d.reserve, covered = f.reserve >= BARBER_BUDGET - 0.5;
   if(covered) L.push("✅ Gastos de la barbería CUBIERTOS ("+money(BARBER_BUDGET)+")");
   else L.push("⏳ Gastos de la barbería: "+money(f.reserve)+" de "+money(BARBER_BUDGET)+" · faltan "+money(BARBER_BUDGET - f.reserve));
   if(covered && prevRes < BARBER_BUDGET - 0.5 && d.ing > 0) hitos.push("🎉 ¡Hoy se cubrieron los gastos de la barbería del mes!");
-  const am = num(CFG.ahorro_meta), prevAh = Math.max(0, prevIng - prevRes) * SAVE_PCT / 100;
+  const am = num(CFG.ahorro_meta), prevAh = f.ahorro - d.ahorro;
   L.push("🔵 Ahorro del mes: "+money(f.ahorro)+(am > 0 ? " de "+money(am)+(f.ahorro >= am ? " ✅ ¡meta de ahorro lograda!" : " · faltan "+money(am - f.ahorro)) : ""));
   if(am > 0 && f.ahorro >= am && prevAh < am && d.ing > 0) hitos.push("🎉 ¡Hoy llegaste a la meta de ahorro del mes!");
   L.push("🏦 Fondo acumulado de la barbería: "+money(fundTotal()));
@@ -1775,11 +1808,14 @@ function renderAjustes(){
     fld("ajStart","Día desde el que cuenta el panel","date",START_DATE)+'<div class="note" style="margin:-8px 0 12px">Pon aquí el día que vuelvas a trabajar: lo anterior se ignora y las citas fijas dejan de salir como pendientes.</div>'+
     fld("ajBudget","Gastos fijos de la barbería por mes","number",BARBER_BUDGET)+
     fld("ajSave","% de ahorro (sobre lo que queda después de la barbería)","number",SAVE_PCT)+
-    fld("ajAhorro","Meta de ahorro del mes (opcional)","number",CFG.ahorro_meta || "")+'</div>';
+    fld("ajAhorro","Meta de ahorro del mes (opcional)","number",CFG.ahorro_meta || "")+
+    fld("ajRound","Redondear el reparto a (billete más chico que usas)","number",ROUND_STEP)+'</div>';
   h += '<div class="block"><div class="blockTitle">Mi WhatsApp y el bot</div>'+
     fld("ajNum","Mi número de WhatsApp (con código de país, sin +)","tel",CFG.mi_numero || "")+
     fld("ajBot","Dirección del bot (URL)","text",CFG.bot_url || "",'placeholder="https://...&text={texto}" autocapitalize="off" autocorrect="off"')+
     '<div class="note" style="margin:-8px 0 12px">Pega la dirección con {texto} donde va el mensaje (y {numero} si pide tu número).</div>'+
+    fld("ajNsBot","Bot para avisar no-shows a clientes (opcional, con {numero} y {texto})","text",CFG.ns_bot_url || "",'placeholder="https://...?phone={numero}&text={texto}" autocapitalize="off" autocorrect="off"')+
+    '<div class="note" style="margin:-8px 0 12px">Si lo dejas vacío, al marcar no-show te sale un botón para enviar el mensaje por WhatsApp con un toque.</div>'+
     '<div class="field"><label for="ajAuto">Enviar el cierre solo, al cobrar el último cliente del día</label><select id="ajAuto"><option value="0"'+(CFG.auto_cierre ? "" : " selected")+'>No, lo envío yo con el botón</option><option value="1"'+(CFG.auto_cierre ? " selected" : "")+'>Sí, automático</option></select></div>'+
     '<button class="btnGhost" data-aj="test">Enviar mensaje de prueba al bot</button></div>';
   h += '<button class="btn" style="margin-top:12px" data-aj="save">Guardar ajustes</button>';
@@ -1790,8 +1826,9 @@ async function guardarAjustes(){
   if(!ISO.test(start)){ toast("Elige el día de inicio."); return; }
   if(!(budget > 0)){ toast("Los gastos fijos deben ser mayores que 0."); return; }
   if(save < 0 || save > 100){ toast("El ahorro debe estar entre 0 y 100."); return; }
-  CFG = Object.assign({}, CFG, {start_date:start, barber_budget:budget, save_pct:save, ahorro_meta:num($("ajAhorro").value),
-    mi_numero:digits($("ajNum").value), bot_url:$("ajBot").value.trim(), auto_cierre:$("ajAuto").value === "1"});
+    CFG = Object.assign({}, CFG, {start_date:start, barber_budget:budget, save_pct:save, ahorro_meta:num($("ajAhorro").value),
+    mi_numero:digits($("ajNum").value), bot_url:$("ajBot").value.trim(), auto_cierre:$("ajAuto").value === "1",
+    round_step:Math.max(1, num($("ajRound").value) || 10), ns_bot_url:$("ajNsBot").value.trim()});
   if(CFG.bot_url && CFG.bot_url.indexOf("{texto}") < 0){ toast("Falta {texto} en la dirección del bot."); return; }
   const okc = await kvSet("config", CFG); DIRTY["pg-ajustes"] = false; applyCfg();
   toast(okc ? "Ajustes guardados" : "Guardado solo en este teléfono: "+DBERR, 7000); await loadData();
@@ -1857,7 +1894,7 @@ async function hacerRespaldo(tipo){
 function clientList(q){
   const nq = norm(q), dq = digits(q);
   const arr = buildClients().filter(c => !nq || norm(c.nombre).indexOf(nq) >= 0 || (dq.length >= 3 && digits(c.telefono).indexOf(dq) >= 0))
-    .sort((a,b) => String(b.last || "").localeCompare(String(a.last || ""))).slice(0,15);
+    .sort((a,b) => String(b.last || "").localeCompare(String(a.last || ""))).slice(0,300);
   return arr.length ? arr.map(c => row(esc(c.nombre)+(NOTAS[c.key] ? " 📌" : ""), c.visits+" visita(s)"+(c.noshows ? " · "+c.noshows+" falta(s)" : ""), money(c.revenue), "ok",
     '<button class="act" data-fi="'+esc(c.key)+'">Ver ficha</button>')).join("") : empty("No encontré a nadie con ese nombre.");
 }
@@ -1982,7 +2019,26 @@ window.loadData = async function(){
   try{ await loadAll(); }catch(e){ console.error(e); }
   try{ await _ld(); }finally{ busy(0); }
   try{ maybeAutoCierre(); }catch(e){ console.error(e); }
-};
+};  
+<script>
+(function(){
+  const st = document.createElement("style");
+  st.textContent = "#cliRes{max-height:540px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-right:8px}"+
+    "#cliRes::-webkit-scrollbar{width:6px}#cliRes::-webkit-scrollbar-thumb{background:var(--gold);border-radius:6px}"+
+    "#cliRes::-webkit-scrollbar-track{background:rgba(255,255,255,.08);border-radius:6px}";
+  document.head.appendChild(st);
+  function fitCli(){
+    const box = document.getElementById("cliRes"); if(!box || !box.offsetParent) return;
+    const rows = box.querySelectorAll(":scope > .row");
+    if(rows.length <= 5){ box.style.maxHeight = "none"; return; }
+    let h = 0; for(let i = 0; i < 5; i++) h += rows[i].offsetHeight;
+    box.style.maxHeight = h + "px";
+  }
+  const _ra = window.renderAll;
+  window.renderAll = function(){ _ra(); fitCli(); };
+  document.addEventListener("input", e => { if(e.target.id === "cliQ") setTimeout(fitCli, 30); });
+  document.addEventListener("click", () => setTimeout(fitCli, 60));
+})();
 </script>
 </body>
 </html>
