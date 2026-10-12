@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Mono's Barbería | Panel</title>
-<link rel="icon" type="image/png" sizes="520x520" href="favicon.jpg">
-<link rel="apple-touch-icon" sizes="520x520" href="favicon.jpg">
+<link rel="icon" type="image/jpeg" href="favicon.jpg">
+<link rel="apple-touch-icon" href="favicon.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
@@ -176,7 +176,7 @@ body #xToast.show{transform:none}
 <script>
 /* =========================================================
    ⚙️ CONFIGURACIÓN
-   Ahora START_DATE, BARBER_BUDGET y SAVE_PCT se cambian desde
+   Ahora START_DATE, BARBER_BUDGET, SAVE_PCT y ROUND_UNIT se cambian desde
    la pantalla  Más ▾ → Ajustes  dentro del panel.
    Los valores de aquí abajo son solo los de respaldo.
 ========================================================= */
@@ -184,6 +184,7 @@ let START_DATE = "2026-10-08";   // se cambia en Ajustes
 
 let BARBER_BUDGET = 12000;  // gastos fijos de la barbería por mes (se cambia en Ajustes)
 let SAVE_PCT = 10;          // % de ahorro sobre lo que queda después de la barbería (se cambia en Ajustes)
+let ROUND_UNIT = 10;        // los repartos diarios se redondean a múltiplos de esto (billete más chico). Se cambia en Ajustes
 
 const SB_URL = "https://ldxxflhwpyzldisydhmd.supabase.co";
 const SB_KEY = "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
@@ -343,7 +344,11 @@ function buildClients(){
 /* ---------- Finanzas: reparto automático de cada ingreso ----------
    Cada peso que entra se divide al instante en 3:
    1) Fondo de la barbería (gastos fijos + insumos)  2) Ahorro (SAVE_PCT del resto)  3) Para ti
-   El % del fondo = BARBER_BUDGET / ingreso esperado del mes (meta si la hay, si no tu ritmo actual). */
+   El % del fondo = BARBER_BUDGET / ingreso esperado del mes (meta si la hay, si no tu ritmo actual).
+   Como cobras en efectivo, el reparto de CADA DÍA se redondea a múltiplos de ROUND_UNIT (billete más chico):
+   barbería y ahorro son cifras redondas y "Para ti" es lo que sobra, así el total del día siempre cuadra.
+   Las cifras del mes son la suma de los repartos diarios ya redondeados. */
+function roundU(v){ const u = ROUND_UNIT; return u > 0 ? Math.round(v/u)*u : v; }
 function monthFin(month){
   const rs = reservas.filter(r => r.status==="cobrada" && r.fecha.slice(0,7)===month);
   const ing = rs.reduce((s,r) => s + r.charged + r.tip, 0);
@@ -362,18 +367,26 @@ function monthFin(month){
   }
   expected = Math.max(expected, BARBER_BUDGET*1.5);          // nunca reserva más de ~2/3 de cada cobro
   const rate = Math.min(0.67, BARBER_BUDGET / expected);
-  const reserve = Math.min(BARBER_BUDGET, ing * rate);       // reservado para la barbería este mes
+  // reparto día por día, redondeado a billetes
+  const byD = {}, perDay = {};
+  rs.forEach(r => { byD[r.fecha] = (byD[r.fecha] || 0) + r.charged + r.tip; });
+  let reserve = 0, ahorro = 0;
+  Object.keys(byD).sort().forEach(d => {
+    const di = byD[d];
+    const rv = Math.max(0, Math.min(roundU(di * rate), BARBER_BUDGET - reserve, di));   // sin pasarse del tope mensual
+    const rest = di - rv;
+    const ah = Math.max(0, Math.min(roundU(rest * SAVE_PCT / 100), rest));
+    perDay[d] = {ing:di, reserve:rv, ahorro:ah, libre:rest - ah};
+    reserve += rv; ahorro += ah;
+  });
   const resto = ing - reserve;
-  const ahorro = resto * SAVE_PCT / 100;
   const deficit = Math.max(0, gReg - reserve);               // gastos que pasaron lo reservado (salen de tu retiro)
   const libre = Math.max(0, resto - ahorro - deficit);
-  return {ing, gReg, rate, expected, source, reserve, resto, ahorro, deficit, libre, fondo: reserve - gReg};
+  return {ing, gReg, rate, expected, source, reserve, resto, ahorro, deficit, libre, fondo: reserve - gReg, perDay};
 }
 function dayFin(day){
-  const f = monthFin(day.slice(0,7));
-  const ing = reservas.filter(r => r.status==="cobrada" && r.fecha===day).reduce((s,r) => s + r.charged + r.tip, 0);
-  const reserve = ing * f.rate, resto = ing - reserve, ahorro = resto * SAVE_PCT / 100;
-  return {ing, reserve, ahorro, libre: resto - ahorro, rate: f.rate};
+  const f = monthFin(day.slice(0,7)), d = f.perDay[day] || {ing:0, reserve:0, ahorro:0, libre:0};
+  return {ing:d.ing, reserve:d.reserve, ahorro:d.ahorro, libre:d.libre, rate:f.rate};
 }
 // Fondo acumulado de la barbería (lo reservado menos lo gastado, de todos los meses)
 function fundTotal(){
@@ -633,6 +646,7 @@ function savingsBlock(){
   const t = todayStr(), f = monthFin(t.slice(0,7)), d = dayFin(t), fondo = fundTotal();
   const r = f.rate*100, ah = (100-r)*SAVE_PCT/100, tuyo = 100-r-ah;
   let body = '<div class="note" style="margin:0 0 6px"><b>Por cada $100 que entran: <span style="color:var(--bad)">$'+r.toFixed(0)+' a la barbería</span>, <span style="color:var(--save)">$'+ah.toFixed(0)+' a ahorro</span> y <span style="color:var(--ok)">$'+tuyo.toFixed(0)+' son para ti</span>.</b></div>';
+  body += '<div class="note" style="margin:0 0 6px">Los repartos del día se redondean a múltiplos de '+money(ROUND_UNIT)+' para que puedas separarlos con tus billetes.</div>';
   body += '<div class="subTitle">De lo que entró hoy</div>' +
     row("Entró hoy","cobrado + propinas",money(d.ing),"ok") +
     row("Para la barbería","gastos e insumos",money(d.reserve),"bad") +
@@ -648,7 +662,7 @@ function savingsBlock(){
   if(f.deficit>0) body += '<div class="note" style="margin-top:8px;color:var(--bad)">Gastaste '+money(f.deficit)+' más de lo reservado este mes; ya se descontó de tu retiro.</div>';
   body += '<div class="note" style="margin-top:8px">El % para la barbería se ajusta solo según '+(f.source==="meta"?"tu meta del mes ("+money(f.expected)+")":"tu ritmo actual (proyección ≈ "+money(f.expected)+" al mes)")+'. Registra la renta y demás gastos fijos en Gastos para que el fondo sea real.</div>';
   return block("Ahorro y retiro", body,
-    "Cada cobro se reparte solo: primero una parte va al fondo de la barbería (así los gastos se cubren poco a poco, no de golpe), luego el "+SAVE_PCT+"% del resto se ahorra, y lo demás es tuyo desde el primer día. No tienes que esperar a cubrir la barbería para retirar. Lo que retires hoy y lo acumulado del mes se calculan por separado: no se descuentan los retiros que ya hiciste.");
+    "Cada cobro se reparte solo: primero una parte va al fondo de la barbería (así los gastos se cubren poco a poco, no de golpe), luego el "+SAVE_PCT+"% del resto se ahorra, y lo demás es tuyo desde el primer día. Como cobras en efectivo, cada día se redondea a múltiplos de "+money(ROUND_UNIT)+": barbería y ahorro son cifras redondas y 'Para ti' es lo que sobra. Los totales del mes son la suma de esos repartos diarios. No tienes que esperar a cubrir la barbería para retirar. Lo que retires hoy y lo acumulado del mes se calculan por separado: no se descuentan los retiros que ya hiciste.");
 }
 function productsBlock(){
   const adv = purchaseAdvice();
@@ -977,26 +991,45 @@ function goals(m){
   const gMonth = sumGastos(gastos.filter(x => mon(String(x.fecha)) === m.month));
   return {meta, daily, src, eq:Math.max(BARBER_BUDGET, gMonth), gMonth, b, todayWd};
 }
+/* Proyección del mes: para cada día que falta combina
+   (1) lo YA RESERVADO ese día (suma de sus turnos agendados; si un turno no tiene precio usa tu ticket promedio)
+   (2) lo que suele faltar por llenarse: la diferencia entre lo que sueles hacer ese día de la semana y lo ya reservado.
+   Mientras más cerca está el día, más se confía en las reservas reales y menos en el promedio.
+   Si lo reservado ya supera tu promedio, se usa lo reservado. Se recalcula con cada actualización. */
 function projection(m, G){
-  const last = +G.b.last.slice(8,10), booked = {};
-  reservas.forEach(r => { if(r.status === "futura" && mon(r.fecha) === m.month) booked[r.fecha] = (booked[r.fecha] || 0) + (r.total || r.expected || 0); });
-  const todayProj = G.todayWd === 0 ? m.todayIng : Math.max(m.todayIng + (booked[m.t] || 0), m.wdAvg(G.todayWd));
-  const remain = Math.max(0, todayProj - m.todayIng), tomorrow = addDays(m.t, 1);
-  const labels = [], act = [], pro = []; let cum = 0, eqDay = null;
+  const last = +G.b.last.slice(8,10), booked = {}, nBook = {};
+  reservas.forEach(r => {
+    if(mon(r.fecha) !== m.month) return;
+    if(r.status === "futura" || (r.status === "pendiente" && r.fecha === m.t)){
+      booked[r.fecha] = (booked[r.fecha] || 0) + (r.total || r.expected || m.ticketAll || 0);
+      nBook[r.fecha] = (nBook[r.fecha] || 0) + 1;
+    }
+  });
+  const estDay = (f, earned) => {
+    const w = parseD(f).getDay(), b = booked[f] || 0;
+    if(w === 0) return earned + b;
+    const ahead = Math.max(0, daysBetween(m.t, f)), confBook = Math.max(0.35, 0.75 - 0.07*ahead);
+    const gap = Math.max(0, m.wdAvg(w) - earned - b);
+    return earned + b + gap*(1 - confBook);
+  };
+  const remain = Math.max(0, estDay(m.t, m.todayIng) - m.todayIng), tomorrow = addDays(m.t, 1);
+  const labels = [], act = [], pro = [], days = []; let cum = 0, eqDay = null;
   for(let i = 1; i <= last; i++){
-    const f = m.month+"-"+String(i).padStart(2,"0"), w = parseD(f).getDay(); labels.push(String(i));
+    const f = m.month+"-"+String(i).padStart(2,"0"); labels.push(String(i));
     if(f <= m.t){
       cum += (m.byDay[f] || 0); act.push(Math.round(cum)); pro.push(f === m.t ? Math.round(cum) : null);
       if(eqDay === null && cum >= G.eq) eqDay = i;
     }else{
       act.push(null);
-      cum += (f === tomorrow ? remain : 0) + Math.max(w === 0 ? 0 : m.wdAvg(w), booked[f] || 0);
+      const e = estDay(f, 0);
+      cum += (f === tomorrow ? remain : 0) + e;
       pro.push(Math.round(cum));
+      days.push({f, n:nBook[f] || 0, booked:booked[f] || 0, est:e});
       if(eqDay === null && cum >= G.eq) eqDay = i;
     }
   }
   if(m.t === G.b.last) cum += remain;
-  return {labels, act, pro, end:cum, eqDay};
+  return {labels, act, pro, end:cum, eqDay, days};
 }
 function costModel(m){
   const cur = weekStart(m.t), cl = {}, sp = {};
@@ -1146,13 +1179,21 @@ function renderPlan(X){
   // Proyección
   let pj = '<div class="chartBox"><canvas id="chProj"></canvas></div>';
   pj += row("Cierre estimado del mes", G.meta > 0 ? (P.end >= G.meta ? "Vas a superar tu meta de "+money(G.meta) : "Te faltarían "+money(G.meta - P.end)+" para tu meta de "+money(G.meta)) : "Configura una meta del mes para compararlo", money(P.end), P.end >= (G.meta || 0) ? "ok" : "warn");
-  h += block("¿Cómo vas a cerrar el mes?", pj, "La línea sólida verde es lo cobrado hasta hoy. La punteada es lo que pasaría si los días que faltan se parecen a lo que sueles hacer cada día de la semana (cuenta tus citas ya reservadas). La roja es el punto de equilibrio y la azul tu meta. Se corrige sola con cada cobro.");
+  h += block("¿Cómo vas a cerrar el mes?", pj, "La línea sólida verde es lo cobrado hasta hoy. La punteada es la proyección: para cada día que falta suma el dinero de los turnos que ya están reservados (el total de esos clientes) más lo que normalmente se termina llenando ese día de la semana según tu historial. Mientras más cerca está el día, más pesan las reservas reales. La roja es el punto de equilibrio y la azul tu meta. Se recalcula con cada actualización.");
   after.push(() => {
     const sets = [{label:"Cobrado", data:P.act, color:C_OK, fill:true, r:2}, {label:"Proyección", data:P.pro, color:"#b7f2cb", dash:[6,5], r:2},
       {label:"Equilibrio", data:P.labels.map(() => Math.round(G.eq)), color:C_BAD, dash:[2,4], r:0, tension:0}];
     if(G.meta > 0) sets.push({label:"Meta", data:P.labels.map(() => Math.round(G.meta)), color:C_SAVE, dash:[2,4], r:0, tension:0});
     multiLine("chProj", P.labels, sets, {money:true, maxX:8});
   });
+
+  // Reservas de los próximos días (de dónde sale la proyección)
+  const nx = P.days.filter(d => d.n > 0).slice(0,7);
+  h += block("Reservas de los próximos días", nx.length ? nx.map(d => row(DAYS[parseD(d.f).getDay()]+" "+niceDate(d.f),
+      d.n+" cliente(s) reservado(s) · "+money(d.booked)+" ya reservados", money(d.est), "ok")).join("") +
+      '<div class="note">El monto de la derecha es lo que estimo que cerrará cada día: lo reservado más lo que suele llenarse. Es lo que usa la proyección.</div>'
+    : empty("Aún no hay reservas para los próximos días de este mes."),
+    "Aquí ves cuánto dinero hay ya reservado por día y cuánto estimo que cerrará ese día. Si un turno no tiene precio, uso tu ticket promedio.");
 
   // Fugas
   const mr = reservas.filter(r => mon(r.fecha) === m.month), s = resumen(mr);
@@ -1334,6 +1375,9 @@ const byTime = (a,b) => (a.fecha+String(slotMin(a.turno)||0).padStart(4,"0")).lo
 const fld = (id,label,type,val,extra) => '<div class="field"><label for="'+id+'">'+label+'</label><input id="'+id+'" type="'+type+'" '+(type==="number"?'inputmode="decimal" ':'')+'value="'+esc(val===null||val===undefined?"":val)+'" '+(extra||'')+'></div>';
 const owedOf = r => r.total || r.expected || 0;
 
+/* barra de progreso superior mientras se carga */
+function busy(on){ let el = $("xBusy"); if(!el){ el = document.createElement("div"); el.id = "xBusy"; document.body.appendChild(el); } el.className = on ? "on" : ""; }
+
 /* ---------- Guardado de ajustes (Supabase tabla "ajustes"; si no existe, en este teléfono) ---------- */
 let DBERR = "";
 const pend = (k, on) => { try{ if(on === undefined) return localStorage.getItem("monos_pend_"+k) === "1"; if(on) localStorage.setItem("monos_pend_"+k,"1"); else localStorage.removeItem("monos_pend_"+k); }catch(e){} return false; };
@@ -1364,625 +1408,8 @@ function applyCfg(){
   if(CFG.start_date && ISO.test(CFG.start_date)) START_DATE = CFG.start_date;
   if(num(CFG.barber_budget) > 0) BARBER_BUDGET = num(CFG.barber_budget);
   if(CFG.save_pct !== undefined && CFG.save_pct !== "" && num(CFG.save_pct) >= 0 && num(CFG.save_pct) <= 100) SAVE_PCT = num(CFG.save_pct);
+  if(num(CFG.round_unit) >= 1) ROUND_UNIT = num(CFG.round_unit);
 }
 async function loadAll(){
   const r = await Promise.all([kvGet("config",{}), kvGet("precios",[]), kvGet("notas",{}), kvGet("mensajes",{}), kvGet("estado",{})]);
-  CFG = r[0] || {}; PRECIOS = Array.isArray(r[1]) ? r[1] : []; NOTAS = r[2] || {}; MSGS = r[3] || {}; ESTADO = r[4] || {};
-  applyCfg(); window.setMsgs(MSGS);
-  BLK = [];
-  try{
-    const q = await sb.from("turnos").select("id,fecha,turno,nombre,telefono").gte("fecha", todayStr()).eq("nombre","Bloqueado").limit(3000);
-    if(!q.error) BLK = q.data || [];
-  }catch(e){}
-}
-const _ld = window.loadData;
-window.loadData = async function(){
-  try{ await loadAll(); }catch(e){ console.error(e); }
-  await _ld();
-  try{ maybeAutoCierre(); }catch(e){ console.error(e); }
-};
-
-/* ---------- Ventanas y avisos (en vez de las ventanitas de texto) ---------- */
-function toast(t, ms){
-  let el = $("xToast"); if(!el){ el = document.createElement("div"); el.id = "xToast"; document.body.appendChild(el); }
-  el.textContent = t; el.className = "show"; clearTimeout(toast._t); toast._t = setTimeout(() => { el.className = ""; }, ms || 3500);
-}
-function sheet(title, html, okLabel, getVals, onOpen){
-  return new Promise(resolve => {
-    const m = document.createElement("div"); m.className = "modal"; m.style.zIndex = 120;
-    m.innerHTML = '<div class="sheet"><h2>'+title+'</h2>'+html+'<div class="xmsg"></div>'+
-      (okLabel ? '<button class="btn xok">'+okLabel+'</button>' : '')+'<button class="btnGhost xno">'+(okLabel ? 'Cancelar' : 'Cerrar')+'</button></div>';
-    document.body.appendChild(m);
-    const close = v => { m.remove(); resolve(v); };
-    m.querySelector(".xno").onclick = () => close(null);
-    m.addEventListener("click", e => { if(e.target === m) close(null); });
-    const ok = m.querySelector(".xok");
-    if(ok) ok.onclick = () => { const v = getVals ? getVals(m) : true; if(v === false) return; close(v); };
-    m.err = t => { m.querySelector(".xmsg").innerHTML = '<div class="msg err">'+esc(t)+'</div>'; };
-    if(onOpen) onOpen(m);
-  });
-}
-async function ask(title, text, okLabel){ return !!(await sheet(esc(title), '<p class="lead" style="margin-bottom:6px">'+esc(text)+'</p>', okLabel || "Aceptar")); }
-
-/* ---------- Acciones sobre reservas (reemplazan a las anteriores) ---------- */
-window.act = async function(a, key){
-  const r = reservas.find(x => x.key === key); if(!r) return;
-  const ids = r.rows.map(x => x.id); let ok = false;
-  if(a === "cobrar"){ return openCobrar(r); }
-  else if(a === "propina"){
-    const v = await sheet("Propina de "+esc(r.nombre), fld("xTip","Propina (reemplaza la anterior)","number",r.tip||""), "Guardar", m => ({tip:num(m.querySelector("#xTip").value)}));
-    if(!v) return;
-    ok = await updRows([ids[0]], {propina:v.tip});
-    if(ok && ids.length > 1) ok = await updRows(ids.slice(1), {propina:0});
-  }else if(a === "noshow"){
-    if(!(await ask("Marcar no-show", r.nombre+" no vino. Quedará como no-show y te debe el turno.", "Marcar no-show"))) return;
-    ok = await updRows(ids, {no_show:true});
-  }else if(a === "cancelar"){
-    if(!(await ask("Cancelar y liberar turno", "Se libera el turno de "+r.nombre+" en la web para que otro cliente lo reserve. No cuenta como no-show.", "Cancelar y liberar"))) return;
-    const {error} = await sb.from("turnos").delete().in("id", ids);
-    if(error){
-      await sb.from("turnos").update({cancelado:true}).in("id", ids);
-      alert("No pude liberar el turno en la web (falta el permiso de borrar en Supabase: corre el SQL que te dejé). Solo quedó marcada como cancelada.");
-      ok = true;
-    }else{ ok = true; toast("Turno liberado en la web. Borra el evento del calendario del iPhone.", 6000); }
-  }else if(a === "nspaid"){
-    ok = await updRows(ids, {no_show_cobrado:true, cobro_no_show:owedOf(r)});
-  }else if(a === "quitarns"){
-    if(!(await ask("Quitar no-show", "¿Quitar la marca de no-show de "+r.nombre+"?", "Quitar"))) return;
-    ok = await updRows(ids, {no_show:false, no_show_cobrado:false});
-  }
-  if(ok) await loadData();
-};
-
-/* ---------- Cobrar mejorado ---------- */
-async function openCobrar(r){
-  const names = []; PRECIOS.forEach(x => names.push(x.n));
-  r.services.forEach(s => { if(!names.some(n => norm(n) === norm(s))) names.push(s); });
-  const priceOf = n => { const f = PRECIOS.find(x => norm(x.n) === norm(n)); return f ? f.p : 0; };
-  const isSel = n => r.services.some(s => norm(s) === norm(n));
-  const debt = reservas.filter(x => x.client === r.client && x.status === "noshow" && !x.noShowPaid && x.key !== r.key);
-  const debtAmt = debt.reduce((s,x) => s + owedOf(x), 0);
-  const nota = NOTAS[r.client];
-  let html = "";
-  if(nota) html += '<div class="msg" style="margin:0 0 12px;background:rgba(245,201,110,.14);border:1px solid rgba(245,201,110,.5);color:var(--warn)">📌 '+esc(nota)+'</div>';
-  if(debt.length) html += '<div class="msg" style="margin:0 0 12px;background:rgba(255,129,116,.14);border:1px solid rgba(255,129,116,.45);color:#ffd2cc"><b>Ojo: debe '+debt.length+' no-show.</b> Faltó el '+debt.map(x => niceDate(x.fecha)).join(", ")+'.'+
-    '<label class="xsv" style="border:0;padding:8px 0 0"><input type="checkbox" id="xNsOn"><span>Me lo pagó ahora</span><input type="number" inputmode="decimal" class="xpr" id="xNsAmt" value="'+(debtAmt||"")+'"></label></div>';
-  html += '<div class="subTitle" style="margin-top:0">Servicios</div>';
-  html += names.length ? names.map((n,i) => '<label class="xsv"><input type="checkbox" class="xsc" data-i="'+i+'"'+(isSel(n)?" checked":"")+'><span>'+esc(n)+'</span><input type="number" inputmode="decimal" class="xpr xsp" data-i="'+i+'" value="'+(priceOf(n)||"")+'"></label>').join("")
-    : '<div class="note">Aún no hay lista de precios (Negocio ▾ → Precios). Escribe el precio abajo.</div>';
-  html += fld("xBase","Precio normal","number", r.total || r.expected || "") + fld("xDesc","Descuento","number","") + fld("xTip","Propina","number", r.tip || "");
-  html += '<div class="row" style="border:0"><div class="rowTop"><div class="rowTitle">Total a cobrar</div><div class="rowVal ok" id="xTot" style="font-size:22px">$0</div></div></div>';
-  const v = await sheet("Cobrar a "+esc(r.nombre), html, "Guardar cobro", m => {
-    const base = num(m.querySelector("#xBase").value), desc = num(m.querySelector("#xDesc").value), tip = num(m.querySelector("#xTip").value);
-    const nsOn = m.querySelector("#xNsOn") && m.querySelector("#xNsOn").checked, nsAmt = nsOn ? num(m.querySelector("#xNsAmt").value) : 0;
-    if(base <= 0 && !nsOn){ m.err("Escribe el precio normal o elige un servicio con precio."); return false; }
-    const sel = []; m.querySelectorAll(".xsc").forEach(c => { if(c.checked) sel.push(names[+c.dataset.i]); });
-    return {base, desc, tip, nsOn, nsAmt, sel, total:Math.max(0, base - desc) + nsAmt};
-  }, m => {
-    let touched = false; const q = s => m.querySelector(s);
-    const calc = () => { const t = Math.max(0, num(q("#xBase").value) - num(q("#xDesc").value)) + (q("#xNsOn") && q("#xNsOn").checked ? num(q("#xNsAmt").value) : 0); q("#xTot").textContent = money(t); };
-    const sum = () => { let s = 0; m.querySelectorAll(".xsc").forEach(c => { if(c.checked){ const p = m.querySelector('.xsp[data-i="'+c.dataset.i+'"]'); s += num(p && p.value); } }); return s; };
-    m.addEventListener("input", e => {
-      if(e.target.id === "xBase") touched = true;
-      if(e.target.classList.contains("xsp") || e.target.classList.contains("xsc")){ const s = sum(); if(s > 0 || !touched) q("#xBase").value = s > 0 ? s : (r.total || r.expected || ""); }
-      calc();
-    });
-    m.addEventListener("change", e => { if(e.target.classList.contains("xsc") || e.target.id === "xNsOn"){ const s = sum(); if(e.target.classList.contains("xsc") && s > 0) q("#xBase").value = s; calc(); } });
-    calc();
-  });
-  if(!v) return;
-  const ids = r.rows.map(x => x.id);
-  const first = {precio_cobrado:v.total, precio_esperado:v.base, propina:v.tip};
-  const all = {};
-  if(v.sel.length){ all.servicios = v.sel.join(", "); all.total = v.base; }
-  let ok = await updRows([ids[0]], Object.assign({}, all, first));
-  if(ok && ids.length > 1) ok = await updRows(ids.slice(1), Object.assign({}, all, {precio_cobrado:0, propina:0}));
-  if(ok && v.nsOn){
-    const debt = reservas.filter(x => x.client === r.client && x.status === "noshow" && !x.noShowPaid && x.key !== r.key);
-    for(const d of debt){ if(ok) ok = await updRows(d.rows.map(x => x.id), {no_show_cobrado:true, cobro_no_show:owedOf(d)}); }
-  }
-  if(ok){ toast("Cobro guardado: "+money(v.total)); await loadData(); }
-}
-
-/* ---------- Dinero personal (ventanas nuevas) ---------- */
-window.aporteDinero = async function(tipo){
-  const v = await sheet(tipo === "in" ? "Puse dinero mío" : "Me devolví dinero", fld("xMonto","Monto","number","")+fld("xPara","¿Para qué fue? (opcional)","text",""), "Guardar", m => {
-    const monto = num(m.querySelector("#xMonto").value); if(monto <= 0){ m.err("Escribe un monto mayor que 0."); return false; }
-    return {monto, para:m.querySelector("#xPara").value.trim()};
-  });
-  if(!v) return;
-  const {error} = await sb.from("gastos").insert({fecha:todayStr(), categoria:"otros", descripcion:(tipo === "in" ? TAG_APORTE : TAG_DEVOL)+v.para, monto:v.monto});
-  if(error){ alert("No se pudo guardar: "+error.message); return; }
-  await loadData();
-};
-window.delAporte = async function(id){
-  if(!(await ask("Borrar movimiento", "¿Borrar este movimiento?", "Borrar"))) return;
-  const {error} = await sb.from("gastos").delete().eq("id", id);
-  if(error){ alert("No se pudo borrar: "+error.message); return; }
-  await loadData();
-};
-window.delExpense = async function(id){
-  if(!(await ask("Borrar gasto", "¿Seguro que quieres borrar este gasto?", "Borrar"))) return;
-  const {error} = await sb.from("gastos").delete().eq("id", id);
-  if(error){ alert("No se pudo borrar: "+error.message); return; }
-  await loadData();
-};
-
-/* ---------- WhatsApp ---------- */
-function waTo(phone, text){
-  let p = digits(phone); if(!p) return "";
-  const pais = window.getMsgs().pais || "";
-  if(pais && p.length <= 10 && p.indexOf(pais) !== 0) p = pais + p;
-  return "https://wa.me/"+p+"?text="+encodeURIComponent(text);
-}
-function fillNs(r){
-  const first = r.nombre === "Sin nombre" ? "amigo" : String(r.nombre).split(/\s+/)[0], tpl = MSGS.noshow || DEFAULT_NS;
-  return tpl.replace(/\{nombre\}/g, first).replace(/\{fecha\}/g, niceDate(r.fecha)).replace(/\{hora\}/g, r.turno).replace(/\{monto\}/g, owedOf(r) ? money(owedOf(r)) : "el valor del turno").replace(/\{link\}/g, window.getMsgs().link);
-}
-async function sendBot(text){
-  const url = String(CFG.bot_url || "").trim(); if(!url) return false;
-  const full = url.replace(/\{texto\}/g, encodeURIComponent(text)).replace(/\{numero\}/g, digits(CFG.mi_numero));
-  try{ await fetch(full, {mode:"no-cors"}); return true; }catch(e){ return false; }
-}
-
-/* ---------- Cierre del día ---------- */
-function cierreTexto(day){
-  const list = reservas.filter(r => r.fecha === day);
-  const cob = list.filter(r => r.status === "cobrada"), ns = list.filter(r => r.status === "noshow"), pend = list.filter(r => r.status === "pendiente" || r.status === "futura");
-  const rev = cob.reduce((s,r) => s + r.charged, 0), tips = cob.reduce((s,r) => s + r.tip, 0), svc = cob.reduce((s,r) => s + r.services.length, 0);
-  const pendAmt = pend.reduce((s,r) => s + owedOf(r), 0);
-  const d = dayFin(day), mth = day.slice(0,7), f = monthFin(mth), L = [], hitos = [];
-  L.push("💈 *Cierre del día · "+DAYS[parseD(day).getDay()]+" "+niceDate(day)+"*", "");
-  L.push("👥 Atendidos: *"+cob.length+"*"+(svc ? " ("+svc+" servicios)" : ""));
-  L.push("💵 Cobrado: *"+money(rev)+"*");
-  L.push("🙌 Propinas: *"+money(tips)+"*");
-  L.push("🔴 Descuentos: *"+money(resumen(cob).disc)+"*");
-  L.push("➕ Total del día: *"+money(rev+tips)+"*");
-  if(cob.length) L.push("🎟️ Ticket promedio: "+money(rev/cob.length));
-  if(ns.length) L.push("🚫 No-shows: "+ns.length+" ("+ns.slice(0,3).map(r => r.nombre).join(", ")+")");
-  if(pend.length) L.push("⏳ Sin cobrar: "+pend.length+(pendAmt ? " (≈ "+money(pendAmt)+")" : ""));
-  L.push("", "*Reparto de hoy*", "🏠 Barbería: "+money(d.reserve), "🔵 Ahorro: "+money(d.ahorro), "🟢 Para ti: *"+money(d.libre)+"*");
-  L.push("", "*Barbería y ahorro del mes*");
-  const prevIng = Math.max(0, f.ing - d.ing), prevRes = Math.min(BARBER_BUDGET, prevIng * f.rate), covered = f.reserve >= BARBER_BUDGET - 0.5;
-  if(covered) L.push("✅ Gastos de la barbería CUBIERTOS ("+money(BARBER_BUDGET)+")");
-  else L.push("⏳ Gastos de la barbería: "+money(f.reserve)+" de "+money(BARBER_BUDGET)+" · faltan "+money(BARBER_BUDGET - f.reserve));
-  if(covered && prevRes < BARBER_BUDGET - 0.5 && d.ing > 0) hitos.push("🎉 ¡Hoy se cubrieron los gastos de la barbería del mes!");
-  const am = num(CFG.ahorro_meta), prevAh = Math.max(0, prevIng - prevRes) * SAVE_PCT / 100;
-  L.push("🔵 Ahorro del mes: "+money(f.ahorro)+(am > 0 ? " de "+money(am)+(f.ahorro >= am ? " ✅ ¡meta de ahorro lograda!" : " · faltan "+money(am - f.ahorro)) : ""));
-  if(am > 0 && f.ahorro >= am && prevAh < am && d.ing > 0) hitos.push("🎉 ¡Hoy llegaste a la meta de ahorro del mes!");
-  L.push("🏦 Fondo acumulado de la barbería: "+money(fundTotal()));
-  const g = metas.find(x => String(x.mes).slice(0,7) === mth);
-  if(g){
-    const gr = num(g.objetivo_ingresos), gp = num(g.objetivo_ganancia), b = monthBounds(mth), s0 = b.first < START_DATE ? START_DATE : b.first;
-    const daily = gr > 0 ? gr / Math.max(1, workdaysBetween(s0, b.last)) : 0, profit = f.ing - f.gReg;
-    L.push("", "*Metas*");
-    if(daily > 0) L.push("📅 Meta del día: "+money(d.ing)+" de "+money(daily)+(d.ing >= daily ? " ✅ ¡lograda!" : " · faltaron "+money(daily - d.ing)));
-    if(gr > 0){ L.push("🎯 Cobrado del mes: "+money(f.ing)+" de "+money(gr)+" ("+pct(f.ing/gr*100)+")"+(f.ing >= gr ? " ✅ ¡meta lograda!" : " · faltan "+money(gr - f.ing)));
-      if(f.ing >= gr && prevIng < gr && d.ing > 0) hitos.push("🏆 ¡Hoy se logró la meta de dinero cobrado del mes!"); }
-    if(gp > 0) L.push("💎 Ganancia neta del mes: "+money(profit)+" de "+money(gp)+(profit >= gp ? " ✅ ¡meta lograda!" : " · faltan "+money(gp - profit)));
-  }
-  if(hitos.length){ L.push(""); hitos.forEach(h => L.push(h)); }
-  return L.join("\n");
-}
-async function abrirCierre(){
-  const day = todayStr(), txt = cierreTexto(day), tieneBot = !!String(CFG.bot_url || "").trim(), num_ = digits(CFG.mi_numero);
-  const html = '<div class="block" style="margin:0 0 12px;white-space:pre-wrap;font-size:14px;line-height:1.5">'+esc(txt)+'</div>'+
-    '<div class="acts" style="margin:0 0 14px"><button class="act" data-cx="copy">Copiar</button>'+
-    (num_ ? '<a class="act" target="_blank" rel="noopener" href="https://wa.me/'+(window.getMsgs().pais && num_.length <= 10 ? window.getMsgs().pais : "")+num_+'?text='+encodeURIComponent(txt)+'">Abrir en mi WhatsApp</a>' : '')+
-    '<a class="act" target="_blank" rel="noopener" href="https://wa.me/?text='+encodeURIComponent(txt)+'">Enviar a otra persona</a></div>';
-  const v = await sheet("Cierre del día", html, tieneBot ? "Enviar a mi WhatsApp (bot)" : null, () => true, m => {
-    m.addEventListener("click", async e => { const b = e.target.closest('[data-cx="copy"]'); if(!b) return;
-      try{ await navigator.clipboard.writeText(txt); toast("Copiado"); }catch(err){ toast("No se pudo copiar"); } });
-  });
-  if(v){
-    const ok = await sendBot(txt);
-    if(ok){ ESTADO.last_cierre = day; await kvSet("estado", ESTADO); toast("Enviado al bot. Revisa tu WhatsApp."); } else toast("No pude enviar al bot. Revisa Ajustes.");
-  }
-}
-async function maybeAutoCierre(){
-  if(autoBusy || !CFG.auto_cierre || !String(CFG.bot_url || "").trim()) return;
-  const t = todayStr(); if(ESTADO.last_cierre === t) return;
-  const list = reservas.filter(r => r.fecha === t);
-  if(!list.some(r => r.status === "cobrada")) return;
-  if(list.some(r => r.status === "pendiente" || r.status === "futura")) return;
-  autoBusy = true;
-  const ok = await sendBot(cierreTexto(t));
-  if(ok){ ESTADO.last_cierre = t; await kvSet("estado", ESTADO); toast("Cierre del día enviado a tu WhatsApp", 5000); }
-  autoBusy = false;
-}
-
-/* ---------- Ficha del cliente ---------- */
-async function openFicha(key){
-  const cl = buildClients().find(c => c.key === key); if(!cl) return;
-  const rs = reservas.filter(r => r.client === key).sort((a,b) => byTime(b,a));
-  const cob = rs.filter(r => r.status === "cobrada"), tot = cob.reduce((s,r) => s + r.charged, 0);
-  const owed = rs.filter(r => r.status === "noshow" && !r.noShowPaid), owedAmt = owed.reduce((s,r) => s + owedOf(r), 0);
-  const svc = {}; cob.forEach(r => r.services.forEach(s => { const k = norm(s); svc[k] = svc[k] || {l:s, n:0}; svc[k].n++; }));
-  const top = Object.values(svc).sort((a,b) => b.n - a.n).slice(0,4).map(x => esc(x.l)+" ("+x.n+")").join(", ") || "—";
-  let html = row("Visitas", cl.telefono ? esc(cl.telefono) : "Sin teléfono", String(cl.visits), "ok") +
-    row("Ha gastado", "Ticket promedio "+money(cob.length ? tot/cob.length : 0), money(tot), "ok") +
-    row("Última visita", "Servicios más pedidos: "+top, cl.last ? niceDate(cl.last) : "—", "") +
-    row("No-shows", owed.length ? "Debe "+money(owedAmt) : "Sin deudas", String(cl.noshows), cl.noshows ? "bad" : "");
-  html += '<div class="field" style="margin-top:12px"><label for="fiNota">📌 Nota fija (ej. "navaja en los lados")</label><textarea id="fiNota" rows="3" style="width:100%;background:var(--input);border:1px solid var(--line);border-radius:10px;padding:12px;color:inherit;font:inherit;outline:none">'+esc(NOTAS[key] || "")+'</textarea></div>';
-  const link = cl.telefono ? waTo(cl.telefono, "Hola "+String(cl.nombre).split(/\s+/)[0]+" 👋") : "";
-  if(link) html += '<div class="acts" style="margin:0 0 10px"><a class="act good" target="_blank" rel="noopener" href="'+link+'">Escribir por WhatsApp</a></div>';
-  html += '<div class="subTitle">Historial</div>' + (rs.slice(0,10).map(r => row(niceDate(r.fecha)+" · "+esc(r.turno), r.services.length ? esc(r.services.join(", ")) : "Sin servicios anotados",
-    r.status === "cobrada" ? money(r.charged) : (r.status === "noshow" ? "no-show" : (r.status === "futura" ? "agendado" : "pendiente")), r.status === "cobrada" ? "ok" : (r.status === "noshow" ? "bad" : "warn"))).join("") || empty("Sin historial."));
-  const v = await sheet(esc(cl.nombre), html, "Guardar nota", m => ({nota:m.querySelector("#fiNota").value.trim()}));
-  if(!v) return;
-  if(v.nota) NOTAS[key] = v.nota; else delete NOTAS[key];
-  await kvSet("notas", NOTAS); renderAll(); toast("Nota guardada");
-}
-
-/* ---------- HOY ---------- */
-function hoyRow(r){
-  const t = todayStr(), nota = NOTAS[r.client], debt = reservas.filter(x => x.client === r.client && x.status === "noshow" && !x.noShowPaid && x.key !== r.key);
-  const debtAmt = debt.reduce((s,x) => s + owedOf(x), 0);
-  let sub = (r.fecha !== t ? niceDate(r.fecha)+" · " : "")+esc(r.turno)+(r.services.length ? " · "+esc(r.services.join(", ")) : "");
-  if(nota) sub += '<br><span style="color:var(--warn)">📌 '+esc(nota)+'</span>';
-  if(debt.length) sub += '<br><span style="color:var(--bad)">⚠ Debe un no-show'+(debtAmt ? " de "+money(debtAmt) : "")+'</span>';
-  const ficha = '<button class="act" data-fi="'+esc(r.client)+'">Ficha</button>';
-  let acts, val, cls;
-  if(r.status === "cobrada"){ val = money(r.charged); cls = "ok"; acts = btn("propina", r, r.tip ? "Cambiar propina" : "+ Propina") + ficha; }
-  else if(r.status === "noshow"){ val = "no-show"; cls = "bad"; acts = (r.noShowPaid ? '<span class="note">Ya cobrado</span>' : btn("nspaid", r, "Marcar cobrado", "good")) + btn("quitarns", r, "Quitar") + ficha; }
-  else{ val = owedOf(r) ? money(owedOf(r)) : "sin monto"; cls = r.status === "pendiente" ? "warn" : "";
-    acts = btn("cobrar", r, "Cobrar", "good") + (r.status === "pendiente" ? btn("noshow", r, "No-show", "red") : "") + btn("cancelar", r, "Cancelar", "red") + ficha; }
-  return row(esc(r.nombre)+(nota ? " 📌" : ""), sub, val, cls, acts);
-}
-function renderHoy(){
-  const t = todayStr(), d = dayFin(t), list = reservas.filter(r => r.fecha === t).sort(byTime);
-  const prev = reservas.filter(r => r.status === "pendiente" && r.fecha < t).sort(byTime);
-  const cob = list.filter(r => r.status === "cobrada"), pend = list.filter(r => r.status === "pendiente" || r.status === "futura");
-  const rev = cob.reduce((s,r) => s + r.charged, 0), tips = cob.reduce((s,r) => s + r.tip, 0);
-  let h = '<h1>Hoy</h1><p class="lead">'+DAYS[parseD(t).getDay()]+' '+niceDate(t)+'</p>';
-  if(t < START_DATE) h += '<div class="msg err" style="margin:0 0 12px">El panel empieza a contar el '+niceDate(START_DATE)+'. Si ya volviste a trabajar, cámbialo en Más ▾ → Ajustes.</div>';
-  h += '<div class="grid">'+card("Cobrado hoy", money(rev), "Propinas "+money(tips), "ok")+card("Atendidos hoy", cob.length, "Clientes cobrados")+
-    card("Faltan por cobrar", pend.length, pend.length ? "≈ "+money(pend.reduce((s,r) => s+owedOf(r),0)) : "Todo al día", pend.length ? "warn" : "")+
-    card("Para ti hoy", money(d.libre), "Ya descontado barbería y ahorro", "ok")+'</div>';
-  if(prev.length) h += block("Pendientes de días anteriores", prev.map(hoyRow).join(""), "Clientes cuya hora ya pasó y no se cobraron. Cóbralos, márcalos no-show o cancélalos.");
-  h += block("Clientes de hoy", list.length ? list.map(hoyRow).join("") : empty("No hay clientes agendados para hoy."));
-  h += '<button class="btn" style="margin-top:12px" data-cierre="1">Cierre del día</button>';
-  h += '<div class="note" style="text-align:center">Resumen listo para WhatsApp con cobrado, propinas, reparto, gastos de la barbería, ahorro y metas.</div>';
-  $("pg-hoy").innerHTML = h;
-}
-
-/* ---------- PRECIOS ---------- */
-function guess(name){
-  const v = cobr().filter(r => r.services.length === 1 && norm(r.services[0]) === norm(name) && r.charged > 0).map(r => r.charged).sort((a,b) => a-b);
-  return v.length ? Math.round(v[Math.floor(v.length/2)]) : 0;
-}
-const cobr = () => reservas.filter(r => r.status === "cobrada");
-function renderPrecios(force){
-  if(DIRTY["pg-precios"] && !force) return;
-  const seen = {}; reservas.forEach(r => r.services.forEach(s => { const k = norm(s); if(!seen[k]) seen[k] = s; }));
-  const missing = Object.keys(seen).filter(k => !PRECIOS.some(p => norm(p.n) === k)).map(k => seen[k]);
-  let h = '<h1>Precios</h1><p class="lead">Tu lista de precios. Se usa al cobrar y para actualizar las reservas que ya están agendadas.</p>';
-  let b = PRECIOS.length ? PRECIOS.map((p,i) => '<div class="xsv"><input type="text" class="xpn" data-i="'+i+'" value="'+esc(p.n)+'" placeholder="Servicio" style="flex:1;min-width:0;background:var(--input);border:1px solid var(--line);border-radius:8px;padding:9px"><input type="number" inputmode="decimal" class="xpr xpp" data-i="'+i+'" value="'+(p.p||"")+'" placeholder="$"><button class="del" data-pdel="'+i+'" aria-label="Quitar">×</button></div>').join("") : empty("Todavía no hay precios. Añade tu primer servicio.");
-  b += '<button class="btnGhost" data-padd="">+ Añadir servicio</button>';
-  if(missing.length) b += '<div class="note" style="margin-top:10px">Servicios que ya usaste (toca para añadirlos):</div><div class="acts">'+missing.map(n => '<button class="act" data-padd="'+esc(n)+'">'+esc(n)+'</button>').join("")+'</div>';
-  h += '<div class="block">'+b+'</div>';
-  h += '<button class="btn" style="margin-top:12px" data-pa="save">Guardar precios</button><button class="btnGhost" data-pa="apply">Guardar y aplicar a reservas futuras</button>';
-  h += '<div class="note">"Aplicar" cambia el precio de las reservas que aún no llegan, según los servicios que pidió cada cliente. Los ya cobrados no se tocan.</div>';
-  $("pg-precios").innerHTML = h;
-}
-async function guardarPrecios(){
-  PRECIOS = PRECIOS.filter(x => String(x.n).trim()).map(x => ({n:String(x.n).trim(), p:num(x.p)}));
-  await kvSet("precios", PRECIOS); DIRTY["pg-precios"] = false;
-}
-async function aplicarPrecios(){
-  await guardarPrecios();
-  const fut = reservas.filter(r => r.status === "futura"), cambios = []; let igual = 0, sinPrecio = 0, sinServ = 0;
-  fut.forEach(r => {
-    if(!r.services.length){ sinServ++; return; }
-    let s = 0, ok = true;
-    r.services.forEach(n => { const p = PRECIOS.find(x => norm(x.n) === norm(n)); if(!p || !(p.p > 0)) ok = false; else s += p.p; });
-    if(!ok){ sinPrecio++; return; }
-    if(Math.round(s) === Math.round(owedOf(r))) igual++; else cambios.push({r, nuevo:s});
-  });
-  if(!cambios.length){ renderPrecios(true); toast("Guardado. "+(fut.length ? "Ninguna reserva futura necesitaba cambio." : "No hay reservas futuras."), 5000); return; }
-  const txt = cambios.length+" reserva(s) cambiarán de precio"+(igual ? ", "+igual+" ya estaban bien" : "")+(sinPrecio ? ", "+sinPrecio+" no se tocan porque falta el precio de algún servicio" : "")+(sinServ ? ", "+sinServ+" no tienen servicios anotados" : "")+".";
-  if(!(await ask("Aplicar precios nuevos", txt, "Aplicar"))){ renderPrecios(true); return; }
-  let ok = true;
-  for(const c of cambios){
-    const ids = c.r.rows.map(x => x.id);
-    if(ok) ok = await updRows([ids[0]], {precio_esperado:c.nuevo, total:c.nuevo});
-    if(ok && ids.length > 1) ok = await updRows(ids.slice(1), {precio_esperado:0, total:c.nuevo});
-  }
-  if(ok){ toast("Actualicé "+cambios.length+" reserva(s) futura(s)", 5000); await loadData(); }
-}
-
-/* ---------- GASTOS Y RETIROS ---------- */
-function renderGastosPg(){
-  const month = todayStr().slice(0,7), F = window.__admin.fondoInfo(), ap = window.__admin.aportes();
-  const gm = gastos.filter(g => mon(String(g.fecha)) === month).sort((a,b) => String(b.fecha).localeCompare(String(a.fecha)));
-  let h = '<h1>Gastos y retiros</h1><p class="lead">Lo que se gasta en la barbería y el dinero tuyo que entra y sale del fondo.</p>';
-  h += '<button class="btn" onclick="openExpense()">Añadir gasto</button><button class="btnGhost" onclick="aporteDinero(\'in\')">Puse dinero mío en la barbería</button><button class="btnGhost" onclick="aporteDinero(\'out\')">Me devolví dinero del fondo</button>';
-  h += block("Fondo de la barbería", row("Estado", esc(F.txt), "", F.tone) + row("Dinero tuyo metido", "Total que has puesto de tu bolsillo", money(F.inn), F.inn > 0 ? "warn" : "") +
-    row("Ya devuelto", "Lo que te has devuelto del fondo", money(F.out), "ok") + row("Por devolverte", F.canReturn > 0 ? "El fondo ya permite devolverte hasta "+money(F.canReturn) : "Cuando el fondo tenga de sobra, te aviso", money(F.debt), F.debt > 0 ? "warn" : ""));
-  h += block("Gastos de este mes ("+money(sumGastos(gm))+")", gm.length ? gm.map(x => row(esc(x.descripcion || x.categoria || "Gasto"), niceDate(String(x.fecha))+" · "+esc(x.categoria || "otros"),
-    money(x.monto)+' <button class="del" onclick="delExpense('+Number(x.id)+')" aria-label="Borrar">×</button>', "bad")).join("") : empty("Todavía no hay gastos este mes."));
-  const mov = ap.slice().sort((a,b) => String(b.fecha).localeCompare(String(a.fecha))).slice(0,12);
-  h += block("Tu dinero y devoluciones", mov.length ? mov.map(g => row(/^devolucion/.test(norm(g.descripcion)) ? "Devolución" : "Aporte", niceDate(String(g.fecha))+" · "+esc(String(g.descripcion).replace(/^[^:]*:\s*/, "")),
-    money(g.monto)+' <button class="del" onclick="delAporte('+Number(g.id)+')" aria-label="Borrar">×</button>', /^devolucion/.test(norm(g.descripcion)) ? "ok" : "warn")).join("") : empty("Aún no has anotado movimientos."),
-    "No cuentan como gasto ni cambian tus ganancias; solo muestran cuánto te debe la barbería.");
-  $("pg-gastos").innerHTML = h;
-}
-
-/* ---------- METAS y COMPRAS ---------- */
-function renderMetasPg(){
-  const month = todayStr().slice(0,7), f = monthFin(month), am = num(CFG.ahorro_meta);
-  let h = '<h1>Metas</h1><p class="lead">Lo que quieres lograr este mes.</p>';
-  h += block("Meta del mes", goalHtml());
-  h += block("Barbería y ahorro del mes",
-    barRow2("Gastos de la barbería", f.reserve, BARBER_BUDGET, "bad", "r") + (am > 0 ? barRow2("Meta de ahorro", f.ahorro, am, "save", "b") : '<div class="note">Puedes poner una meta de ahorro en Más ▾ → Ajustes.</div>'),
-    "La barbería se cubre poco a poco con cada cobro. El ahorro es el % que separas del resto.");
-  $("pg-metas").innerHTML = h;
-}
-function barRow2(t, a, b, cls, bc){
-  const pc = b > 0 ? Math.min(100, a/b*100) : 0;
-  return '<div class="row"><div class="rowTop"><div><div class="rowTitle">'+t+'</div><div class="rowSub">'+money(a)+' de '+money(b)+(a >= b-0.5 ? ' · ¡cubierto!' : ' · faltan '+money(b-a))+'</div></div><div class="rowVal '+cls+'">'+pct(pc)+'</div></div><div class="bar"><i class="'+bc+'" style="width:'+pc+'%"></i></div></div>';
-}
-function renderComprasPg(){
-  let h = '<h1>Compras</h1><p class="lead">Cuándo conviene abastecer cada producto.</p>' + productsBlock() +
-    '<button class="btn" style="margin-top:12px" onclick="openExpense()">Anotar una compra</button>';
-  $("pg-compras").innerHTML = h;
-}
-
-/* ---------- BLOQUEAR DÍAS ---------- */
-function blockedDays(){
-  const map = {}, seen = new Set(), t = todayStr();
-  BLK.concat(bloqueos.filter(b => b.fecha >= t)).forEach(b => { if(seen.has(b.id)) return; seen.add(b.id); (map[b.fecha] = map[b.fecha] || []).push(b.id); });
-  return Object.keys(map).sort().map(f => ({fecha:f, ids:map[f]}));
-}
-function renderBloqueosPg(force){
-  if(DIRTY["pg-bloqueos"] && !force) return;
-  const t = todayStr(), days = blockedDays();
-  let h = '<h1>Bloquear días</h1><p class="lead">Para vacaciones, enfermedad o un día libre: cierra los turnos en la web sin ocuparlos uno por uno.</p>';
-  h += '<div class="block">'+fld("blkFrom","Desde","date",t)+fld("blkTo","Hasta","date",t)+'<button class="btn" data-blk="go">Bloquear</button>'+
-    '<div class="note">No se bloquean los domingos. Los clientes que ya reservaron en esos días no se tocan.</div></div>';
-  h += block("Días bloqueados", days.length ? days.map(d => row(DAYS[parseD(d.fecha).getDay()]+" "+niceDate(d.fecha), d.ids.length+" turno(s) cerrados", "", "", '<button class="act red" data-unblk="'+d.fecha+'">Liberar día</button>')).join("") : empty("No hay días bloqueados."));
-  $("pg-bloqueos").innerHTML = h;
-}
-async function bloquearDias(){
-  const from = $("blkFrom").value, to = $("blkTo").value, t = todayStr();
-  if(!from || !to || from > to){ toast("Revisa las fechas: «Hasta» no puede ser antes que «Desde»."); return; }
-  if(from < t){ toast("Elige fechas desde hoy en adelante."); return; }
-  const rows = []; let dias = 0;
-  eachDay(from, to, (d, wd) => { if(wd === 0) return; dias++; SLOTS.forEach(s => rows.push({fecha:d, turno:s, estado:"ocupado", nombre:"Bloqueado"})); });
-  if(!dias){ toast("Esas fechas son solo domingos."); return; }
-  const booked = reservas.filter(r => r.fecha >= from && r.fecha <= to).length;
-  if(!(await ask("Bloquear días", "Se cerrarán los turnos libres de "+dias+" día(s), del "+niceDate(from)+" al "+niceDate(to)+"."+(booked ? " Hay "+booked+" reserva(s) de clientes en esas fechas; no se tocan." : ""), "Bloquear"))) return;
-  for(let i = 0; i < rows.length; i += 200){
-    const {error} = await sb.from("turnos").upsert(rows.slice(i, i+200), {onConflict:"fecha,turno", ignoreDuplicates:true});
-    if(error){ alert("No se pudo bloquear: "+error.message+"\n\nSi dice 'policy', corre el SQL que te dejé en el chat."); return; }
-  }
-  DIRTY["pg-bloqueos"] = false; toast("Días bloqueados"); await loadData();
-}
-async function liberarDia(f){
-  const d = blockedDays().find(x => x.fecha === f); if(!d) return;
-  if(!(await ask("Liberar día", "Se abrirán los turnos bloqueados del "+niceDate(f)+" en la web.", "Liberar"))) return;
-  const {error} = await sb.from("turnos").delete().in("id", d.ids);
-  if(error){ alert("No se pudo liberar: "+error.message+"\n\nFalta el permiso de borrar: corre el SQL que te dejé en el chat."); return; }
-  toast("Día liberado"); await loadData();
-}
-
-/* ---------- AJUSTES y MENSAJES ---------- */
-function renderAjustes(){
-  if(DIRTY["pg-ajustes"]) return;
-  let h = '<h1>Ajustes</h1><p class="lead">Lo que antes cambiabas en el código ahora se cambia aquí.</p>';
-  if(DBERR) h += '<div class="msg err" style="margin:0 0 12px">Supabase no está guardando tus ajustes ('+esc(DBERR)+'). Por ahora quedan solo en este teléfono.</div>';
-  h += '<div class="block"><div class="blockTitle">Negocio</div>'+
-    fld("ajStart","Día desde el que cuenta el panel","date",START_DATE)+'<div class="note" style="margin:-8px 0 12px">Pon aquí el día que vuelvas a trabajar: lo anterior se ignora y las citas fijas dejan de salir como pendientes.</div>'+
-    fld("ajBudget","Gastos fijos de la barbería por mes","number",BARBER_BUDGET)+
-    fld("ajSave","% de ahorro (sobre lo que queda después de la barbería)","number",SAVE_PCT)+
-    fld("ajAhorro","Meta de ahorro del mes (opcional)","number",CFG.ahorro_meta || "")+'</div>';
-  h += '<div class="block"><div class="blockTitle">Mi WhatsApp y el bot</div>'+
-    fld("ajNum","Mi número de WhatsApp (con código de país, sin +)","tel",CFG.mi_numero || "")+
-    fld("ajBot","Dirección del bot (URL)","text",CFG.bot_url || "",'placeholder="https://...&text={texto}" autocapitalize="off" autocorrect="off"')+
-    '<div class="note" style="margin:-8px 0 12px">Pega la dirección con {texto} donde va el mensaje (y {numero} si pide tu número).</div>'+
-    '<div class="field"><label for="ajAuto">Enviar el cierre solo, al cobrar el último cliente del día</label><select id="ajAuto"><option value="0"'+(CFG.auto_cierre ? "" : " selected")+'>No, lo envío yo con el botón</option><option value="1"'+(CFG.auto_cierre ? " selected" : "")+'>Sí, automático</option></select></div>'+
-    '<button class="btnGhost" data-aj="test">Enviar mensaje de prueba al bot</button></div>';
-  h += '<button class="btn" style="margin-top:12px" data-aj="save">Guardar ajustes</button>';
-  $("pg-ajustes").innerHTML = h;
-}
-async function guardarAjustes(){
-  const start = $("ajStart").value, budget = num($("ajBudget").value), save = num($("ajSave").value);
-  if(!ISO.test(start)){ toast("Elige el día de inicio."); return; }
-  if(!(budget > 0)){ toast("Los gastos fijos deben ser mayores que 0."); return; }
-  if(save < 0 || save > 100){ toast("El ahorro debe estar entre 0 y 100."); return; }
-  CFG = Object.assign({}, CFG, {start_date:start, barber_budget:budget, save_pct:save, ahorro_meta:num($("ajAhorro").value),
-    mi_numero:digits($("ajNum").value), bot_url:$("ajBot").value.trim(), auto_cierre:$("ajAuto").value === "1"});
-  if(CFG.bot_url && CFG.bot_url.indexOf("{texto}") < 0){ toast("Falta {texto} en la dirección del bot."); return; }
-  const okc = await kvSet("config", CFG); DIRTY["pg-ajustes"] = false; applyCfg();
-  toast(okc ? "Ajustes guardados" : "Guardado solo en este teléfono: "+DBERR, 7000); await loadData();
-}
-function renderMensajes(){
-  if(DIRTY["pg-mensajes"]) return;
-  const m = window.getMsgs();
-  const ta = (id,l,v) => '<div class="field"><label for="'+id+'">'+l+'</label><textarea id="'+id+'" rows="4" style="width:100%;background:var(--input);border:1px solid var(--line);border-radius:10px;padding:12px;color:inherit;font:inherit;outline:none">'+esc(v)+'</textarea></div>';
-  let h = '<h1>Mensajes</h1><p class="lead">Los textos que se mandan a tus clientes por WhatsApp.</p><div class="block">'+
-    ta("msRiesgo","Cliente que ya pasó su ritmo de visitas",m.riesgo)+ta("msRecup","Cliente que lleva mucho sin venir",m.recuperar)+ta("msNs","Cobro de no-show",MSGS.noshow || DEFAULT_NS)+
-    fld("msLink","Link de tus reservas","text",m.link)+fld("msPais","Código de país (sin +)","tel",m.pais)+
-    '<div class="note">Palabras mágicas: {nombre}, {dias}, {ciclo}, {link}. En el de no-show también {fecha}, {hora} y {monto}.</div></div>'+
-    '<button class="btn" style="margin-top:12px" data-ms="save">Guardar mensajes</button>';
-  $("pg-mensajes").innerHTML = h;
-}
-async function guardarMensajes(){
-  MSGS = {riesgo:$("msRiesgo").value.trim(), recuperar:$("msRecup").value.trim(), noshow:$("msNs").value.trim(), link:$("msLink").value.trim(), pais:digits($("msPais").value)};
-  window.setMsgs(MSGS);
-  const ok = await kvSet("mensajes", MSGS); DIRTY["pg-mensajes"] = false;
-  toast(ok ? "Mensajes guardados" : "Guardado solo en este teléfono: "+DBERR, 7000);
-  renderAll();
-}
-
-/* ---------- RESPALDO ---------- */
-async function fetchFull(table){
-  let from = 0, all = [];
-  while(true){
-    const {data, error} = await sb.from(table).select("*").order("id",{ascending:true}).range(from, from+999);
-    if(error) throw error; all = all.concat(data || []); if(!data || data.length < 1000) break; from += 1000;
-  }
-  return all;
-}
-function csv(rows){
-  const cols = []; rows.forEach(r => Object.keys(r).forEach(k => { if(cols.indexOf(k) < 0) cols.push(k); }));
-  const q = v => { v = v === null || v === undefined ? "" : (typeof v === "object" ? JSON.stringify(v) : String(v)); return '"'+v.replace(/"/g,'""')+'"'; };
-  return "\ufeff"+cols.map(q).join(",")+"\n"+rows.map(r => cols.map(c => q(r[c])).join(",")).join("\n");
-}
-function descargar(nombre, texto, mime){
-  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([texto], {type:mime})); a.download = nombre;
-  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
-}
-function renderRespaldo(){
-  let h = '<h1>Respaldo</h1><p class="lead">Descarga tus datos por si algún día pasa algo.</p>';
-  h += '<div class="block"><button class="btn" data-bk="json">Descargar todo (respaldo completo)</button><button class="btnGhost" data-bk="turnos">Turnos y cobros (Excel)</button><button class="btnGhost" data-bk="gastos">Gastos (Excel)</button>'+
-    '<div id="bkMsg" class="note">'+(ESTADO.last_backup ? "Último respaldo: "+niceDate(ESTADO.last_backup)+"." : "Aún no has hecho un respaldo.")+' Incluye todo el historial, aunque el panel empiece a contar más tarde.</div></div>';
-  $("pg-respaldo").innerHTML = h;
-}
-async function hacerRespaldo(tipo){
-  const msg = $("bkMsg"); msg.textContent = "Preparando…";
-  try{
-    const f = todayStr();
-    if(tipo === "turnos"){ descargar("turnos-monos-"+f+".csv", csv(await fetchFull("turnos")), "text/csv;charset=utf-8"); }
-    else if(tipo === "gastos"){ descargar("gastos-monos-"+f+".csv", csv(await fetchFull("gastos")), "text/csv;charset=utf-8"); }
-    else{
-      const [t,g,m] = await Promise.all([fetchFull("turnos"), fetchFull("gastos"), fetchFull("metas")]);
-      descargar("respaldo-monos-"+f+".json", JSON.stringify({fecha_respaldo:f, turnos:t, gastos:g, metas:m, config:CFG, precios:PRECIOS, notas:NOTAS, mensajes:MSGS}, null, 1), "application/json");
-    }
-    ESTADO.last_backup = f; await kvSet("estado", ESTADO); msg.textContent = "Listo: revisa tus descargas. Último respaldo: "+niceDate(f)+".";
-  }catch(e){ msg.textContent = "No se pudo: "+(e.message || e); }
-}
-
-/* ---------- CLIENTES (buscador) y NO-SHOWS (cobro por WhatsApp) ---------- */
-function clientList(q){
-  const nq = norm(q), dq = digits(q);
-  const arr = buildClients().filter(c => !nq || norm(c.nombre).indexOf(nq) >= 0 || (dq.length >= 3 && digits(c.telefono).indexOf(dq) >= 0))
-    .sort((a,b) => String(b.last || "").localeCompare(String(a.last || ""))).slice(0,15);
-  return arr.length ? arr.map(c => row(esc(c.nombre)+(NOTAS[c.key] ? " 📌" : ""), c.visits+" visita(s)"+(c.noshows ? " · "+c.noshows+" falta(s)" : ""), money(c.revenue), "ok",
-    '<button class="act" data-fi="'+esc(c.key)+'">Ver ficha</button>')).join("") : empty("No encontré a nadie con ese nombre.");
-}
-function decorateClientes(){
-  const g = $("pg-clientes").querySelector(".grid"); if(!g) return;
-  g.insertAdjacentHTML("afterend", block("Buscar cliente", '<div class="field"><input id="cliQ" type="search" placeholder="Nombre o teléfono"></div><div id="cliRes">'+clientList("")+'</div>',
-    "Abre la ficha de cualquier cliente: historial, no-shows y una nota fija."));
-}
-function decorateNoShows(){
-  document.querySelectorAll('#pg-noshows button.act[data-a="nspaid"]').forEach(b => {
-    const r = reservas.find(x => x.key === b.dataset.k); if(!r) return;
-    const link = waTo(r.telefono, fillNs(r));
-    b.insertAdjacentHTML("afterend", link ? '<a class="act" href="'+link+'" target="_blank" rel="noopener">Cobrar por WhatsApp</a>' : '<span class="note">Sin teléfono</span>');
-  });
-}
-
-/* ---------- MENÚ INFERIOR (4 botones con listas) ---------- */
-const PAGES = ["hoy","resumen","dinero","clientes","agenda","noshows","plan","sim","precios","gastos","metas","compras","bloqueos","ajustes","mensajes","respaldo"];
-const STATS = ["resumen","dinero","clientes","agenda","noshows","plan","sim"];
-const GROUPS = {
-  hoy:{label:"Hoy", icon:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>', page:"hoy"},
-  stats:{label:"Estadísticas", icon:'<svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V4M19 20v-6"/></svg>', items:[["resumen","Resumen"],["dinero","Dinero"],["clientes","Clientes"],["agenda","Agenda"],["noshows","No-shows"],["plan","Plan"],["sim","Simula"]]},
-  negocio:{label:"Negocio", icon:'<svg viewBox="0 0 24 24"><rect x="3.5" y="7.5" width="17" height="12" rx="2"/><path d="M9 7.5v-2h6v2M3.5 13h17"/></svg>', items:[["precios","Precios"],["gastos","Gastos y retiros"],["metas","Metas"],["compras","Compras"],["bloqueos","Bloquear días"]]},
-  mas:{label:"Más", icon:'<svg viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></svg>', items:[["ajustes","Ajustes"],["mensajes","Mensajes"],["respaldo","Respaldo"],["salir","Salir"]]}
-};
-const main = document.querySelector("main");
-["hoy","precios","gastos","metas","compras","bloqueos","ajustes","mensajes","respaldo"].forEach(n => {
-  const s = document.createElement("section"); s.id = "pg-"+n; s.className = "hidden"; if(n === "hoy") main.insertBefore(s, main.firstChild); else main.appendChild(s);
-});
-const nav = document.querySelector("nav.bottom");
-nav.innerHTML = Object.keys(GROUPS).map(k => '<button data-g="'+k+'"><span>'+GROUPS[k].icon+'</span>'+GROUPS[k].label+(GROUPS[k].items ? " ▾" : "")+'</button>').join("");
-const shade = document.createElement("div"); shade.id = "navShade"; shade.className = "hidden";
-const pop = document.createElement("div"); pop.id = "navPop"; pop.className = "hidden";
-$("app").appendChild(shade); $("app").appendChild(pop);
-let current = "hoy";
-function groupOf(p){ return GROUPS.hoy.page === p ? "hoy" : Object.keys(GROUPS).find(k => GROUPS[k].items && GROUPS[k].items.some(i => i[0] === p)); }
-function closePop(){ pop.classList.add("hidden"); shade.classList.add("hidden"); }
-function go(p){
-  current = p; closePop();
-  PAGES.forEach(n => $("pg-"+n).classList.toggle("hidden", n !== p));
-  $("periods").classList.toggle("hidden", STATS.indexOf(p) < 0 || ["plan","sim"].indexOf(p) >= 0);
-  const g = groupOf(p); nav.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.g === g));
-  window.scrollTo(0,0);
-}
-nav.addEventListener("click", e => {
-  const b = e.target.closest("button"); if(!b) return;
-  const k = b.dataset.g, G = GROUPS[k];
-  if(!G.items){ go(G.page); return; }
-  if(!pop.classList.contains("hidden") && pop.dataset.g === k){ closePop(); return; }
-  pop.dataset.g = k;
-  pop.innerHTML = G.items.map(i => '<button data-go="'+i[0]+'"'+(i[0] === current ? ' class="on"' : '')+'>'+i[1]+'</button>').join("");
-  const r = b.getBoundingClientRect(), w = Math.min(230, window.innerWidth - 16);
-  pop.style.width = w+"px"; pop.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left + r.width/2 - w/2))+"px";
-  pop.classList.remove("hidden"); shade.classList.remove("hidden");
-});
-pop.addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return;
-  if(b.dataset.go === "salir"){ closePop(); $("logoutBtn").click(); return; } go(b.dataset.go); });
-shade.addEventListener("click", closePop);
-
-/* ---------- Estilos nuevos ---------- */
-const st = document.createElement("style");
-st.textContent = "nav.bottom button{font-size:11px}nav.bottom span{font-size:18px}"+
- "#navShade{position:fixed;inset:0 0 calc(62px + env(safe-area-inset-bottom)) 0;z-index:35}"+
- "#navPop{position:fixed;bottom:calc(68px + env(safe-area-inset-bottom));z-index:40;background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:6px;box-shadow:0 10px 30px rgba(0,0,0,.5)}"+
- "#navPop button{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--cream);font-size:16px;padding:12px 14px;border-radius:10px}"+
- "#navPop button.on{background:var(--gold);color:var(--forest);font-weight:700}"+
- ".xsv{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1)}"+
- ".xsv input[type=checkbox]{width:22px;height:22px;flex-shrink:0}.xsv span{flex:1}"+
- ".xpr{width:96px;background:var(--input);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:16px;color:inherit}"+
- "#xToast{position:fixed;left:16px;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:200;max-width:420px;margin:0 auto;background:var(--gold);color:var(--forest);font-weight:700;border-radius:12px;padding:12px 16px;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}"+
- "#xToast.show{opacity:1}a.act{display:inline-block;text-decoration:none}";
-document.head.appendChild(st);
-
-/* ---------- Eventos ---------- */
-document.addEventListener("input", e => {
-  const sec = e.target.closest("section"); if(sec && ["pg-ajustes","pg-mensajes","pg-precios","pg-bloqueos"].indexOf(sec.id) >= 0) DIRTY[sec.id] = true;
-  if(e.target.id === "cliQ"){ $("cliRes").innerHTML = clientList(e.target.value); return; }
-  if(e.target.classList.contains("xpn") && e.target.closest("#pg-precios")){ const p = PRECIOS[+e.target.dataset.i]; if(p) p.n = e.target.value; }
-  if(e.target.classList.contains("xpp") && e.target.closest("#pg-precios")){ const p = PRECIOS[+e.target.dataset.i]; if(p) p.p = num(e.target.value); }
-});
-document.addEventListener("click", async e => {
-  const t = e.target;
-  let b = t.closest("[data-fi]"); if(b){ openFicha(b.dataset.fi); return; }
-  b = t.closest("[data-cierre]"); if(b){ abrirCierre(); return; }
-  b = t.closest("[data-pdel]"); if(b){ PRECIOS.splice(+b.dataset.pdel, 1); DIRTY["pg-precios"] = true; renderPrecios(true); return; }
-  b = t.closest("[data-padd]"); if(b){ const n = b.dataset.padd; PRECIOS.push({n, p:n ? guess(n) : 0}); DIRTY["pg-precios"] = true; renderPrecios(true);
-    if(!n){ const i = document.querySelectorAll("#pg-precios .xpn"); if(i.length) i[i.length-1].focus(); } return; }
-  b = t.closest("[data-pa]"); if(b){ if(b.dataset.pa === "apply") await aplicarPrecios(); else{ await guardarPrecios(); renderPrecios(true); toast("Precios guardados"); } return; }
-  b = t.closest("[data-blk]"); if(b){ await bloquearDias(); return; }
-  b = t.closest("[data-unblk]"); if(b){ await liberarDia(b.dataset.unblk); return; }
-  b = t.closest("[data-aj]"); if(b){
-    if(b.dataset.aj === "save") await guardarAjustes();
-    else{
-      CFG.bot_url = $("ajBot").value.trim(); CFG.mi_numero = digits($("ajNum").value);
-      if(!CFG.bot_url){ toast("Primero pega la dirección del bot."); return; }
-      toast(await sendBot("💈 Prueba del panel de Mono's: si ves esto, el bot funciona.") ? "Enviado. Revisa tu WhatsApp." : "No pude enviar. Revisa la dirección.");
-    } return; }
-  b = t.closest("[data-ms]"); if(b){ await guardarMensajes(); return; }
-  b = t.closest("[data-bk]"); if(b){ await hacerRespaldo(b.dataset.bk); return; }
-});
-
-/* ---------- Enganche con el render ---------- */
-const _ra = window.renderAll;
-window.renderAll = function(){
-  _ra();
-  try{
-    renderHoy(); renderPrecios(); renderGastosPg(); renderMetasPg(); renderComprasPg(); renderBloqueosPg();
-    renderAjustes(); renderMensajes(); renderRespaldo(); decorateClientes(); decorateNoShows();
-  }catch(e){
-    console.error(e);
-    $("globalMsg").insertAdjacentHTML("beforeend", '<div class="msg err">Las pantallas nuevas tuvieron un problema: '+esc(e.message || e)+'</div>');
-  }
-};
-document.addEventListener("touchstart",function(){},{passive:true});
-go("hoy");
-if(typeof appShown !== "undefined" && appShown && turnos.length) window.renderAll();
-})();
-function busy(on){ let el=$("xBusy"); if(!el){ el=document.createElement("div"); el.id="xBusy"; document.body.appendChild(el); } el.className=on?"on":""; }
-const _ld = window.loadData;
-window.loadData = async function(){
-  busy(1);
-  try{ await loadAll(); }catch(e){ console.error(e); }
-  try{ await _ld(); }finally{ busy(0); }
-  try{ maybeAutoCierre(); }catch(e){ console.error(e); }
-};
-</script>
-</body>
-</html>
+  CFG = r[0] || {}; PRECIOS = Array.isArray(r[1]) ? r[1] : []; NOTAS = r[2] || {}; MSGS = r[3] 
