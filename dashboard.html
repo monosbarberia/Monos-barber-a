@@ -1344,7 +1344,6 @@ if(typeof appShown !== "undefined" && appShown && turnos.length) window.renderAl
 "use strict";
 if(typeof renderAll !== "function" || typeof sb === "undefined" || !window.__admin) return;
 
-const DEFAULT_NS = "Hola {nombre} 👋 el {fecha} tenías turno a las {hora} en Mono's y no pudiste venir. Quedó pendiente {monto}. Cuando puedas me lo mandas o lo pagas en tu próxima cita. ¡Gracias! 🙏";
 const TAG_APORTE = "APORTE PERSONAL: ", TAG_DEVOL = "DEVOLUCION PERSONAL: ";
 let CFG = {}, PRECIOS = [], NOTAS = {}, MSGS = {}, ESTADO = {}, BLK = [], autoBusy = false;
 const DIRTY = {};
@@ -1430,38 +1429,9 @@ function sheet(title, html, okLabel, getVals, onOpen){
 async function ask(title, text, okLabel){ return !!(await sheet(esc(title), '<p class="lead" style="margin-bottom:6px">'+esc(text)+'</p>', okLabel || "Aceptar")); }
 
 /* ---------- Acciones sobre reservas (reemplazan a las anteriores) ---------- */
-function noShowUrl(){
-  const ns = String(CFG.ns_bot_url || "").trim(), b = String(CFG.bot_url || "").trim();
-  if(ns) return ns;
-  return b.indexOf("{numero}") >= 0 ? b : "";          // el bot general solo sirve si también lleva {numero}
-}
-async function noShowManual(r, why){
-  const txt = fillNs(r), link = waTo(r.telefono, txt);
-  await sheet("No-show de "+esc(r.nombre), (why ? '<div class="msg err" style="margin:0 0 12px">'+esc(why)+'</div>' : '')+
-    '<div class="block" style="margin:0 0 12px;white-space:pre-wrap;font-size:14px;line-height:1.5">'+esc(txt)+'</div>'+
-    (link ? '<div class="acts"><a class="act good" target="_blank" rel="noopener" href="'+link+'">Enviar por WhatsApp</a></div>' : '<div class="note">Este cliente no tiene teléfono.</div>'), null);
-}
-// Al marcar no-show, el mensaje de cobro se manda solo por el bot (una sola vez por reserva)
-async function enviarNoShow(r){
-  if(CFG.auto_noshow === false) return noShowManual(r);
-  const ph = phoneFull(r.telefono);
-  if(ph.length < 8){ toast("No-show marcado. "+r.nombre+" no tiene un teléfono válido para avisarle.", 6000); return; }
-  const url = noShowUrl();
-  if(!url) return noShowManual(r, "Para que el mensaje salga solo, pega la dirección del bot de no-shows en Más ▾ → Ajustes (con {numero} y {texto}).");
-  ESTADO.ns_sent = ESTADO.ns_sent || {};
-  if(ESTADO.ns_sent[r.key]){ toast("No-show marcado. A "+r.nombre+" ya se le había enviado el mensaje de cobro.", 6000); return; }
-  const full = url.replace(/\{texto\}/g, encodeURIComponent(fillNs(r))).replace(/\{numero\}/g, ph);
-  try{ await fetch(full, {mode:"no-cors"}); }
-  catch(e){ return noShowManual(r, "No pude contactar al bot. Puedes enviarlo tú con un toque."); }
-  ESTADO.ns_sent[r.key] = todayStr();
-  const keys = Object.keys(ESTADO.ns_sent);
-  if(keys.length > 300) keys.sort((a,b) => String(ESTADO.ns_sent[a]).localeCompare(String(ESTADO.ns_sent[b]))).slice(0, keys.length - 300).forEach(k => { delete ESTADO.ns_sent[k]; });
-  await kvSet("estado", ESTADO);
-  toast("Mensaje de cobro enviado al bot para "+r.nombre+". (El panel no puede confirmar la entrega: revisa el bot si dudas.)", 8000);
-}
 window.act = async function(a, key){
   const r = reservas.find(x => x.key === key); if(!r) return;
-  const ids = r.rows.map(x => x.id); let ok = false, avisar = false;
+  const ids = r.rows.map(x => x.id); let ok = false;
   if(a === "cobrar"){ return openCobrar(r); }
   else if(a === "propina"){
     const v = await sheet("Propina de "+esc(r.nombre), fld("xTip","Propina (reemplaza la anterior)","number",r.tip||""), "Guardar", m => ({tip:num(m.querySelector("#xTip").value)}));
@@ -1469,8 +1439,8 @@ window.act = async function(a, key){
     ok = await updRows([ids[0]], {propina:v.tip});
     if(ok && ids.length > 1) ok = await updRows(ids.slice(1), {propina:0});
   }else if(a === "noshow"){
-    if(!(await ask("Marcar no-show", r.nombre+" no vino. Quedará como no-show, te debe el turno y se le preparará el mensaje de cobro.", "Marcar no-show"))) return;
-    ok = await updRows(ids, {no_show:true}); avisar = ok;
+    if(!(await ask("Marcar no-show", r.nombre+" no vino. Quedará como no-show y te debe el turno.", "Marcar no-show"))) return;
+    ok = await updRows(ids, {no_show:true});
   }else if(a === "cancelar"){
     if(!(await ask("Cancelar y liberar turno", "Se libera el turno de "+r.nombre+" en la web para que otro cliente lo reserve. No cuenta como no-show.", "Cancelar y liberar"))) return;
     const q = await sb.from("turnos").delete().in("id", ids).select("id");
@@ -1485,7 +1455,7 @@ window.act = async function(a, key){
     if(!(await ask("Quitar no-show", "¿Quitar la marca de no-show de "+r.nombre+"?", "Quitar"))) return;
     ok = await updRows(ids, {no_show:false, no_show_cobrado:false});
   }
-  if(ok){ await loadData(); if(avisar) await enviarNoShow(r); }
+  if(ok){ await loadData(); }
 };
 
 /* ---------- Cobrar mejorado ---------- */
@@ -1566,10 +1536,6 @@ window.delExpense = async function(id){
 function waTo(phone, text){
   const p = phoneFull(phone); if(!p) return "";
   return "https://wa.me/"+p+"?text="+encodeURIComponent(text);
-}
-function fillNs(r){
-  const first = r.nombre === "Sin nombre" ? "amigo" : String(r.nombre).split(/\s+/)[0], tpl = MSGS.noshow || DEFAULT_NS;
-  return tpl.replace(/\{nombre\}/g, first).replace(/\{fecha\}/g, niceDate(r.fecha)).replace(/\{hora\}/g, r.turno).replace(/\{monto\}/g, owedOf(r) ? money(owedOf(r)) : "el valor del turno").replace(/\{link\}/g, window.getMsgs().link);
 }
 async function sendBot(text){
   const url = String(CFG.bot_url || "").trim(); if(!url) return false;
@@ -1677,8 +1643,7 @@ function hoyRow(r){
   let acts, val, cls;
   if(r.status === "cobrada"){ val = money(r.charged); cls = "ok"; acts = btn("propina", r, r.tip ? "Cambiar propina" : "+ Propina") + ficha; }
   else if(r.status === "noshow"){ val = "no-show"; cls = "bad";
-    const nsLink = r.noShowPaid ? "" : waTo(r.telefono, fillNs(r));
-    acts = (r.noShowPaid ? '<span class="note">Ya cobrado</span>' : btn("nspaid", r, "Marcar cobrado", "good") + (nsLink ? '<a class="act" href="'+nsLink+'" target="_blank" rel="noopener">Cobrar por WhatsApp</a>' : "")) + btn("quitarns", r, "Quitar") + ficha; }
+    acts = (r.noShowPaid ? '<span class="note">Ya cobrado</span>' : btn("nspaid", r, "Marcar cobrado", "good")) + btn("quitarns", r, "Quitar") + ficha; }
   else{ val = owedOf(r) ? money(owedOf(r)) : "sin monto"; cls = r.status === "pendiente" ? "warn" : "";
     acts = btn("cobrar", r, "Cobrar", "good") + (r.status === "pendiente" ? btn("noshow", r, "No-show", "red") : "") + btn("cancelar", r, "Cancelar", "red") + ficha; }
   return row(esc(r.nombre)+(nota ? " 📌" : ""), sub, val, cls, acts);
@@ -1841,11 +1806,8 @@ function renderAjustes(){
     fld("ajNum","Mi número de WhatsApp (con código de país, sin +)","tel",CFG.mi_numero || "")+
     fld("ajBot","Dirección del bot (URL)","text",CFG.bot_url || "",'placeholder="https://...&text={texto}" autocapitalize="off" autocorrect="off"')+
     '<div class="note" style="margin:-8px 0 12px">Pega la dirección con {texto} donde va el mensaje (y {numero} si pide tu número).</div>'+
-    fld("ajNsBot","Bot para avisar no-shows a clientes (opcional, con {numero} y {texto})","text",CFG.ns_bot_url || "",'placeholder="https://...?phone={numero}&text={texto}" autocapitalize="off" autocorrect="off"')+
-    '<div class="note" style="margin:-8px 0 12px">Si lo dejas vacío (y el bot general no lleva {numero}), al marcar no-show te sale un botón para enviar el mensaje por WhatsApp con un toque.</div>'+
-    '<div class="field"><label for="ajAutoNs">Enviar solo el cobro al cliente cuando marco un no-show</label><select id="ajAutoNs"><option value="1"'+(CFG.auto_noshow === false ? "" : " selected")+'>Sí, automático (una sola vez por reserva)</option><option value="0"'+(CFG.auto_noshow === false ? " selected" : "")+'>No, lo envío yo con un toque</option></select></div>'+
     '<div class="field"><label for="ajAuto">Enviar el cierre solo, al cobrar el último cliente del día</label><select id="ajAuto"><option value="0"'+(CFG.auto_cierre ? "" : " selected")+'>No, lo envío yo con el botón</option><option value="1"'+(CFG.auto_cierre ? " selected" : "")+'>Sí, automático</option></select></div>'+
-    '<div class="note" style="margin:0 0 8px">Ojo: las direcciones de los bots se guardan en tu base de datos. Si llevan una clave o token, asegúrate de que las tablas estén protegidas para que solo tu usuario las lea.</div>'+
+    '<div class="note" style="margin:0 0 8px">Ojo: la dirección del bot se guarda en tu base de datos. Si lleva una clave o token, asegúrate de que las tablas estén protegidas para que solo tu usuario las lea.</div>'+
     '<button class="btnGhost" data-aj="test">Enviar mensaje de prueba al bot</button></div>';
   h += '<button class="btn" style="margin-top:12px" data-aj="save">Guardar ajustes</button>';
   $("pg-ajustes").innerHTML = h;
@@ -1857,11 +1819,9 @@ async function guardarAjustes(){
   if(!(pb > 0 && pb <= 100)){ toast("El % para la barbería debe estar entre 1 y 100."); return; }
   if(save < 0 || save > 100){ toast("El ahorro debe estar entre 0 y 100."); return; }
   if(goal < 0){ toast("La meta de ahorro no puede ser negativa."); return; }
-  const nsUrl = $("ajNsBot").value.trim();
-  if(nsUrl && (nsUrl.indexOf("{texto}") < 0 || nsUrl.indexOf("{numero}") < 0)){ toast("La dirección del bot de no-shows necesita {texto} y {numero}."); return; }
   CFG = Object.assign({}, CFG, {start_date:start, barber_budget:budget, barber_pct:pb, save_pct:save, save_goal:goal, ahorro_meta:goal,
-    round_step:Math.max(1, num($("ajRound").value) || 10), mi_numero:digits($("ajNum").value), bot_url:$("ajBot").value.trim(), ns_bot_url:nsUrl,
-    auto_cierre:$("ajAuto").value === "1", auto_noshow:$("ajAutoNs").value === "1"});
+    round_step:Math.max(1, num($("ajRound").value) || 10), mi_numero:digits($("ajNum").value), bot_url:$("ajBot").value.trim(),
+    auto_cierre:$("ajAuto").value === "1"});
   if(CFG.bot_url && CFG.bot_url.indexOf("{texto}") < 0){ toast("Falta {texto} en la dirección del bot."); return; }
   const okc = await kvSet("config", CFG); DIRTY["pg-ajustes"] = false; applyCfg();
   toast(okc ? "Ajustes guardados" : "Guardado solo en este teléfono: "+DBERR, 7000); await loadData();
@@ -1871,14 +1831,14 @@ function renderMensajes(){
   const m = window.getMsgs();
   const ta = (id,l,v) => '<div class="field"><label for="'+id+'">'+l+'</label><textarea id="'+id+'" rows="4" style="width:100%;background:var(--input);border:1px solid var(--line);border-radius:10px;padding:12px;color:inherit;font:inherit;outline:none">'+esc(v)+'</textarea></div>';
   let h = '<h1>Mensajes</h1><p class="lead">Los textos que se mandan a tus clientes por WhatsApp.</p><div class="block">'+
-    ta("msRiesgo","Cliente que ya pasó su ritmo de visitas",m.riesgo)+ta("msRecup","Cliente que lleva mucho sin venir",m.recuperar)+ta("msNs","Cobro de no-show",MSGS.noshow || DEFAULT_NS)+
+    ta("msRiesgo","Cliente que ya pasó su ritmo de visitas",m.riesgo)+ta("msRecup","Cliente que lleva mucho sin venir",m.recuperar)+
     fld("msLink","Link de tus reservas","text",m.link)+fld("msPais","Código de país (sin +)","tel",m.pais)+
-    '<div class="note">Palabras mágicas: {nombre}, {dias}, {ciclo}, {link}. En el de no-show también {fecha}, {hora} y {monto}.</div></div>'+
+    '<div class="note">Palabras mágicas: {nombre}, {dias}, {ciclo}, {link}.</div></div>'+
     '<button class="btn" style="margin-top:12px" data-ms="save">Guardar mensajes</button>';
   $("pg-mensajes").innerHTML = h;
 }
 async function guardarMensajes(){
-  MSGS = {riesgo:$("msRiesgo").value.trim(), recuperar:$("msRecup").value.trim(), noshow:$("msNs").value.trim(), link:$("msLink").value.trim(), pais:digits($("msPais").value)};
+  MSGS = {riesgo:$("msRiesgo").value.trim(), recuperar:$("msRecup").value.trim(), link:$("msLink").value.trim(), pais:digits($("msPais").value)};
   window.setMsgs(MSGS);
   const ok = await kvSet("mensajes", MSGS); DIRTY["pg-mensajes"] = false;
   toast(ok ? "Mensajes guardados" : "Guardado solo en este teléfono: "+DBERR, 7000);
@@ -1923,7 +1883,7 @@ async function hacerRespaldo(tipo){
   }catch(e){ msg.textContent = "No se pudo: "+(e.message || e); }
 }
 
-/* ---------- CLIENTES (buscador) y NO-SHOWS (cobro por WhatsApp) ---------- */
+/* ---------- CLIENTES (buscador) ---------- */
 function clientList(q){
   const nq = norm(q), dq = digits(q);
   const arr = buildClients().filter(c => !nq || norm(c.nombre).indexOf(nq) >= 0 || (dq.length >= 3 && digits(c.telefono).indexOf(dq) >= 0))
@@ -1946,13 +1906,6 @@ function decorateClientes(){
   g.insertAdjacentHTML("afterend", block("Buscar cliente", '<div class="field"><input id="cliQ" type="search" placeholder="Nombre o teléfono"></div><div id="cliRes">'+clientList("")+'</div>',
     "Abre la ficha de cualquier cliente: historial, no-shows y una nota fija. Se ven 5 a la vez; baja con la barra de la derecha para ver los demás."));
   fitCliList();
-}
-function decorateNoShows(){
-  document.querySelectorAll('#pg-noshows button.act[data-a="nspaid"]').forEach(b => {
-    const r = reservas.find(x => x.key === b.dataset.k); if(!r) return;
-    const link = waTo(r.telefono, fillNs(r));
-    b.insertAdjacentHTML("afterend", link ? '<a class="act" href="'+link+'" target="_blank" rel="noopener">Cobrar por WhatsApp</a>' : '<span class="note">Sin teléfono</span>');
-  });
 }
 
 /* ---------- MENÚ INFERIOR (4 botones con listas) ---------- */
@@ -2046,7 +1999,7 @@ window.renderAll = function(){
   _ra();
   try{
     renderHoy(); renderPrecios(); renderGastosPg(); renderMetasPg(); renderComprasPg(); renderBloqueosPg();
-    renderAjustes(); renderMensajes(); renderRespaldo(); decorateClientes(); decorateNoShows();
+    renderAjustes(); renderMensajes(); renderRespaldo(); decorateClientes();
   }catch(e){
     console.error(e);
     $("globalMsg").insertAdjacentHTML("beforeend", '<div class="msg err">Las pantallas nuevas tuvieron un problema: '+esc(e.message || e)+'</div>');
