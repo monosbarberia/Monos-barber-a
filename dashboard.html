@@ -1388,8 +1388,12 @@ function applyCfg(){
   else if(num(CFG.ahorro_meta) > 0) SAVE_GOAL = num(CFG.ahorro_meta);
 }
 async function loadAll(){
-  const r = await Promise.all([kvGet("config",{}), kvGet("precios",[]), kvGet("notas",{}), kvGet("mensajes",{}), kvGet("estado",{})]);
-  CFG = r[0] || {}; PRECIOS = Array.isArray(r[1]) ? r[1] : []; NOTAS = r[2] || {}; MSGS = r[3] || {}; ESTADO = r[4] || {};
+    const r = await Promise.all([kvGet("config",{}), kvGet("notas",{}), kvGet("mensajes",{}), kvGet("estado",{})]);
+  CFG = r[0] || {}; NOTAS = r[1] || {}; MSGS = r[2] || {}; ESTADO = r[3] || {};
+  try{
+    const p = await sb.from("precios").select("servicio,precio,orden").order("orden");
+    if(!p.error) PRECIOS = (p.data || []).map(x => ({n:x.servicio, p:num(x.precio)}));
+  }catch(e){}
   applyCfg(); window.setMsgs(MSGS);
   BLK = [];
   try{
@@ -1690,9 +1694,33 @@ function renderPrecios(force){
   $("pg-precios").innerHTML = h;
 }
 async function guardarPrecios(){
-  PRECIOS = PRECIOS.filter(x => String(x.n).trim()).map(x => ({n:String(x.n).trim(), p:num(x.p)}));
-  await kvSet("precios", PRECIOS); DIRTY["pg-precios"] = false;
+  async function guardarPrecios(){
+  const list = PRECIOS.filter(x => String(x.n).trim()).map((x,i) => ({servicio:String(x.n).trim(), precio:Math.max(0, Math.round(num(x.p))), orden:i+1}));
+  if(!list.length){ alert("Deja al menos un servicio en la lista."); return false; }
+  const seen = new Set();
+  for(const r of list){ const k = norm(r.servicio); if(seen.has(k)){ alert("Hay un servicio repetido: "+r.servicio); return false; } seen.add(k); }
+  const up = await sb.from("precios").upsert(list, {onConflict:"servicio"});
+  if(up.error){ alert("No se pudieron guardar los precios: "+up.error.message); return false; }
+  const old = await sb.from("precios").select("servicio");
+  const keep = new Set(list.map(r => r.servicio));
+  const gone = (old.data || []).map(o => o.servicio).filter(s => !keep.has(s));
+  if(gone.length){
+    const d = await sb.from("precios").delete().in("servicio", gone).select("servicio");
+    if(d.error) alert("Se guardaron los precios, pero no se pudieron quitar los servicios eliminados: "+d.error.message);
+  }
+  PRECIOS = list.map(r => ({n:r.servicio, p:r.precio})); DIRTY["pg-precios"] = false;
+  return true;
 }
+async function aplicarPreciosSql(){
+  if(!(await ask("Aplicar precios nuevos", "Se guardan los precios y se recalcula el total de las reservas que aún no llegan ni se han cobrado, según los servicios de cada una. Lo ya cobrado no cambia.", "Aplicar"))) return;
+  if(!(await guardarPrecios())) return;
+  const r = await sb.rpc("aplicar_precios");
+  renderPrecios(true);
+  if(r.error){ alert("Los precios se guardaron, pero no se pudieron aplicar a las reservas futuras: "+r.error.message+"\n\nFalta crear la función aplicar_precios en Supabase."); return; }
+  toast("Listo: "+r.data+" reserva(s) futura(s) actualizadas", 6000);
+  await loadData();
+}
+
 async function aplicarPrecios(){
   await guardarPrecios();
   const fut = reservas.filter(r => r.status === "futura"), cambios = []; let igual = 0, sinPrecio = 0, sinServ = 0;
@@ -1772,7 +1800,7 @@ async function bloquearDias(){
   if(!from || !to || from > to){ toast("Revisa las fechas: «Hasta» no puede ser antes que «Desde»."); return; }
   if(from < t){ toast("Elige fechas desde hoy en adelante."); return; }
   const rows = []; let dias = 0;
-  eachDay(from, to, (d, wd) => { if(wd === 0) return; dias++; SLOTS.forEach(s => rows.push({fecha:d, turno:s, estado:"ocupado", nombre:"Bloqueado"})); });
+  eachDay(from, to, (d, wd) => { if(wd === 0) return; dias++; SLOTS.forEach(s => rows.push({fecha:d, turno:s, estado:"ocupado", nombre:"Bloqueado", notificado:true})); });
   if(!dias){ toast("Esas fechas son solo domingos."); return; }
   const booked = reservas.filter(r => r.fecha >= from && r.fecha <= to).length;
   if(!(await ask("Bloquear días", "Se cerrarán los turnos libres de "+dias+" día(s), del "+niceDate(from)+" al "+niceDate(to)+"."+(booked ? " Hay "+booked+" reserva(s) de clientes en esas fechas; no se tocan." : ""), "Bloquear"))) return;
@@ -1979,7 +2007,7 @@ document.addEventListener("click", async e => {
   b = t.closest("[data-pdel]"); if(b){ PRECIOS.splice(+b.dataset.pdel, 1); DIRTY["pg-precios"] = true; renderPrecios(true); return; }
   b = t.closest("[data-padd]"); if(b){ const n = b.dataset.padd; PRECIOS.push({n, p:n ? guess(n) : 0}); DIRTY["pg-precios"] = true; renderPrecios(true);
     if(!n){ const i = document.querySelectorAll("#pg-precios .xpn"); if(i.length) i[i.length-1].focus(); } return; }
-  b = t.closest("[data-pa]"); if(b){ if(b.dataset.pa === "apply") await aplicarPrecios(); else{ await guardarPrecios(); renderPrecios(true); toast("Precios guardados"); } return; }
+  b = t.closest("[data-pa]"); if(b){ if(b.dataset.pa === "apply") await aplicarPreciosSql(); else if(await guardarPrecios()){ renderPrecios(true); toast("Precios guardados: la web y los atajos ya los usan", 5000); } return; }
   b = t.closest("[data-blk]"); if(b){ await bloquearDias(); return; }
   b = t.closest("[data-unblk]"); if(b){ await liberarDia(b.dataset.unblk); return; }
   b = t.closest("[data-aj]"); if(b){
@@ -2007,7 +2035,7 @@ window.renderAll = function(){
 };
 document.addEventListener("touchstart",function(){},{passive:true});
 go("hoy");
-if(typeof appShown !== "undefined" && appShown && turnos.length) window.renderAll();
+if(typeof appShown !== "undefined" && appShown) window.loadData();
 })();
 </script>
 </body>
