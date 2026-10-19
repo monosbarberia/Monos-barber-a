@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Mono's Barbería | Panel</title>
-<link rel="icon" type="image/png" sizes="520x520" href="favicon.jpg">
+<link rel="icon" type="image/jpeg" sizes="520x520" href="favicon.jpg">
 <link rel="apple-touch-icon" sizes="520x520" href="favicon.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -1388,7 +1388,7 @@ function applyCfg(){
   else if(num(CFG.ahorro_meta) > 0) SAVE_GOAL = num(CFG.ahorro_meta);
 }
 async function loadAll(){
-    const r = await Promise.all([kvGet("config",{}), kvGet("notas",{}), kvGet("mensajes",{}), kvGet("estado",{})]);
+  const r = await Promise.all([kvGet("config",{}), kvGet("notas",{}), kvGet("mensajes",{}), kvGet("estado",{})]);
   CFG = r[0] || {}; NOTAS = r[1] || {}; MSGS = r[2] || {}; ESTADO = r[3] || {};
   try{
     const p = await sb.from("precios").select("servicio,precio,orden").order("orden");
@@ -1694,7 +1694,6 @@ function renderPrecios(force){
   $("pg-precios").innerHTML = h;
 }
 async function guardarPrecios(){
-  async function guardarPrecios(){
   const list = PRECIOS.filter(x => String(x.n).trim()).map((x,i) => ({servicio:String(x.n).trim(), precio:Math.max(0, Math.round(num(x.p))), orden:i+1}));
   if(!list.length){ alert("Deja al menos un servicio en la lista."); return false; }
   const seen = new Set();
@@ -1719,28 +1718,6 @@ async function aplicarPreciosSql(){
   if(r.error){ alert("Los precios se guardaron, pero no se pudieron aplicar a las reservas futuras: "+r.error.message+"\n\nFalta crear la función aplicar_precios en Supabase."); return; }
   toast("Listo: "+r.data+" reserva(s) futura(s) actualizadas", 6000);
   await loadData();
-}
-
-async function aplicarPrecios(){
-  await guardarPrecios();
-  const fut = reservas.filter(r => r.status === "futura"), cambios = []; let igual = 0, sinPrecio = 0, sinServ = 0;
-  fut.forEach(r => {
-    if(!r.services.length){ sinServ++; return; }
-    let s = 0, ok = true;
-    r.services.forEach(n => { const p = PRECIOS.find(x => norm(x.n) === norm(n)); if(!p || !(p.p > 0)) ok = false; else s += p.p; });
-    if(!ok){ sinPrecio++; return; }
-    if(Math.round(s) === Math.round(owedOf(r))) igual++; else cambios.push({r, nuevo:s});
-  });
-  if(!cambios.length){ renderPrecios(true); toast("Guardado. "+(fut.length ? "Ninguna reserva futura necesitaba cambio." : "No hay reservas futuras."), 5000); return; }
-  const txt = cambios.length+" reserva(s) cambiarán de precio"+(igual ? ", "+igual+" ya estaban bien" : "")+(sinPrecio ? ", "+sinPrecio+" no se tocan porque falta el precio de algún servicio" : "")+(sinServ ? ", "+sinServ+" no tienen servicios anotados" : "")+".";
-  if(!(await ask("Aplicar precios nuevos", txt, "Aplicar"))){ renderPrecios(true); return; }
-  let ok = true;
-  for(const c of cambios){
-    const ids = c.r.rows.map(x => x.id);
-    if(ok) ok = await updRows([ids[0]], {precio_esperado:c.nuevo, total:c.nuevo});
-    if(ok && ids.length > 1) ok = await updRows(ids.slice(1), {precio_esperado:0, total:c.nuevo});
-  }
-  if(ok){ toast("Actualicé "+cambios.length+" reserva(s) futura(s)", 5000); await loadData(); }
 }
 
 /* ---------- GASTOS Y RETIROS ---------- */
@@ -1947,7 +1924,7 @@ const GROUPS = {
 };
 const main = document.querySelector("main");
 ["hoy","precios","gastos","metas","compras","bloqueos","ajustes","mensajes","respaldo"].forEach(n => {
-  const s = document.createElement("section"); s.id = "pg-"+n; s.className = "hidden"; if(n === "hoy") main.insertBefore(s, main.firstChild); else main.appendChild(s);
+  const s = document.createElement("section"); s.id = "pg-"+n; s.className = "hidden"; if(n === "hoy") main.insertBefore(s, $("pg-resumen")); else main.appendChild(s);
 });
 const nav = document.querySelector("nav.bottom");
 nav.innerHTML = Object.keys(GROUPS).map(k => '<button data-g="'+k+'"><span>'+GROUPS[k].icon+'</span>'+GROUPS[k].label+(GROUPS[k].items ? " ▾" : "")+'</button>').join("");
