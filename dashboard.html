@@ -1812,7 +1812,7 @@ function renderAjustes(){
     fld("ajBot","Dirección del bot (URL)","text",CFG.bot_url || "",'placeholder="https://...&text={texto}" autocapitalize="off" autocorrect="off"')+
     '<div class="note" style="margin:-8px 0 12px">Pega la dirección con {texto} donde va el mensaje (y {numero} si pide tu número).</div>'+
     '<div class="field"><label for="ajAuto">Enviar el cierre solo, al cobrar el último cliente del día</label><select id="ajAuto"><option value="0"'+(CFG.auto_cierre ? "" : " selected")+'>No, lo envío yo con el botón</option><option value="1"'+(CFG.auto_cierre ? " selected" : "")+'>Sí, automático</option></select></div>'+
-    '<div class="note" style="margin:0 0 8px">Ojo: la dirección del bot se guarda en tu base de datos. Si lleva una clave o token, asegúrate de que las tablas estén protegidas para que solo tu usuario las lea.</div>'+
+    '<div class="note" style="margin:0 0 8px">La dirección del bot se guarda en tu base de datos, protegida para que solo tu usuario la lea. No se incluye en el respaldo descargable.</div>'+
     '<button class="btnGhost" data-aj="test">Enviar mensaje de prueba al bot</button></div>';
   h += '<button class="btn" style="margin-top:12px" data-aj="save">Guardar ajustes</button>';
   $("pg-ajustes").innerHTML = h;
@@ -1882,7 +1882,7 @@ async function hacerRespaldo(tipo){
     else if(tipo === "gastos"){ descargar("gastos-monos-"+f+".csv", csv(await fetchFull("gastos")), "text/csv;charset=utf-8"); }
     else{
       const [t,g,m] = await Promise.all([fetchFull("turnos"), fetchFull("gastos"), fetchFull("metas")]);
-      descargar("respaldo-monos-"+f+".json", JSON.stringify({fecha_respaldo:f, turnos:t, gastos:g, metas:m, config:CFG, precios:PRECIOS, notas:NOTAS, mensajes:MSGS}, null, 1), "application/json");
+      descargar("respaldo-monos-"+f+".json", JSON.stringify({fecha_respaldo:f, turnos:t, gastos:g, metas:m, config:Object.assign({}, CFG, {bot_url:""}), precios:PRECIOS, notas:NOTAS, mensajes:MSGS}, null, 1), "application/json");
     }
     ESTADO.last_backup = f; await kvSet("estado", ESTADO); msg.textContent = "Listo: revisa tus descargas. Último respaldo: "+niceDate(f)+".";
   }catch(e){ msg.textContent = "No se pudo: "+(e.message || e); }
