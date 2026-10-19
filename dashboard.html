@@ -2093,5 +2093,254 @@ go("hoy");
 if(typeof appShown !== "undefined" && appShown) window.loadData();
 })();
 </script>
+   <script>
+/* =====================================================================
+   💰 BLOQUE "MI DINERO"
+   Pégalo COMPLETO justo ANTES de </body> (después del último </script>).
+   Incluye: bolsas (barbería / ahorro / tu parte), movimientos editables,
+   categorías de gastos e ingresos, y de dónde sale / a dónde va el dinero.
+   ===================================================================== */
+(function(){
+"use strict";
+if(typeof renderAll!=="function"||typeof sb==="undefined"||!window.__admin) return;
+
+const BOLSAS=[["barberia","Barbería"],["ahorro","Ahorro"],["mio","Para ti"]];
+const bn=k=>(BOLSAS.find(b=>b[0]===k)||BOLSAS[0])[1];
+const DEF={catG:["productos","mantenimiento de máquinas","navajas","otros"],catI:["Venta de productos","Otros ingresos"],bolsaG:{},ingresos:[]};
+let CART=JSON.parse(JSON.stringify(DEF)), outG=[], MES=todayStr().slice(0,7), FIL="todo";
+
+/* ---------- Guardado (tabla "ajustes" de Supabase; copia en el teléfono) ---------- */
+async function cargarCart(){
+  let v=null;
+  try{const {data,error}=await sb.from("ajustes").select("valor").eq("clave","cartera").limit(1);if(error)throw error;if(data&&data.length)v=data[0].valor;}catch(e){}
+  if(!v){try{v=JSON.parse(localStorage.getItem("monos_cartera")||"null");}catch(e){}}
+  CART=Object.assign(JSON.parse(JSON.stringify(DEF)),v||{});
+}
+async function guardarCart(){
+  try{localStorage.setItem("monos_cartera",JSON.stringify(CART));}catch(e){}
+  try{
+    let r=await sb.from("ajustes").update({valor:CART}).eq("clave","cartera").select("clave");
+    if(r.error)throw r.error;
+    if(!r.data||!r.data.length){r=await sb.from("ajustes").insert({clave:"cartera",valor:CART}).select("clave");if(r.error)throw r.error;}
+    return true;
+  }catch(e){toast("No se guardó en la base de datos: "+(e.message||e),6000);return false;}
+}
+
+/* ---------- Utilidades de pantalla ---------- */
+function toast(t,ms){let el=$("xToast");if(!el){el=document.createElement("div");el.id="xToast";document.body.appendChild(el);}
+  el.textContent=t;el.className="show";clearTimeout(toast._t);toast._t=setTimeout(()=>{el.className="";},ms||3500);}
+function mSheet(title,html,ok,getVals){return new Promise(res=>{
+  const m=document.createElement("div");m.className="modal";m.style.zIndex=150;
+  m.innerHTML='<div class="sheet"><h2>'+title+'</h2>'+html+'<div class="xm"></div>'+(ok?'<button class="btn xok">'+ok+'</button>':'')+'<button class="btnGhost xno">'+(ok?"Cancelar":"Cerrar")+'</button></div>';
+  document.body.appendChild(m);
+  const close=v=>{m.remove();res(v);};
+  m.querySelector(".xno").onclick=()=>close(null);
+  m.addEventListener("click",e=>{if(e.target===m)close(null);});
+  const b=m.querySelector(".xok");
+  if(b)b.onclick=()=>{const v=getVals?getVals(m):true;if(typeof v==="string"){m.querySelector(".xm").innerHTML='<div class="msg err">'+esc(v)+'</div>';return;}close(v);};
+});}
+const ask=(t,x,ok)=>mSheet(esc(t),'<p class="lead">'+esc(x)+'</p>',ok||"Aceptar",()=>true);
+const F=(id,l,type,val)=>'<div class="field"><label for="'+id+'">'+l+'</label><input id="'+id+'" type="'+type+'"'+(type==="number"?' inputmode="decimal"':'')+' value="'+esc(val==null?"":val)+'"></div>';
+const SEL=(id,l,opts,val)=>'<div class="field"><label for="'+id+'">'+l+'</label><select id="'+id+'">'+opts.map(o=>{const v=Array.isArray(o)?o[0]:o,t=Array.isArray(o)?o[1]:o;return '<option value="'+esc(v)+'"'+(v===val?" selected":"")+'>'+esc(t)+'</option>';}).join("")+'</select></div>';
+const q=(m,s)=>m.querySelector(s);
+
+/* ---------- Datos ---------- */
+const bolsaOfG=id=>CART.bolsaG[id]||"barberia";
+const allG=()=>gastos.concat(outG);
+
+function balances(){
+  const o={barberia:{c:0,x:0,g:0},ahorro:{c:0,x:0,g:0},mio:{c:0,x:0,g:0}};
+  let y=+START_DATE.slice(0,4),m=+START_DATE.slice(5,7);const cur=todayStr().slice(0,7);
+  for(let i=0;i<120;i++){
+    const k=y+"-"+String(m).padStart(2,"0"),f=monthFin(k);
+    o.barberia.c+=f.reserve;o.barberia.g+=f.gReg;o.ahorro.c+=f.ahorro;o.mio.c+=f.libre;
+    if(k>=cur)break;m++;if(m>12){m=1;y++;}
+  }
+  CART.ingresos.forEach(i=>{if(o[i.bolsa])o[i.bolsa].x+=num(i.monto);});
+  outG.forEach(g=>{const b=bolsaOfG(g.id);if(o[b])o[b].g+=num(g.monto);});
+  Object.keys(o).forEach(k=>{o[k].q=o[k].c+o[k].x-o[k].g;});
+  return o;
+}
+function balCards(){
+  const b=balances(),tot=b.barberia.q+b.ahorro.q+b.mio.q;
+  return '<div class="grid">'+card("En la barbería",money(b.barberia.q),"Fondo para gastos","bad")+card("En ahorro",money(b.ahorro.q),"No lo toques","save")+
+    card("Tu parte",money(b.mio.q),"Lo que te toca retirar","ok")+card("Total",money(tot),"Las 3 bolsas juntas","gold")+'</div>';
+}
+function movs(){
+  const L=[];
+  reservas.filter(r=>r.status==="cobrada"&&mon(r.fecha)===MES).forEach(r=>L.push({t:"cobro",f:r.fecha,k:r.key,title:r.nombre,sub:"Cobro de servicio"+(r.tip?" · propina "+money(r.tip):""),val:r.charged+r.tip}));
+  CART.ingresos.filter(i=>mon(String(i.fecha))===MES).forEach(i=>L.push({t:"ingreso",f:String(i.fecha).slice(0,10),k:i.id,title:i.desc||i.cat,sub:i.cat+" · va a "+bn(i.bolsa),val:num(i.monto)}));
+  allG().filter(g=>mon(String(g.fecha))===MES).forEach(g=>L.push({t:"gasto",f:String(g.fecha).slice(0,10),k:g.id,title:g.descripcion||g.categoria||"Gasto",sub:(g.categoria||"otros")+" · sale de "+bn(bolsaOfG(g.id)),val:-num(g.monto)}));
+  L.sort((a,b)=>b.f.localeCompare(a.f));return L;
+}
+function movBlock(){
+  const all=movs(),L=all.filter(x=>FIL==="todo"||(FIL==="ing"?x.val>=0:x.val<0));
+  const ing=all.filter(x=>x.val>=0).reduce((s,x)=>s+x.val,0),gas=-all.filter(x=>x.val<0).reduce((s,x)=>s+x.val,0);
+  const chips=[["todo","Todo"],["ing","Ingresos"],["gas","Gastos"]].map(c=>'<button class="period'+(FIL===c[0]?" on":"")+'" data-fil="'+c[0]+'">'+c[1]+'</button>').join("");
+  const rows=L.length?L.map(x=>row(esc(x.title),niceDate(x.f)+" · "+esc(x.sub),(x.val>=0?"+":"")+money(x.val),x.val>=0?"ok":"bad",
+    '<button class="act" data-mv="edit" data-t="'+x.t+'" data-k="'+esc(x.k)+'">Editar</button><button class="act red" data-mv="del" data-t="'+x.t+'" data-k="'+esc(x.k)+'">Borrar</button>')).join(""):empty("No hay movimientos este mes.");
+  return block("Movimientos del mes",
+    '<div class="field"><label>Mes</label><input type="month" class="cmes" value="'+MES+'"></div><div class="periods" style="margin:0 0 8px">'+chips+'</div>'+
+    '<div class="note" style="margin:0 0 6px">Entró '+money(ing)+' · Salió '+money(gas)+'</div>'+rows+
+    '<div class="acts" style="margin-top:10px"><button class="act good" data-cart="gasto">+ Gasto</button><button class="act good" data-cart="ingreso">+ Ingreso</button></div>',
+    "Aquí ves todo lo que entra y sale. Toca Editar para corregir un movimiento o Borrar si te equivocaste. Borrar un cobro lo devuelve a «por cobrar».");
+}
+function repartoBlock(){
+  const b=balances();
+  return block("Cómo está cada bolsa",BOLSAS.map(([k,n])=>{const x=b[k];
+    return row(n,"Cobros "+money(x.c)+" · Otros ingresos "+money(x.x)+" · Gastos "+money(x.g),money(x.q),x.q<0?"bad":(k==="ahorro"?"save":"ok"));}).join(""),
+    "Los cobros se reparten solos entre las 3 bolsas con tus reglas de Ajustes. Los otros ingresos van a la bolsa que tú elijas, y cada gasto sale de la bolsa que elijas.");
+}
+function catBlock(kd){
+  const arr=kd==="g"?CART.catG:CART.catI;
+  return block(kd==="g"?"Categorías de gastos":"Categorías de ingresos",
+    arr.map((c,i)=>row(esc(c),"","","",(kd==="g"&&norm(c)==="otros")?'<span class="note">Fija (no se puede cambiar)</span>':
+      '<button class="act" data-cat="edit" data-kd="'+kd+'" data-i="'+i+'">Editar</button><button class="act red" data-cat="del" data-kd="'+kd+'" data-i="'+i+'">Borrar</button>')).join("")+
+    '<button class="btnGhost" data-cat="add" data-kd="'+kd+'">+ Añadir categoría</button>',
+    kd==="g"?"Si cambias el nombre, también se cambia en los gastos que ya anotaste. Si borras una, los gastos viejos conservan su nombre.":"Úsalas para los ingresos que no son cobros de clientes (por ejemplo, venta de productos).");
+}
+
+/* ---------- Pantallas ---------- */
+function renderCartera(){
+  $("pg-cartera").innerHTML='<h1>Mi dinero</h1><p class="lead">Lo que tiene la barbería, el ahorro y tu parte.</p>'+balCards()+
+    '<div class="acts" style="margin:12px 0 0"><button class="act good" data-cart="gasto">+ Gasto</button><button class="act good" data-cart="ingreso">+ Ingreso</button></div>'+
+    repartoBlock()+movBlock()+catBlock("g")+catBlock("i");
+}
+function injectHoy(){
+  const lead=$("pg-hoy")&&$("pg-hoy").querySelector(".lead");if(!lead)return;
+  lead.insertAdjacentHTML("afterend",'<div style="margin:0 0 4px">'+balCards()+'<button class="btnGhost" data-cart="go">Ver movimientos y editar</button></div>');
+}
+function fixGastosPg(){
+  const p=$("pg-gastos");if(!p)return;
+  Array.prototype.slice.call(p.querySelectorAll(".block")).forEach(b=>{
+    const t=b.querySelector(".blockTitle");if(t&&t.textContent.indexOf("Gastos de este mes")===0)b.outerHTML=movBlock();});
+}
+
+/* ---------- Gastos ---------- */
+async function gastoSheet(g){
+  const cats=CART.catG.slice();if(g&&g.categoria&&!cats.some(c=>norm(c)===norm(g.categoria)))cats.push(g.categoria);
+  const v=await mSheet(g?"Editar gasto":"Añadir gasto",
+    F("gFecha","Fecha","date",g?String(g.fecha).slice(0,10):todayStr())+SEL("gCat","Categoría",cats,g?g.categoria:cats[0])+
+    F("gDesc","Nombre o detalle (ej. Colonia)","text",g?g.descripcion:"")+F("gMonto","Monto","number",g?num(g.monto):"")+
+    SEL("gBol","¿De dónde sale el dinero?",BOLSAS,g?bolsaOfG(g.id):"barberia"),"Guardar",m=>{
+      const monto=num(q(m,"#gMonto").value),fecha=q(m,"#gFecha").value;
+      if(!fecha||monto<=0)return "Escribe una fecha y un monto mayor que 0.";
+      return {fecha,categoria:q(m,"#gCat").value,descripcion:q(m,"#gDesc").value.trim(),monto,bolsa:q(m,"#gBol").value};});
+  if(!v)return;
+  const rowv={fecha:v.fecha,categoria:v.categoria,descripcion:v.descripcion,monto:v.monto};let id=g&&g.id;
+  if(g){const r=await sb.from("gastos").update(rowv).eq("id",g.id);if(r.error){alert("No se pudo guardar: "+r.error.message);return;}}
+  else{const r=await sb.from("gastos").insert(rowv).select("id");if(r.error){alert("No se pudo guardar: "+r.error.message);return;}id=r.data&&r.data[0]&&r.data[0].id;}
+  if(id!=null){if(v.bolsa==="barberia")delete CART.bolsaG[id];else CART.bolsaG[id]=v.bolsa;await guardarCart();}
+  else if(v.bolsa!=="barberia")alert("El gasto se guardó, pero no pude fijar de qué bolsa sale. Edítalo y vuelve a elegirla.");
+  toast(g?"Gasto actualizado":"Gasto guardado");await loadData();
+}
+async function borrarGasto(id){
+  if(!(await ask("Borrar gasto","¿Seguro que quieres borrar este gasto?","Borrar")))return;
+  const r=await sb.from("gastos").delete().eq("id",id);if(r.error){alert("No se pudo borrar: "+r.error.message);return;}
+  if(CART.bolsaG[id]){delete CART.bolsaG[id];await guardarCart();}
+  toast("Gasto borrado");await loadData();
+}
+window.openExpense=function(){gastoSheet();};
+window.delExpense=function(id){borrarGasto(id);};
+
+/* ---------- Ingresos extra ---------- */
+async function ingresoSheet(i){
+  const cats=CART.catI.slice();if(i&&i.cat&&cats.indexOf(i.cat)<0)cats.push(i.cat);
+  if(!cats.length){toast("Primero crea una categoría de ingresos.");return;}
+  const v=await mSheet(i?"Editar ingreso":"Añadir ingreso",
+    F("iFecha","Fecha","date",i?String(i.fecha).slice(0,10):todayStr())+SEL("iCat","Categoría",cats,i?i.cat:cats[0])+
+    F("iDesc","Detalle (opcional)","text",i?i.desc:"")+F("iMonto","Monto","number",i?num(i.monto):"")+
+    SEL("iBol","¿A dónde va este dinero?",BOLSAS,i?i.bolsa:"mio"),"Guardar",m=>{
+      const monto=num(q(m,"#iMonto").value),fecha=q(m,"#iFecha").value;
+      if(!fecha||monto<=0)return "Escribe una fecha y un monto mayor que 0.";
+      return {fecha,cat:q(m,"#iCat").value,desc:q(m,"#iDesc").value.trim(),monto,bolsa:q(m,"#iBol").value};});
+  if(!v)return;
+  if(i)Object.assign(i,v);else CART.ingresos.push(Object.assign({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5)},v));
+  await guardarCart();toast(i?"Ingreso actualizado":"Ingreso guardado");window.renderAll();
+}
+async function ingresoDel(id){
+  if(!(await ask("Borrar ingreso","¿Seguro que quieres borrar este ingreso?","Borrar")))return;
+  CART.ingresos=CART.ingresos.filter(x=>x.id!==id);await guardarCart();toast("Ingreso borrado");window.renderAll();
+}
+
+/* ---------- Cobros de clientes (editar / borrar) ---------- */
+async function cobroEdit(key){
+  const r=reservas.find(x=>x.key===key);if(!r)return;
+  const v=await mSheet("Editar cobro de "+esc(r.nombre),F("cPrecio","Dinero cobrado","number",r.charged)+F("cProp","Propina","number",r.tip||""),"Guardar",m=>{
+    const p=num(q(m,"#cPrecio").value);if(p<0)return "El monto no puede ser negativo.";return {p,t:num(q(m,"#cProp").value)};});
+  if(!v)return;const ids=r.rows.map(x=>x.id);
+  let ok=await updRows([ids[0]],{precio_cobrado:v.p,propina:v.t});
+  if(ok&&ids.length>1)ok=await updRows(ids.slice(1),{precio_cobrado:0,propina:0});
+  if(ok){toast("Cobro actualizado");await loadData();}
+}
+async function cobroDel(key){
+  const r=reservas.find(x=>x.key===key);if(!r)return;
+  if(!(await ask("Borrar cobro","Se quita el cobro de "+r.nombre+" ("+money(r.charged+r.tip)+"). El cliente vuelve a la lista de «por cobrar». Si en realidad no vino, después márcalo como no-show o cancélalo.","Borrar cobro")))return;
+  const ok=await updRows(r.rows.map(x=>x.id),{precio_cobrado:null,propina:0});
+  if(ok){toast("Cobro borrado");await loadData();}
+}
+
+/* ---------- Categorías ---------- */
+async function catAction(a,kd,i){
+  const arr=kd==="g"?CART.catG:CART.catI,old=arr[i];
+  const nombre=(titulo,val)=>mSheet(titulo,F("cn","Nombre","text",val||""),"Guardar",m=>{
+    const n=q(m,"#cn").value.trim();if(!n)return "Escribe un nombre.";
+    if(arr.some((c,j)=>j!==i&&norm(c)===norm(n)))return "Ya existe esa categoría.";return n;});
+  if(a==="add"){const v=await nombre("Nueva categoría","");if(!v)return;arr.push(v);}
+  else if(a==="edit"){
+    const v=await nombre("Editar categoría",old);if(!v||v===old)return;arr[i]=v;
+    if(kd==="g"){const r=await sb.from("gastos").update({categoria:old===v?old:v}).eq("categoria",old);if(r.error)alert("Se cambió la lista, pero no los gastos viejos: "+r.error.message);}
+    else CART.ingresos.forEach(x=>{if(x.cat===old)x.cat=v;});
+  }else if(a==="del"){
+    if(!(await ask("Borrar categoría","Se quita «"+old+"» de la lista. Los movimientos que ya la usan no se borran.","Borrar")))return;
+    arr.splice(i,1);
+  }
+  await guardarCart();if(kd==="g")await loadData();else window.renderAll();
+}
+
+/* ---------- Enganche con el panel ---------- */
+const main=document.querySelector("main");
+const sec=document.createElement("section");sec.id="pg-cartera";sec.className="hidden";main.appendChild(sec);
+const nav=document.querySelector("nav.bottom");
+nav.insertAdjacentHTML("beforeend",'<button data-g="cartera"><span><svg viewBox="0 0 24 24"><rect x="3.5" y="6.5" width="17" height="12" rx="2"/><path d="M16 12.5h2.5M3.5 9.5h17"/></svg></span>Mi dinero</button>');
+function showCartera(){
+  Array.prototype.forEach.call(main.children,s=>{if(s.tagName==="SECTION")s.classList.add("hidden");});
+  $("pg-cartera").classList.remove("hidden");$("periods").classList.add("hidden");
+  const pop=$("navPop"),sh=$("navShade");if(pop)pop.classList.add("hidden");if(sh)sh.classList.add("hidden");
+  nav.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.g==="cartera"));
+  renderCartera();window.scrollTo(0,0);
+}
+nav.addEventListener("click",e=>{const b=e.target.closest('button[data-g="cartera"]');if(!b)return;e.stopPropagation();showCartera();},true);
+document.addEventListener("click",e=>{
+  if(e.target.closest("#navPop button")||e.target.closest('nav.bottom button[data-g="hoy"]'))$("pg-cartera").classList.add("hidden");
+},true);
+document.addEventListener("change",e=>{if(e.target.classList&&e.target.classList.contains("cmes")&&e.target.value){MES=e.target.value;window.renderAll();}});
+document.addEventListener("click",e=>{
+  let b=e.target.closest("[data-fil]");if(b){FIL=b.dataset.fil;window.renderAll();return;}
+  b=e.target.closest("[data-cart]");if(b){const a=b.dataset.cart;if(a==="go")showCartera();else if(a==="gasto")gastoSheet();else ingresoSheet();return;}
+  b=e.target.closest("[data-mv]");if(b){
+    const a=b.dataset.mv,t=b.dataset.t,k=b.dataset.k;
+    if(t==="cobro")a==="edit"?cobroEdit(k):cobroDel(k);
+    else if(t==="ingreso")a==="edit"?ingresoSheet(CART.ingresos.find(x=>x.id===k)):ingresoDel(k);
+    else{const g=allG().find(x=>String(x.id)===k);if(g)a==="edit"?gastoSheet(g):borrarGasto(g.id);}
+    return;}
+  b=e.target.closest("[data-cat]");if(b){catAction(b.dataset.cat,b.dataset.kd,+b.dataset.i);}
+});
+
+const _ld=window.loadData;
+window.loadData=async function(){await cargarCart();return _ld.apply(this,arguments);};
+const _ra=window.renderAll;
+window.renderAll=function(){
+  if(!gastos._s&&!gastos._m){   // aparto los gastos que NO salen de la barbería para que no resten del fondo
+    outG=gastos.filter(g=>{const b=CART.bolsaG[g.id];return b&&b!=="barberia";});
+    const keep=gastos.filter(g=>outG.indexOf(g)<0);keep._m=true;gastos=keep;
+  }
+  _ra();
+  try{renderCartera();injectHoy();fixGastosPg();}
+  catch(e){console.error(e);$("globalMsg").insertAdjacentHTML("beforeend",'<div class="msg err">Mi dinero tuvo un problema: '+esc(e.message||e)+'</div>');}
+};
+if(typeof appShown!=="undefined"&&appShown)window.loadData();
+})();
+</script>
 </body>
 </html>
