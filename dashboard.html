@@ -1672,99 +1672,6 @@ function renderComprasPg(){
     '<button class="btn" style="margin-top:12px" onclick="openExpense()">Anotar una compra</button>';
   $("pg-compras").innerHTML = h;
 }
-  function renderInventarioPg(){
-  const items = window.inventario || [];
-  
-  let h = '<h1>Inventario</h1><p class="lead">Control de productos y stock de la barbería.</p>';
-
-  // Resumen rápido
-  const bajos = items.filter(i => Number(i.stock_actual) <= Number(i.stock_minimo));
-  h += '<div class="grid" style="margin-bottom:14px">';
-  h += card("Productos", items.length, "En inventario");
-  h += card("Stock bajo", bajos.length, bajos.length ? "Hay que reponer" : "Todo bien", bajos.length ? "warn" : "ok");
-  h += '</div>';
-
-  if (items.length === 0) {
-    h += '<div class="block">' + empty("Todavía no hay productos. Añade el primero.") + '</div>';
-  } else {
-    h += '<div class="block">';
-    h += items.map(item => {
-      const stock = Number(item.stock_actual);
-      const min = Number(item.stock_minimo);
-      const bajo = stock <= min;
-      return row(
-        esc(item.nombre),
-        (item.unidad || "unidad") + (item.notas ? " · " + esc(item.notas) : ""),
-        stock + (bajo ? " ⚠" : ""),
-        bajo ? "warn" : "ok"
-      );
-    }).join("");
-    h += '</div>';
-  }
-async function abrirFormularioProducto() {
-  const html = `
-    <div class="field">
-      <label>Nombre del producto</label>
-      <input id="invNombre" type="text" placeholder="Ej. Colonia, Cuchillas, Talco...">
-    </div>
-    <div class="field">
-      <label>Stock actual</label>
-      <input id="invStock" type="number" inputmode="decimal" value="0">
-    </div>
-    <div class="field">
-      <label>Stock mínimo (aviso cuando baje de este número)</label>
-      <input id="invMinimo" type="number" inputmode="decimal" value="2">
-    </div>
-    <div class="field">
-      <label>Unidad (opcional)</label>
-      <input id="invUnidad" type="text" placeholder="unidad, botella, caja..." value="unidad">
-    </div>
-  `;
-
-  const resultado = await sheet(
-    "Añadir producto",
-    html,
-    "Guardar producto",
-    (m) => {
-      const nombre = m.querySelector("#invNombre").value.trim();
-      const stock = Number(m.querySelector("#invStock").value) || 0;
-      const minimo = Number(m.querySelector("#invMinimo").value) || 0;
-      const unidad = m.querySelector("#invUnidad").value.trim() || "unidad";
-
-      if (!nombre) {
-async function abrirFormularioProducto() {
-  const html = `
-    <div class="field"><label>Nombre del producto</label>
-      <input id="invNombre" type="text" placeholder="Ej. Colonia, Cuchillas, Talco..."></div>
-    <div class="field"><label>Stock actual</label>
-      <input id="invStock" type="number" inputmode="decimal" value="0"></div>
-    <div class="field"><label>Stock mínimo (aviso cuando baje de este número)</label>
-      <input id="invMinimo" type="number" inputmode="decimal" value="2"></div>
-    <div class="field"><label>Unidad (opcional)</label>
-      <input id="invUnidad" type="text" placeholder="unidad, botella, caja..." value="unidad"></div>`;
-
-  const resultado = await sheet("Añadir producto", html, "Guardar producto", (m) => {
-async function abrirFormularioProducto() {
-  const html = `
-    <div class="field"><label>Nombre del producto</label>
-      <input id="invNombre" type="text" placeholder="Ej. Colonia, Cuchillas, Talco..."></div>
-    <div class="field"><label>Stock actual</label>
-      <input id="invStock" type="number" inputmode="decimal" value="0"></div>
-    <div class="field"><label>Stock mínimo (aviso cuando baje de este número)</label>
-      <input id="invMinimo" type="number" inputmode="decimal" value="2"></div>
-    <div class="field"><label>Unidad (opcional)</label>
-      <input id="invUnidad" type="text" placeholder="unidad, botella, caja..." value="unidad"></div>`;
-
-  const resultado = await sheet("Añadir producto", html, "Guardar producto", (m) => {
-    const nombre = m.querySelector("#invNombre").value.trim();
-    const stock = Number(m.querySelector("#invStock").value) || 0;
-    const minimo = Number(m.querySelector("#invMinimo").value) || 0;
-    const unidad = m.querySelector("#invUnidad").value.trim() || "unidad";
-    if (!nombre) { m.err("Escribe el nombre del producto."); return false; }
-    return { nombre, stock_actual: stock, stock_minimo: minimo, unidad };
-  });
-  if (!resultado) return;
-
 async function abrirFormularioProducto() {
   const html = `
     <div class="field"><label>Nombre del producto</label>
@@ -1824,8 +1731,7 @@ function renderInventarioPg(){
 
   const b = document.getElementById("btnAddProducto");
   if (b) b.onclick = () => abrirFormularioProducto();
-}
-        
+}  
 /* ---------- BLOQUEAR DÍAS ---------- */
 function blockedDays(){
   const map = {}, seen = new Set(), t = todayStr();
