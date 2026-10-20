@@ -677,8 +677,17 @@ async function fetchAll(table){
 async function loadData(){
   $("globalMsg").innerHTML = "";
   try{
-    const res = await Promise.all([fetchAll("turnos"), fetchAll("gastos"), fetchAll("metas")]);
-    turnos = res[0]; gastos = res[1].filter(g => String(g.fecha) >= START_DATE); metas = res[2]; lastLoad = Date.now();
+    const res = await Promise.all([
+  fetchAll("turnos"), 
+  fetchAll("gastos"), 
+  fetchAll("metas"),
+  sb.from("inventario").select("*").order("nombre")
+]);
+turnos = res[0]; 
+gastos = res[1].filter(g => String(g.fecha) >= START_DATE); 
+metas = res[2];
+window.inventario = (res[3].data || []);
+lastLoad = Date.now();
     if(!turnos.length) $("globalMsg").innerHTML = '<div class="msg err">No hay turnos desde '+niceDate(START_DATE)+'. Si debería haber, revisa que tu usuario esté en la tabla admins.</div>';
     renderAll();
   }catch(e){ console.error(e); $("globalMsg").innerHTML = '<div class="msg err"><b>No se pudieron cargar los datos.</b><br>'+esc(e.message||e)+'</div>'; }
@@ -1664,10 +1673,44 @@ function renderComprasPg(){
   $("pg-compras").innerHTML = h;
 }
   function renderInventarioPg(){
+  const items = window.inventario || [];
+  
   let h = '<h1>Inventario</h1><p class="lead">Control de productos y stock de la barbería.</p>';
-  h += '<div class="block"><div class="empty">Pronto podrás ver y gestionar tu inventario aquí.<br>Primero vamos a conectar los datos.</div></div>';
-  h += '<button class="btn" style="margin-top:12px" onclick="alert(\'Próximamente: añadir producto\')">+ Añadir producto</button>';
+
+  // Resumen rápido
+  const bajos = items.filter(i => Number(i.stock_actual) <= Number(i.stock_minimo));
+  h += '<div class="grid" style="margin-bottom:14px">';
+  h += card("Productos", items.length, "En inventario");
+  h += card("Stock bajo", bajos.length, bajos.length ? "Hay que reponer" : "Todo bien", bajos.length ? "warn" : "ok");
+  h += '</div>';
+
+  if (items.length === 0) {
+    h += '<div class="block">' + empty("Todavía no hay productos. Añade el primero.") + '</div>';
+  } else {
+    h += '<div class="block">';
+    h += items.map(item => {
+      const stock = Number(item.stock_actual);
+      const min = Number(item.stock_minimo);
+      const bajo = stock <= min;
+      return row(
+        esc(item.nombre),
+        (item.unidad || "unidad") + (item.notas ? " · " + esc(item.notas) : ""),
+        stock + (bajo ? " ⚠" : ""),
+        bajo ? "warn" : "ok"
+      );
+    }).join("");
+    h += '</div>';
+  }
+
+  h += '<button class="btn" style="margin-top:14px" id="btnAddProducto">+ Añadir producto</button>';
+  
   $("pg-inventario").innerHTML = h;
+
+  // Botón de añadir (por ahora solo aviso)
+  const btn = document.getElementById("btnAddProducto");
+  if (btn) {
+    btn.onclick = () => alert("En el siguiente paso activamos el formulario para añadir productos.");
+  }
 }
 
 /* ---------- BLOQUEAR DÍAS ---------- */
