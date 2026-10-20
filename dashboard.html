@@ -1903,7 +1903,7 @@ const PAGES = ["hoy","resumen","dinero","clientes","agenda","noshows","plan","si
 const STATS = ["resumen","dinero","clientes","agenda","noshows","plan","sim"];
 const GROUPS = {
   hoy:{label:"Hoy", icon:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>', page:"hoy"},
-  stats:{label:"Estadísticas", icon:'<svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V4M19 20v-6"/></svg>', items:[["resumen","Resumen"],["dinero","Dinero"],["clientes","Clientes"],["agenda","Agenda"],["noshows","No-shows"],["Plan y proyección"],["Simulador (avanzado)"]]},
+  stats:{label:"Estadísticas", icon:'<svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V4M19 20v-6"/></svg>', items:[["resumen","Resumen"],["dinero","Dinero"],["clientes","Clientes"],["agenda","Agenda"],["noshows","No-shows"],["plan","Plan y proyección"],["Simulador (avanzado)"]]},
   negocio:{label:"Negocio", icon:'<svg viewBox="0 0 24 24"><rect x="3.5" y="7.5" width="17" height="12" rx="2"/><path d="M9 7.5v-2h6v2M3.5 13h17"/></svg>', items:[["precios","Precios"],["gastos","Gastos y retiros"],["metas","Metas"],["compras","Compras"],["bloqueos","Bloquear días"]]},
   mas:{label:"Más", icon:'<svg viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></svg>', items:[["ajustes","Ajustes"],["mensajes","Mensajes"],["respaldo","Respaldo"],["salir","Salir"]]}
 };
@@ -2132,10 +2132,22 @@ function catBlock(kd){
 }
 
 /* ---------- Pantallas ---------- */
+function sobresBlock(){
+  const b=balances(),CR=openBal(),f=monthFin(todayStr().slice(0,7));
+  const one=(k,ico,name,desc,cls)=>{const x=b[k];
+    return row(ico+" "+name,desc+"<br>Ha entrado "+money(x.c+x.x)+" · Se ha gastado "+money(x.g),money(x.q),x.q<0?"bad":cls);};
+  let h=one("barberia","🔴","Barbería","Para pagar los gastos del negocio","bad")+
+    window.barStack("Meta de este mes",CR.barberia,f.reserve,BARBER_BUDGET,"bad","r");
+  h+=one("ahorro","🔵","Ahorro","No se toca","save");
+  if(SAVE_GOAL>0)h+=window.barStack("Meta de este mes",CR.ahorro,f.ahorro,SAVE_GOAL,"save","b");
+  h+=one("mio","🟢","Para ti","Lo que puedes retirar","ok");
+  const tot=b.barberia.q+b.ahorro.q+b.mio.q;
+  h+=row("Total en los 3 sobres","",money(tot),"");
+  return block("Tus 3 sobres",h,"Cada sobre muestra lo que tiene ahora. En las barras, lo amarillo es lo que sobró de meses anteriores y lo de color es lo apartado este mes.");
+}
 function renderCartera(){
-  $("pg-cartera").innerHTML='<h1>Mi dinero</h1><p class="lead">Lo que tiene la barbería, el ahorro y tu parte.</p>'+balCards()+
-    '<div class="acts" style="margin:12px 0 0"><button class="act good" data-cart="gasto">+ Gasto</button><button class="act good" data-cart="ingreso">+ Ingreso</button></div>'+
-    repartoBlock()+movBlock()+catBlock("g")+catBlock("i");
+  $("pg-cartera").innerHTML='<h1>Mi dinero</h1><p class="lead">Lo que tiene cada sobre ahora mismo.</p>'+
+    sobresBlock()+movBlock()+catBlock("g")+catBlock("i");
 }
 function injectHoy(){
   const lead=$("pg-hoy")&&$("pg-hoy").querySelector(".lead");if(!lead)return;
@@ -2298,7 +2310,7 @@ const NAV = {
       ["clientes", "Clientes"],
       ["agenda", "Agenda"],
       ["noshows", "No-shows"],
-      ["Simulador (avanzado)"]
+      ["sim","Simulador (avanzado)"]
     ]
   },
   cartera: {
