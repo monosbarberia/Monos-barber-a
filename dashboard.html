@@ -11,6 +11,8 @@
 <link rel="stylesheet" href="css/dashboard.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
+<script src="js/config.js"></script>
+<script src="js/supabase-client.js"></script>
 </head>
 <body>
 <section id="login"><div class="loginBox">
@@ -85,8 +87,6 @@ function phoneFull(phone){
   return p;
 }
 
-const SB_URL = "https://ldxxflhwpyzldisydhmd.supabase.co";
-const SB_KEY = "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
 const SLOTS = ["9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM","2:00 PM","2:30 PM","3:00 PM","3:30 PM","4:00 PM"];
 const DAYS = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -101,8 +101,6 @@ try{ KEEP = localStorage.getItem("monos_keep") === "1"; }catch(e){}
 try{
   if(!KEEP) [localStorage, sessionStorage].forEach(st => Object.keys(st).filter(k => k.indexOf("sb-")===0 || k.indexOf("supabase")>=0).forEach(k => st.removeItem(k)));
 }catch(e){}
-try{ sb = window.supabase.createClient(SB_URL, SB_KEY, {auth:{persistSession:true, autoRefreshToken:true, detectSessionInUrl:false}}); }
-catch(e){ document.getElementById("loginMsg").innerHTML = '<div class="msg err">No se pudo cargar Supabase. Recarga la página.</div>'; }
 // Si el navegador restaura la página desde memoria (botón atrás), forzar recarga limpia
 window.addEventListener("pageshow", e => { if(e.persisted) location.reload(); });
 if(window.Chart){ Chart.defaults.color = "#d2d6c3"; Chart.defaults.font.size = 13; }
