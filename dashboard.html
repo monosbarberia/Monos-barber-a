@@ -711,13 +711,49 @@ async function saveGoal(){
 
 /* ---------- Entrada / salida ---------- */
 async function login(){
+  async function login(){
   const email = $("email").value.trim(), password = $("password").value;
-  if(!email || !password){ $("loginMsg").innerHTML = '<div class="msg err">Escribe tu correo y tu contraseña.</div>'; return; }
-  try{ localStorage.setItem("monos_keep", $("keepSession").checked ? "1" : "0"); }catch(e){}
-  $("loginBtn").disabled = true; $("loginBtn").textContent = "Comprobando..."; $("loginMsg").innerHTML = "";
-  const {error} = await sb.auth.signInWithPassword({email, password});
-  $("loginBtn").disabled = false; $("loginBtn").textContent = "Entrar";
-  if(error) $("loginMsg").innerHTML = '<div class="msg err">No se pudo entrar: '+esc(error.message)+'</div>';
+  if(!email || !password){ 
+    $("loginMsg").innerHTML = '<div class="msg err">Escribe tu correo y tu contraseña.</div>'; 
+    return; 
+  }
+
+  try{ 
+    localStorage.setItem("monos_keep", $("keepSession").checked ? "1" : "0"); 
+  }catch(e){}
+
+  $("loginBtn").disabled = true; 
+  $("loginBtn").textContent = "Comprobando..."; 
+  $("loginMsg").innerHTML = "";
+
+  // Comprobamos si sb existe
+  if(!window.sb && !sb){
+    $("loginMsg").innerHTML = '<div class="msg err">Error: no hay conexión con Supabase (sb es null)</div>';
+    $("loginBtn").disabled = false; 
+    $("loginBtn").textContent = "Entrar";
+    return;
+  }
+
+  const cliente = window.sb || sb;
+
+  try {
+    const { data, error } = await cliente.auth.signInWithPassword({ email, password });
+
+    $("loginBtn").disabled = false; 
+    $("loginBtn").textContent = "Entrar";
+
+    if(error){
+      $("loginMsg").innerHTML = '<div class="msg err">No se pudo entrar: ' + (error.message || error) + '</div>';
+      console.error("Error login:", error);
+    } else {
+      $("loginMsg").innerHTML = '<div class="msg" style="background:rgba(98,224,140,.15);border:1px solid var(--ok);color:var(--ok)">Entrando...</div>';
+    }
+  } catch(err) {
+    $("loginBtn").disabled = false; 
+    $("loginBtn").textContent = "Entrar";
+    $("loginMsg").innerHTML = '<div class="msg err">Error inesperado: ' + (err.message || err) + '</div>';
+    console.error(err);
+  }
 }
 async function enter(){
   if(appShown) return; appShown = true;
