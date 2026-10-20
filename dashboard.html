@@ -402,9 +402,20 @@ const HELP = {
 };
 let helpN = 0;
 function toggleHelp(id){ $(id).classList.toggle("hidden"); }
+const ALIAS = {
+  "Ticket promedio":"Lo que te deja cada cliente",
+  "Ocupación":"Turnos llenos",
+  "Ganancia neta":"Lo que te queda limpio",
+  "Servicios realizados":"Servicios hechos",
+  "Por cobrar":"Clientes sin cobrar",
+  "Clientes del período":"Clientes que vinieron",
+  "Desaparecidos":"Clientes que no vuelven",
+  "Recurrentes":"Clientes que repiten",
+  "Turnos perdidos":"Turnos vacíos por faltas"
+};
 function card(label, value, sub, cls){
   const help = HELP[label], id = "h"+(++helpN);
-  return '<div class="card '+(cls||"")+'"><div class="label">'+label+(help?'<button class="info" onclick="toggleHelp(\''+id+'\')" aria-label="Qué significa">?</button>':"")+'</div><div class="value">'+value+'</div>'+(sub?'<div class="sub">'+sub+'</div>':"")+(help?'<div class="help hidden" id="'+id+'">'+help+'</div>':"")+'</div>';
+  return '<div class="card '+(cls||"")+'"><div class="label">'+(ALIAS[label]||label)+(help?'<button class="info" onclick="toggleHelp(\''+id+'\')" aria-label="Qué significa">?</button>':"")+'</div><div class="value">'+value+'</div>'+(sub?'<div class="sub">'+sub+'</div>':"")+(help?'<div class="help hidden" id="'+id+'">'+help+'</div>':"")+'</div>';
 }
 function block(title, body, help){
   const id = "h"+(++helpN);
@@ -552,11 +563,11 @@ function savingsBlock(){
     row("Para ti hoy","puedes retirarlo",money(d.libre),"ok");
   body += '<div class="sep"></div><div class="subTitle">Acumulado del mes</div>' +
     row("Ingresos del mes","cobrado + propinas",money(f.ing),"ok") +
-    row("Reservado para la barbería","tope mensual "+money(BARBER_BUDGET),money(f.reserve),"bad") +
+    row("Apartado este mes para la barbería","meta del mes "+money(BARBER_BUDGET),money(f.reserve),"bad") +
     row("Gastado (registrado)","lo que anotaste en Gastos",money(f.gReg),"bad") +
-    row("Fondo de la barbería","reservado − gastado, acumulado",money(fondo),"bad") +
+    row("En la barbería (ahora)","lo apartado menos lo gastado",money(fondo),"bad") +
     row("Ahorro del mes",hasS ? "meta "+money(SAVE_GOAL) : "sin tope",money(f.ahorro),"save") +
-    row("Disponible para retirar este mes","ya descontado barbería y ahorro",money(f.libre),"ok");
+    row("Para ti este mes","ya sin barbería ni ahorro",money(f.libre),"ok");
   if(f.deficit>0) body += '<div class="note" style="margin-top:8px;color:var(--bad)">Gastaste '+money(f.deficit)+' más de lo reservado este mes; ya se descontó de tu retiro.</div>';
   body += '<div class="note" style="margin-top:8px">Cada día el reparto se redondea a múltiplos de '+money(ROUND_STEP)+' para que puedas separarlo en billetes. Registra la renta y demás gastos fijos en Gastos para que el fondo sea real.</div>';
   return block("Ahorro y retiro", body,
@@ -1083,7 +1094,7 @@ function renderPlan(X){
   const CR = window.__carry ? window.__carry() : {barberia:0, ahorro:0};
 b += window.barStack("Barbería del mes cubierta", CR.barberia, FIN.reserve, BARBER_BUDGET, "bad", "r");
 if(SAVE_GOAL > 0) b += window.barStack("Ahorro del mes", CR.ahorro, FIN.ahorro, SAVE_GOAL, "save", "b");
-  h += block("Hoy y punto de equilibrio", b, "Cada día el "+PCT_BARBER+"% de lo que cobras va a la barbería hasta completar "+money(BARBER_BUDGET)+"; después, solo se aparta el ahorro. El punto de equilibrio es cuánto necesitas cobrar en el mes para completar la barbería ("+money(G.eq)+"). Pasado ese punto, lo demás es ganancia para ti.");
+  h += block("Hoy y lo que hay que cobrar para pagar la barbería", b, "Cada día el "+PCT_BARBER+"% de lo que cobras va a la barbería hasta completar "+money(BARBER_BUDGET)+"; después, solo se aparta el ahorro. El punto de equilibrio es cuánto necesitas cobrar en el mes para completar la barbería ("+money(G.eq)+"). Pasado ese punto, lo demás es ganancia para ti.");
 
   // Proyección
   let pj = '<div class="chartBox"><canvas id="chProj"></canvas></div>';
@@ -1141,9 +1152,9 @@ if(SAVE_GOAL > 0) b += window.barStack("Ahorro del mes", CR.ahorro, FIN.ahorro, 
 
   // Dinero personal
   let dp = row("Estado del fondo", esc(F.txt), "", F.tone);
-  dp += row("Dinero tuyo metido en la barbería", "Total que has puesto de tu bolsillo", money(F.inn), F.inn > 0 ? "warn" : "") +
+  dp += row("Dinero tuyo que pusiste", "Total que has puesto de tu bolsillo", money(F.inn), F.inn > 0 ? "warn" : "") +
     row("Ya devuelto", "Lo que te has devuelto del fondo", money(F.out), "ok") +
-    row("Por devolverte", F.canReturn > 0 ? "El fondo ya permite devolverte hasta "+money(F.canReturn) : "Cuando el fondo tenga de sobra, te aviso", money(F.debt), F.debt > 0 ? "warn" : "");
+    row("La barbería te debe", F.canReturn > 0 ? "El fondo ya permite devolverte hasta "+money(F.canReturn) : "Cuando el fondo tenga de sobra, te aviso", money(F.debt), F.debt > 0 ? "warn" : "");
   dp += '<button class="btnGhost" onclick="aporteDinero(\'in\')">Puse dinero mío en la barbería</button><button class="btnGhost" onclick="aporteDinero(\'out\')">Me devolví dinero del fondo</button>';
   const mov = ap.slice().sort((a,c) => String(c.fecha).localeCompare(String(a.fecha))).slice(0,6);
   if(mov.length) dp += '<div class="sep"></div>' + mov.map(g => row(isDevol(g) ? "Devolución" : "Aporte", niceDate(String(g.fecha))+" · "+esc(String(g.descripcion).replace(/^[^:]*:\s*/, "")), money(g.monto)+' <button class="del" onclick="delAporte('+Number(g.id)+')" aria-label="Borrar">×</button>', isDevol(g) ? "ok" : "warn")).join("");
@@ -1639,8 +1650,8 @@ function renderGastosPg(){
   const gm = gastos.filter(g => mon(String(g.fecha)) === month).sort((a,b) => String(b.fecha).localeCompare(String(a.fecha)));
   let h = '<h1>Gastos y retiros</h1><p class="lead">Lo que se gasta en la barbería y el dinero tuyo que entra y sale del fondo.</p>';
   h += '<button class="btn" onclick="openExpense()">Añadir gasto</button><button class="btnGhost" onclick="aporteDinero(\'in\')">Puse dinero mío en la barbería</button><button class="btnGhost" onclick="aporteDinero(\'out\')">Me devolví dinero del fondo</button>';
-  h += block("Fondo de la barbería", row("Estado", esc(F.txt), "", F.tone) + row("Dinero tuyo metido", "Total que has puesto de tu bolsillo", money(F.inn), F.inn > 0 ? "warn" : "") +
-    row("Ya devuelto", "Lo que te has devuelto del fondo", money(F.out), "ok") + row("Por devolverte", F.canReturn > 0 ? "El fondo ya permite devolverte hasta "+money(F.canReturn) : "Cuando el fondo tenga de sobra, te aviso", money(F.debt), F.debt > 0 ? "warn" : ""));
+  h += block("Fondo de la barbería", row("Estado", esc(F.txt), "", F.tone) + row("Dinero tuyo que pusiste", "Total que has puesto de tu bolsillo", money(F.inn), F.inn > 0 ? "warn" : "") +
+    row("Ya devuelto", "Lo que te has devuelto del fondo", money(F.out), "ok") + row("La barbería te debe", F.canReturn > 0 ? "El fondo ya permite devolverte hasta "+money(F.canReturn) : "Cuando el fondo tenga de sobra, te aviso", money(F.debt), F.debt > 0 ? "warn" : ""));
   h += block("Gastos de este mes ("+money(sumGastos(gm))+")", gm.length ? gm.map(x => row(esc(x.descripcion || x.categoria || "Gasto"), niceDate(String(x.fecha))+" · "+esc(x.categoria || "otros"),
     money(x.monto)+' <button class="del" onclick="delExpense('+Number(x.id)+')" aria-label="Borrar">×</button>', "bad")).join("") : empty("Todavía no hay gastos este mes."));
   const mov = ap.slice().sort((a,b) => String(b.fecha).localeCompare(String(a.fecha))).slice(0,12);
@@ -1892,7 +1903,7 @@ const PAGES = ["hoy","resumen","dinero","clientes","agenda","noshows","plan","si
 const STATS = ["resumen","dinero","clientes","agenda","noshows","plan","sim"];
 const GROUPS = {
   hoy:{label:"Hoy", icon:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>', page:"hoy"},
-  stats:{label:"Estadísticas", icon:'<svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V4M19 20v-6"/></svg>', items:[["resumen","Resumen"],["dinero","Dinero"],["clientes","Clientes"],["agenda","Agenda"],["noshows","No-shows"],["plan","Plan"],["sim","Simula"]]},
+  stats:{label:"Estadísticas", icon:'<svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V4M19 20v-6"/></svg>', items:[["resumen","Resumen"],["dinero","Dinero"],["clientes","Clientes"],["agenda","Agenda"],["noshows","No-shows"],["Plan y proyección"],["Simulador (avanzado)"]]},
   negocio:{label:"Negocio", icon:'<svg viewBox="0 0 24 24"><rect x="3.5" y="7.5" width="17" height="12" rx="2"/><path d="M9 7.5v-2h6v2M3.5 13h17"/></svg>', items:[["precios","Precios"],["gastos","Gastos y retiros"],["metas","Metas"],["compras","Compras"],["bloqueos","Bloquear días"]]},
   mas:{label:"Más", icon:'<svg viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></svg>', items:[["ajustes","Ajustes"],["mensajes","Mensajes"],["respaldo","Respaldo"],["salir","Salir"]]}
 };
@@ -1987,33 +1998,6 @@ window.renderAll = function(){
 };
 document.addEventListener("touchstart",function(){},{passive:true});
 go("hoy");
-/* ---------- Botones de Carteras ---------- */
-document.addEventListener("click",e=>{
-  const t=e.target; let b;
-  b=t.closest("[data-cart]");
-  if(b){
-    const a=b.dataset.cart;
-    if(a==="gasto")gastoSheet();
-    else if(a==="ingreso")ingresoSheet();
-    else if(a==="go"){const n=document.querySelector('nav.bottom button[data-n="cartera"]');if(n)n.click();}
-    return;
-  }
-  b=t.closest("[data-fil]");
-  if(b){FIL=b.dataset.fil;renderCartera();return;}
-  b=t.closest("[data-mv]");
-  if(b){
-    const tp=b.dataset.t,k=b.dataset.k,ed=b.dataset.mv==="edit";
-    if(tp==="cobro")ed?cobroEdit(k):cobroDel(k);
-    else if(tp==="ingreso"){const i=CART.ingresos.find(x=>x.id===k);if(i)ed?ingresoSheet(i):ingresoDel(k);}
-    else if(tp==="gasto"){const g=allG().find(x=>String(x.id)===k);if(g)ed?gastoSheet(g):borrarGasto(g.id);}
-    return;
-  }
-  b=t.closest("[data-cat]");
-  if(b){catAction(b.dataset.cat,b.dataset.kd,+b.dataset.i);return;}
-});
-document.addEventListener("change",e=>{
-  if(e.target.classList&&e.target.classList.contains("cmes")&&e.target.value){MES=e.target.value;renderCartera();}
-});
 if(typeof appShown !== "undefined" && appShown) window.loadData();
 })();
 </script>
@@ -2262,6 +2246,33 @@ window.renderAll=function(){
   try{renderCartera();injectHoy();fixGastosPg();}
   catch(e){console.error(e);$("globalMsg").insertAdjacentHTML("beforeend",'<div class="msg err">Mi dinero tuvo un problema: '+esc(e.message||e)+'</div>');}
 };
+/* ---------- Botones de Carteras ---------- */
+document.addEventListener("click",e=>{
+  const t=e.target; let b;
+  b=t.closest("[data-cart]");
+  if(b){
+    const a=b.dataset.cart;
+    if(a==="gasto")gastoSheet();
+    else if(a==="ingreso")ingresoSheet();
+    else if(a==="go"){const n=document.querySelector('nav.bottom button[data-n="cartera"]');if(n)n.click();}
+    return;
+  }
+  b=t.closest("[data-fil]");
+  if(b){FIL=b.dataset.fil;renderCartera();return;}
+  b=t.closest("[data-mv]");
+  if(b){
+    const tp=b.dataset.t,k=b.dataset.k,ed=b.dataset.mv==="edit";
+    if(tp==="cobro")ed?cobroEdit(k):cobroDel(k);
+    else if(tp==="ingreso"){const i=CART.ingresos.find(x=>x.id===k);if(i)ed?ingresoSheet(i):ingresoDel(k);}
+    else if(tp==="gasto"){const g=allG().find(x=>String(x.id)===k);if(g)ed?gastoSheet(g):borrarGasto(g.id);}
+    return;
+  }
+  b=t.closest("[data-cat]");
+  if(b){catAction(b.dataset.cat,b.dataset.kd,+b.dataset.i);return;}
+});
+document.addEventListener("change",e=>{
+  if(e.target.classList&&e.target.classList.contains("cmes")&&e.target.value){MES=e.target.value;renderCartera();}
+});  
 if(typeof appShown!=="undefined"&&appShown)window.loadData();
 })();
 </script>
@@ -2282,12 +2293,12 @@ const NAV = {
     label: "Estadísticas",
     icon: '<svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V4M19 20v-6"/></svg>',
     items: [
-      ["plan", "Plan"],
+      ["Plan y proyección"],
       ["dinero", "Dinero"],
       ["clientes", "Clientes"],
       ["agenda", "Agenda"],
       ["noshows", "No-shows"],
-      ["sim", "Simula"]
+      ["Simulador (avanzado)"]
     ]
   },
   cartera: {
@@ -2374,13 +2385,25 @@ pop.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return
 shade.addEventListener("click",closePop);
 
 /* Limpieza de pantallas después de cada render */
-function tidy(){
+function fraseHoy(){
+  const t=todayStr(), d=dayFin(t), f=monthFin(t.slice(0,7));
+  let a = d.ing>0
+    ? '<b>Hoy entraron '+money(d.ing)+'.</b><br>Sepáralos así: <span style="color:var(--bad)">🔴 '+money(d.reserve)+' Barbería</span> · <span style="color:var(--save)">🔵 '+money(d.ahorro)+' Ahorro</span> · <span style="color:var(--ok)">🟢 '+money(d.libre)+' Para ti</span>.'
+    : '<b>Hoy todavía no ha entrado dinero.</b>';
+  const falta=Math.max(0,BARBER_BUDGET-f.reserve);
+  a += '<br>'+(falta>0.5
+    ? 'Este mes llevas '+money(f.reserve)+' apartados para la barbería y te faltan '+money(falta)+'.'
+    : 'La barbería de este mes ya está cubierta ✔.');
+  return '<div class="block" style="margin:0 0 12px;line-height:1.6">'+a+'</div>';
+}
+  function tidy(){
   const hoy=$("pg-hoy"),res=$("pg-resumen");
   if(hoy&&res){
     const lead=res.querySelector(":scope > .lead"),grid=res.querySelector(":scope > .grid");
     const rep=Array.prototype.find.call(hoy.querySelectorAll(":scope > .block"),b=>{const t=b.querySelector(".blockTitle");return t&&t.textContent.indexOf("Reparto de hoy")===0;});
     const cierre=hoy.querySelector("[data-cierre]"),cNote=cierre?cierre.nextElementSibling:null;
     if(lead)lead.insertAdjacentHTML("afterend",'<div class="acts" style="margin:0 0 6px"><button class="act good" data-cart="gasto">+ Gasto</button><button class="act good" data-cart="ingreso">+ Ingreso</button></div>');
+    if(lead)lead.insertAdjacentHTML("afterend",fraseHoy());
     if(rep&&grid)grid.after(rep);
     if(cierre){res.appendChild(cierre);if(cNote&&cNote.classList.contains("note"))res.appendChild(cNote);}
     hoy.innerHTML="";
