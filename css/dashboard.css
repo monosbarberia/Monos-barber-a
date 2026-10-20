@@ -768,3 +768,48 @@ a.act {
     font-size: 27px;
   }
 }
+/* ---------- Mejoras extra de usabilidad ---------- */
+
+#refreshBtn.spinning {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+#refreshBtn.spinning::before {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  border: 2px solid rgba(28, 56, 35, 0.3);
+  border-top-color: var(--forest);
+  border-radius: 50%;
+  animation: sp 0.7s linear infinite;
+  vertical-align: -2px;
+}
+
+/* Toast más elegante */
+#xToast {
+  border-radius: 12px;
+  font-size: 14.5px;
+  padding: 13px 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* Cards un poco más suaves */
+.card, .block {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Mejor espacio en iPhone */
+@media (max-width: 430px) {
+  main {
+    padding: 16px 14px 28px;
+  }
+  .hero .big {
+    font-size: 48px;
+  }
+  .card .value {
+    font-size: 26px;
+  }
+}
