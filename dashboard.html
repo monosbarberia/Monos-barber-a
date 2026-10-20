@@ -1744,6 +1744,39 @@ async function abrirFormularioProducto() {
       <input id="invUnidad" type="text" placeholder="unidad, botella, caja..." value="unidad"></div>`;
 
   const resultado = await sheet("Añadir producto", html, "Guardar producto", (m) => {
+async function abrirFormularioProducto() {
+  const html = `
+    <div class="field"><label>Nombre del producto</label>
+      <input id="invNombre" type="text" placeholder="Ej. Colonia, Cuchillas, Talco..."></div>
+    <div class="field"><label>Stock actual</label>
+      <input id="invStock" type="number" inputmode="decimal" value="0"></div>
+    <div class="field"><label>Stock mínimo (aviso cuando baje de este número)</label>
+      <input id="invMinimo" type="number" inputmode="decimal" value="2"></div>
+    <div class="field"><label>Unidad (opcional)</label>
+      <input id="invUnidad" type="text" placeholder="unidad, botella, caja..." value="unidad"></div>`;
+
+  const resultado = await sheet("Añadir producto", html, "Guardar producto", (m) => {
+    const nombre = m.querySelector("#invNombre").value.trim();
+    const stock = Number(m.querySelector("#invStock").value) || 0;
+    const minimo = Number(m.querySelector("#invMinimo").value) || 0;
+    const unidad = m.querySelector("#invUnidad").value.trim() || "unidad";
+    if (!nombre) { m.err("Escribe el nombre del producto."); return false; }
+    return { nombre, stock_actual: stock, stock_minimo: minimo, unidad };
+  });
+  if (!resultado) return;
+
+async function abrirFormularioProducto() {
+  const html = `
+    <div class="field"><label>Nombre del producto</label>
+      <input id="invNombre" type="text" placeholder="Ej. Colonia, Cuchillas, Talco..."></div>
+    <div class="field"><label>Stock actual</label>
+      <input id="invStock" type="number" inputmode="decimal" value="0"></div>
+    <div class="field"><label>Stock mínimo (aviso cuando baje de este número)</label>
+      <input id="invMinimo" type="number" inputmode="decimal" value="2"></div>
+    <div class="field"><label>Unidad (opcional)</label>
+      <input id="invUnidad" type="text" placeholder="unidad, botella, caja..." value="unidad"></div>`;
+
+  const resultado = await sheet("Añadir producto", html, "Guardar producto", (m) => {
     const nombre = m.querySelector("#invNombre").value.trim();
     const stock = Number(m.querySelector("#invStock").value) || 0;
     const minimo = Number(m.querySelector("#invMinimo").value) || 0;
