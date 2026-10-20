@@ -39,6 +39,7 @@
     <section id="pg-resumen"></section><section id="pg-dinero" class="hidden"></section>
     <section id="pg-clientes" class="hidden"></section><section id="pg-agenda" class="hidden"></section>
     <section id="pg-noshows" class="hidden"></section>
+    <section id="pg-inventario" class="hidden"></section>
   </main>
   <nav class="bottom"></nav>
 </section>
@@ -1662,6 +1663,12 @@ function renderComprasPg(){
     '<button class="btn" style="margin-top:12px" onclick="openExpense()">Anotar una compra</button>';
   $("pg-compras").innerHTML = h;
 }
+  function renderInventarioPg(){
+  let h = '<h1>Inventario</h1><p class="lead">Control de productos y stock de la barbería.</p>';
+  h += '<div class="block"><div class="empty">Pronto podrás ver y gestionar tu inventario aquí.<br>Primero vamos a conectar los datos.</div></div>';
+  h += '<button class="btn" style="margin-top:12px" onclick="alert(\'Próximamente: añadir producto\')">+ Añadir producto</button>';
+  $("pg-inventario").innerHTML = h;
+}
 
 /* ---------- BLOQUEAR DÍAS ---------- */
 function blockedDays(){
@@ -1910,7 +1917,7 @@ window.renderAll = function(){
   _ra();
   try{
     renderHoy(); renderPrecios(); renderGastosPg(); renderMetasPg(); renderComprasPg(); renderBloqueosPg();
-    renderAjustes(); renderMensajes(); renderRespaldo(); decorateClientes();
+    renderAjustes(); renderMensajes(); renderRespaldo(); decorateClientes(); renderInventarioPg();
   }catch(e){
     console.error(e);
     $("globalMsg").insertAdjacentHTML("beforeend", '<div class="msg err">Las pantallas nuevas tuvieron un problema: '+esc(e.message || e)+'</div>');
@@ -2176,7 +2183,7 @@ const NAV={
   resumen:{label:"Resumen",icon:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',page:"resumen"},
   stats:{label:"Estadísticas",icon:'<svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V4M19 20v-6"/></svg>',items:[["plan","Plan"],["dinero","Dinero"],["clientes","Clientes"],["agenda","Agenda"],["noshows","No-shows"],["sim","Simula"]]},
   cartera:{label:"Carteras",icon:'<svg viewBox="0 0 24 24"><rect x="3.5" y="6.5" width="17" height="12" rx="2"/><path d="M16 12.5h2.5M3.5 9.5h17"/></svg>',page:"cartera"},
-  mas:{label:"Más",icon:'<svg viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></svg>',items:[["ajustes","Ajustes"],["metas","Metas"],["compras","Compras"],["bloqueos","Bloquear días"],["respaldo","Respaldo"],["salir","Salir"]]}
+  mas:{label:"Más",icon:'<svg viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></svg>',items:[["inventario","Inventario"],["ajustes","Ajustes"],["metas","Metas"],["compras","Compras"],["bloqueos","Bloquear días"],["respaldo","Respaldo"],["salir","Salir"]]}
 };
 /* Ajustes muestra también Precios y Mensajes, en ese orden */
 main.insertBefore($("pg-precios"),$("pg-mensajes"));
