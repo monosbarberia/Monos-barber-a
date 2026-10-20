@@ -2300,13 +2300,43 @@ let cur="resumen";
 const groupOf=p=>Object.keys(NAV).find(k=>NAV[k].page===p||(NAV[k].items&&NAV[k].items.some(i=>i[0]===p)));
 function closePop(){pop.classList.add("hidden");shade.classList.add("hidden");}
 function show(p){
-  cur=p;closePop();
-  Array.prototype.forEach.call(main.children,s=>{if(s.tagName==="SECTION")s.classList.add("hidden");});
-  (p==="ajustes"?["ajustes","precios","mensajes"]:[p]).forEach(i=>{const s=$("pg-"+i);if(s)s.classList.remove("hidden");});
-  $("periods").classList.toggle("hidden",PER.indexOf(p)<0);
-  const g=groupOf(p);nav.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.n===g));
-  window.scrollTo(0,0);
-  if(p==="clientes")requestAnimationFrame(()=>{const x=$("cliQ");if(x)x.dispatchEvent(new Event("input",{bubbles:true}));});
+  cur = p;
+  closePop();
+
+  // Ocultar todas las secciones
+  Array.prototype.forEach.call(main.children, s => {
+    if (s.tagName === "SECTION") s.classList.add("hidden");
+  });
+
+  // Mostrar la sección correspondiente
+  const pagesToShow = (p === "ajustes") ? ["ajustes", "precios", "mensajes"] : [p];
+  pagesToShow.forEach(i => {
+    const s = $("pg-" + i);
+    if (s) s.classList.remove("hidden");
+  });
+
+  // Ocultar o mostrar el selector de períodos
+  $("periods").classList.toggle("hidden", PER.indexOf(p) < 0);
+
+  // Marcar el botón activo
+  const g = groupOf(p);
+  nav.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.n === g));
+
+  window.scrollTo(0, 0);
+
+  // === AQUÍ ESTÁ LA CLAVE: pintar el contenido ===
+  if (p === "inventario" && typeof renderInventarioPg === "function") {
+    renderInventarioPg();
+  }
+  if (p === "cartera" && typeof renderCartera === "function") {
+    renderCartera();
+  }
+  if (p === "clientes") {
+    requestAnimationFrame(() => {
+      const x = $("cliQ");
+      if (x) x.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+  }
 }
 nav.addEventListener("click",e=>{
   const b=e.target.closest("button");if(!b)return;const k=b.dataset.n,G=NAV[k];
