@@ -2289,8 +2289,6 @@ const NAV = {
   }
 };
 /* Ajustes muestra también Precios y Mensajes, en ese orden */
-main.insertBefore($("pg-precios"),$("pg-mensajes"));
-
 /* Menú inferior nuevo */
 const oldNav=document.querySelector("nav.bottom"),nav=oldNav.cloneNode(false);oldNav.replaceWith(nav);
 nav.innerHTML=Object.keys(NAV).map(k=>'<button data-n="'+k+'"><span>'+NAV[k].icon+'</span>'+NAV[k].label+(NAV[k].items?" ▾":"")+'</button>').join("");
