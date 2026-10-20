@@ -2280,12 +2280,12 @@ async function catAction(a,kd,i){
   const arr=kd==="g"?CART.catG:CART.catI,old=arr[i];
   const nombre=(titulo,val)=>mSheet(titulo,F("cn","Nombre","text",val||""),"Guardar",m=>{
     const n=q(m,"#cn").value.trim();if(!n)return "Escribe un nombre.";
-    if(arr.some((c,j)=>j!==i&&norm(c)===norm(n)))return "Ya existe esa categoría.";return n;});
-  if(a==="add"){const v=await nombre("Nueva categoría","");if(!v)return;arr.push(v);}
+    if(arr.some((c,j)=>j!==i&&norm(c)===norm(n)))return "Ya existe esa categoría.";return {n:n};});
+  if(a==="add"){const v=await nombre("Nueva categoría","");if(!v)return;arr.push(v.n);}
   else if(a==="edit"){
-    const v=await nombre("Editar categoría",old);if(!v||v===old)return;arr[i]=v;
-    if(kd==="g"){const r=await sb.from("gastos").update({categoria:old===v?old:v}).eq("categoria",old);if(r.error)alert("Se cambió la lista, pero no los gastos viejos: "+r.error.message);}
-    else CART.ingresos.forEach(x=>{if(x.cat===old)x.cat=v;});
+    const v=await nombre("Editar categoría",old);if(!v||v.n===old)return;arr[i]=v.n;
+    if(kd==="g"){const r=await sb.from("gastos").update({categoria:v.n}).eq("categoria",old);if(r.error)alert("Se cambió la lista, pero no los gastos viejos: "+r.error.message);}
+    else CART.ingresos.forEach(x=>{if(x.cat===old)x.cat=v.n;});
   }else if(a==="del"){
     if(!(await ask("Borrar categoría","Se quita «"+old+"» de la lista. Los movimientos que ya la usan no se borran.","Borrar")))return;
     arr.splice(i,1);
@@ -2335,6 +2335,84 @@ window.renderAll=function(){
   catch(e){console.error(e);$("globalMsg").insertAdjacentHTML("beforeend",'<div class="msg err">Mi dinero tuvo un problema: '+esc(e.message||e)+'</div>');}
 };
 if(typeof appShown!=="undefined"&&appShown)window.loadData();
+})();
+</script>
+<script>
+/* BLOQUE ORDEN: menú nuevo, Resumen unificado, Carteras, Ajustes con Precios y Mensajes */
+(function(){
+"use strict";
+if(typeof renderAll!=="function"||typeof sb==="undefined") return;
+const main=document.querySelector("main");
+const PER=["resumen","dinero","clientes","agenda","noshows"];
+const NAV={
+  resumen:{label:"Resumen",icon:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',page:"resumen"},
+  stats:{label:"Estadísticas",icon:'<svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V4M19 20v-6"/></svg>',items:[["plan","Plan"],["dinero","Dinero"],["clientes","Clientes"],["agenda","Agenda"],["noshows","No-shows"],["sim","Simula"]]},
+  cartera:{label:"Carteras",icon:'<svg viewBox="0 0 24 24"><rect x="3.5" y="6.5" width="17" height="12" rx="2"/><path d="M16 12.5h2.5M3.5 9.5h17"/></svg>',page:"cartera"},
+  mas:{label:"Más",icon:'<svg viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></svg>',items:[["ajustes","Ajustes"],["metas","Metas"],["compras","Compras"],["bloqueos","Bloquear días"],["respaldo","Respaldo"],["salir","Salir"]]}
+};
+/* Ajustes muestra también Precios y Mensajes, en ese orden */
+main.insertBefore($("pg-precios"),$("pg-mensajes"));
+
+/* Menú inferior nuevo */
+const oldNav=document.querySelector("nav.bottom"),nav=oldNav.cloneNode(false);oldNav.replaceWith(nav);
+nav.innerHTML=Object.keys(NAV).map(k=>'<button data-n="'+k+'"><span>'+NAV[k].icon+'</span>'+NAV[k].label+(NAV[k].items?" ▾":"")+'</button>').join("");
+["navPop","navShade"].forEach(i=>{const o=$(i);if(o)o.remove();});
+const shade=document.createElement("div");shade.id="navShade";shade.className="hidden";
+const pop=document.createElement("div");pop.id="navPop";pop.className="hidden";
+$("app").appendChild(shade);$("app").appendChild(pop);
+let cur="resumen";
+const groupOf=p=>Object.keys(NAV).find(k=>NAV[k].page===p||(NAV[k].items&&NAV[k].items.some(i=>i[0]===p)));
+function closePop(){pop.classList.add("hidden");shade.classList.add("hidden");}
+function show(p){
+  cur=p;closePop();
+  Array.prototype.forEach.call(main.children,s=>{if(s.tagName==="SECTION")s.classList.add("hidden");});
+  (p==="ajustes"?["ajustes","precios","mensajes"]:[p]).forEach(i=>{const s=$("pg-"+i);if(s)s.classList.remove("hidden");});
+  $("periods").classList.toggle("hidden",PER.indexOf(p)<0);
+  const g=groupOf(p);nav.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.n===g));
+  window.scrollTo(0,0);
+  if(p==="clientes")requestAnimationFrame(()=>{const x=$("cliQ");if(x)x.dispatchEvent(new Event("input",{bubbles:true}));});
+}
+nav.addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;const k=b.dataset.n,G=NAV[k];
+  if(!G.items){show(G.page);return;}
+  if(!pop.classList.contains("hidden")&&pop.dataset.g===k){closePop();return;}
+  pop.dataset.g=k;
+  pop.innerHTML=G.items.map(i=>'<button data-go="'+i[0]+'"'+(i[0]===cur?' class="on"':'')+'>'+i[1]+'</button>').join("");
+  const r=b.getBoundingClientRect(),w=Math.min(230,window.innerWidth-16);
+  pop.style.width=w+"px";pop.style.left=Math.max(8,Math.min(window.innerWidth-w-8,r.left+r.width/2-w/2))+"px";
+  pop.classList.remove("hidden");shade.classList.remove("hidden");
+});
+pop.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.go==="salir"){closePop();$("logoutBtn").click();return;}show(b.dataset.go);});
+shade.addEventListener("click",closePop);
+
+/* Limpieza de pantallas después de cada render */
+function tidy(){
+  const hoy=$("pg-hoy"),res=$("pg-resumen");
+  if(hoy&&res){
+    const lead=res.querySelector(":scope > .lead"),grid=res.querySelector(":scope > .grid");
+    const rep=Array.prototype.find.call(hoy.querySelectorAll(":scope > .block"),b=>{const t=b.querySelector(".blockTitle");return t&&t.textContent.indexOf("Reparto de hoy")===0;});
+    const cierre=hoy.querySelector("[data-cierre]"),cNote=cierre?cierre.nextElementSibling:null;
+    if(lead)lead.insertAdjacentHTML("afterend",'<div class="acts" style="margin:0 0 6px"><button class="act good" data-cart="gasto">+ Gasto</button><button class="act good" data-cart="ingreso">+ Ingreso</button></div>');
+    if(rep&&grid)grid.after(rep);
+    if(cierre){res.appendChild(cierre);if(cNote&&cNote.classList.contains("note"))res.appendChild(cNote);}
+    hoy.innerHTML="";
+    res.querySelectorAll('button.act[data-a="noshow"]').forEach(b=>b.remove());
+    res.querySelectorAll(".row").forEach(row=>{
+      const b=row.querySelector("button.act[data-a][data-k]"),acts=row.querySelector(".acts");
+      if(!b||!acts||acts.querySelector("[data-fi]"))return;
+      const r=reservas.find(x=>x.key===b.dataset.k);if(!r)return;
+      acts.insertAdjacentHTML("beforeend",'<button class="act" data-fi="'+esc(r.client)+'">Ficha</button>');
+    });
+  }
+  const c=$("pg-cartera");
+  if(c){const h=c.querySelector("h1");if(h)h.textContent="Carteras";const a=c.querySelector(":scope > .acts");if(a)a.remove();}
+  const aj=$("pg-ajustes"),sv=aj&&aj.querySelector('[data-aj="save"]'),l=aj&&aj.querySelector(".lead");
+  if(sv&&l&&l.nextElementSibling!==sv){sv.style.margin="0 0 12px";l.after(sv);}
+}
+const _ra=window.renderAll;
+window.renderAll=function(){_ra.apply(this,arguments);try{tidy();}catch(e){console.error(e);}};
+show("resumen");
 })();
 </script>
 </body>
