@@ -9,6 +9,10 @@
 <link rel="apple-touch-icon" sizes="520x520" href="favicon.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/dashboard.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1c3823">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.js"></script>
 </head>
@@ -2223,5 +2227,15 @@ window.renderAll=function(){_ra.apply(this,arguments);try{tidy();}catch(e){conso
 show("resumen");
 })();
 </script>
+<script>
+  // Registrar Service Worker
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js")
+        .then(reg => console.log("Service Worker registrado"))
+        .catch(err => console.log("Error al registrar SW:", err));
+    });
+  }
+</script>  
 </body>
 </html>
