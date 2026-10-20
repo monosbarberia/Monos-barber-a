@@ -741,14 +741,30 @@ $("loginBtn").addEventListener("click", login);
 $("password").addEventListener("keydown", e => { if(e.key==="Enter") login(); });
 $("logoutBtn").addEventListener("click", async () => { await sb.auth.signOut(); });
 $("refreshBtn").addEventListener("click", async () => {
-  const b = $("refreshBtn"); if(b.disabled) return;
-  b.disabled = true; b.classList.add("spinning"); b.textContent = "Actualizando";
+  const b = $("refreshBtn");
+  if (b.disabled) return;
+
+  b.disabled = true;
+  b.classList.add("spinning");
+  b.textContent = "Actualizando";
+
   const t0 = Date.now();
-  await loadData();
-  const wait = 700 - (Date.now() - t0);
-  if(wait > 0) await new Promise(r => setTimeout(r, wait));
-  b.classList.remove("spinning"); b.textContent = "Listo ✓";
-  setTimeout(() => { b.textContent = "Actualizar"; b.disabled = false; }, 900);
+  try {
+    await loadData();
+  } catch (e) {
+    console.error(e);
+  }
+
+  const wait = 800 - (Date.now() - t0);
+  if (wait > 0) await new Promise(r => setTimeout(r, wait));
+
+  b.classList.remove("spinning");
+  b.textContent = "Listo ✓";
+
+  setTimeout(() => {
+    b.textContent = "Actualizar";
+    b.disabled = false;
+  }, 1100);
 });
 $("saveExpense").addEventListener("click", saveExpense);
 $("saveGoal").addEventListener("click", saveGoal);
