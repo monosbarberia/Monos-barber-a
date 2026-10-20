@@ -91,7 +91,7 @@ const SLOTS = ["9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM","
 const DAYS = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
-let sb = null, turnos = [], gastos = [], metas = [], reservas = [], bloqueos = [];
+let sb = window.sb, turnos = [], gastos = [], metas = [], reservas = [], bloqueos = [];
 let period = "today", appShown = false, lastLoad = 0;
 const charts = {};
 
