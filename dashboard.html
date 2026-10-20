@@ -2229,31 +2229,6 @@ async function catAction(a,kd,i){
 /* ---------- Enganche con el panel ---------- */
 const main=document.querySelector("main");
 const sec=document.createElement("section");sec.id="pg-cartera";sec.className="hidden";main.appendChild(sec);
-const nav=document.querySelector("nav.bottom");
-function showCartera(){
-  Array.prototype.forEach.call(main.children,s=>{if(s.tagName==="SECTION")s.classList.add("hidden");});
-  $("pg-cartera").classList.remove("hidden");$("periods").classList.add("hidden");
-  const pop=$("navPop"),sh=$("navShade");if(pop)pop.classList.add("hidden");if(sh)sh.classList.add("hidden");
-  nav.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.g==="cartera"));
-  renderCartera();window.scrollTo(0,0);
-}
-nav.addEventListener("click",e=>{const b=e.target.closest('button[data-g="cartera"]');if(!b)return;e.stopPropagation();showCartera();},true);
-document.addEventListener("click",e=>{
-  if(e.target.closest("#navPop button")||e.target.closest('nav.bottom button[data-g="hoy"]'))$("pg-cartera").classList.add("hidden");
-},true);
-document.addEventListener("change",e=>{if(e.target.classList&&e.target.classList.contains("cmes")&&e.target.value){MES=e.target.value;window.renderAll();}});
-document.addEventListener("click",e=>{
-  let b=e.target.closest("[data-fil]");if(b){FIL=b.dataset.fil;window.renderAll();return;}
-  b=e.target.closest("[data-cart]");if(b){const a=b.dataset.cart;if(a==="go")showCartera();else if(a==="gasto")gastoSheet();else ingresoSheet();return;}
-  b=e.target.closest("[data-mv]");if(b){
-    const a=b.dataset.mv,t=b.dataset.t,k=b.dataset.k;
-    if(t==="cobro")a==="edit"?cobroEdit(k):cobroDel(k);
-    else if(t==="ingreso")a==="edit"?ingresoSheet(CART.ingresos.find(x=>x.id===k)):ingresoDel(k);
-    else{const g=allG().find(x=>String(x.id)===k);if(g)a==="edit"?gastoSheet(g):borrarGasto(g.id);}
-    return;}
-  b=e.target.closest("[data-cat]");if(b){catAction(b.dataset.cat,b.dataset.kd,+b.dataset.i);}
-});
-
 const _ld=window.loadData;
 window.loadData=async function(){await cargarCart();return _ld.apply(this,arguments);};
 const _ra=window.renderAll;
