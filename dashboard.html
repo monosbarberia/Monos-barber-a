@@ -1080,12 +1080,9 @@ function renderPlan(X){
     b += barRow("Meta de hoy", money(m.todayIng)+" de "+money(G.daily)+(m.todayIng >= G.daily ? " · ¡lograda!" : " · faltan "+money(G.daily - m.todayIng)), pct(Math.min(100,pc)), pc, "ok", "");
     b += '<div class="note">'+(G.src === "meta" ? "Sale de tu meta del mes repartida entre los días de trabajo." : "Es lo que sueles hacer los "+DAYS[G.todayWd].toLowerCase()+"s.")+'</div>';
   }else b += empty("Aún no sé cuánto sueles hacer los "+DAYS[G.todayWd].toLowerCase()+"s. Configura una meta del mes o espera unos días de datos.");
-  const eqpc = BARBER_BUDGET > 0 ? FIN.reserve/BARBER_BUDGET*100 : 0;
-  b += barRow("Barbería del mes cubierta", money(FIN.reserve)+" de "+money(BARBER_BUDGET)+(FIN.reserve >= BARBER_BUDGET - 0.5 ? " · ¡cubierta!" : " · faltan "+money(BARBER_BUDGET - FIN.reserve)), pct(Math.min(100,eqpc)), eqpc, "bad", "r");
-  if(SAVE_GOAL > 0){
-    const sp = FIN.ahorro/SAVE_GOAL*100;
-    b += barRow("Ahorro del mes", money(FIN.ahorro)+" de "+money(SAVE_GOAL)+(FIN.ahorro >= SAVE_GOAL - 0.5 ? " · ¡meta lograda!" : " · faltan "+money(SAVE_GOAL - FIN.ahorro)), pct(Math.min(100,sp)), sp, "save", "b");
-  }
+  const CR = window.__carry ? window.__carry() : {barberia:0, ahorro:0};
+b += window.barStack("Barbería del mes cubierta", CR.barberia, FIN.reserve, BARBER_BUDGET, "bad", "r");
+if(SAVE_GOAL > 0) b += window.barStack("Ahorro del mes", CR.ahorro, FIN.ahorro, SAVE_GOAL, "save", "b");
   h += block("Hoy y punto de equilibrio", b, "Cada día el "+PCT_BARBER+"% de lo que cobras va a la barbería hasta completar "+money(BARBER_BUDGET)+"; después, solo se aparta el ahorro. El punto de equilibrio es cuánto necesitas cobrar en el mes para completar la barbería ("+money(G.eq)+"). Pasado ese punto, lo demás es ganancia para ti.");
 
   // Proyección
@@ -1656,11 +1653,13 @@ function renderGastosPg(){
 /* ---------- METAS y COMPRAS ---------- */
 function renderMetasPg(){
   const month = todayStr().slice(0,7), f = monthFin(month), am = SAVE_GOAL;
+  const CR = window.__carry ? window.__carry() : {barberia:0, ahorro:0};
   let h = '<h1>Metas</h1><p class="lead">Lo que quieres lograr este mes.</p>';
   h += block("Meta del mes", goalHtml());
   h += block("Barbería y ahorro del mes",
-    barRow2("Gastos de la barbería", f.reserve, BARBER_BUDGET, "bad", "r") + (am > 0 ? barRow2("Meta de ahorro", f.ahorro, am, "save", "b") : '<div class="note">Puedes poner una meta de ahorro en Más ▾ → Ajustes.</div>'),
-    "Cada día el "+PCT_BARBER+"% de lo que cobras va a la barbería hasta completar "+money(BARBER_BUDGET)+" y luego deja de separarse. El ahorro es el "+SAVE_PCT+"% del resto (de todo el día si la barbería ya está cubierta) hasta llegar a su meta.");
+    window.barStack("Gastos de la barbería", CR.barberia, f.reserve, BARBER_BUDGET, "bad", "r") +
+    (am > 0 ? window.barStack("Meta de ahorro", CR.ahorro, f.ahorro, am, "save", "b") : '<div class="note">Puedes poner una meta de ahorro en Más ▾ → Ajustes.</div>'),
+    "La parte amarilla es lo que sobró de meses anteriores y se suma a la meta de este mes. La parte roja (barbería) o azul (ahorro) es lo separado este mes.");
   $("pg-metas").innerHTML = h;
 }
 function barRow2(t, a, b, cls, bc){
@@ -1948,6 +1947,7 @@ document.head.appendChild(st);
 /* ---------- Eventos ---------- */
 document.addEventListener("input", e => {
   const sec = e.target.closest("section"); if(sec && ["pg-ajustes","pg-mensajes","pg-precios","pg-bloqueos"].indexOf(sec.id) >= 0) DIRTY[sec.id] = true;
+  if(sec && sec.id === "pg-wa") DIRTY["pg-ajustes"] = true;
   if(e.target.id === "cliQ"){ const box = $("cliRes"); box.innerHTML = clientList(e.target.value); box.scrollTop = 0; fitCliList(); return; }
   if(e.target.classList.contains("xpn") && e.target.closest("#pg-precios")){ const p = PRECIOS[+e.target.dataset.i]; if(p) p.n = e.target.value; }
   if(e.target.classList.contains("xpp") && e.target.closest("#pg-precios")){ const p = PRECIOS[+e.target.dataset.i]; if(p) p.p = num(e.target.value); }
@@ -1987,6 +1987,33 @@ window.renderAll = function(){
 };
 document.addEventListener("touchstart",function(){},{passive:true});
 go("hoy");
+/* ---------- Botones de Carteras ---------- */
+document.addEventListener("click",e=>{
+  const t=e.target; let b;
+  b=t.closest("[data-cart]");
+  if(b){
+    const a=b.dataset.cart;
+    if(a==="gasto")gastoSheet();
+    else if(a==="ingreso")ingresoSheet();
+    else if(a==="go"){const n=document.querySelector('nav.bottom button[data-n="cartera"]');if(n)n.click();}
+    return;
+  }
+  b=t.closest("[data-fil]");
+  if(b){FIL=b.dataset.fil;renderCartera();return;}
+  b=t.closest("[data-mv]");
+  if(b){
+    const tp=b.dataset.t,k=b.dataset.k,ed=b.dataset.mv==="edit";
+    if(tp==="cobro")ed?cobroEdit(k):cobroDel(k);
+    else if(tp==="ingreso"){const i=CART.ingresos.find(x=>x.id===k);if(i)ed?ingresoSheet(i):ingresoDel(k);}
+    else if(tp==="gasto"){const g=allG().find(x=>String(x.id)===k);if(g)ed?gastoSheet(g):borrarGasto(g.id);}
+    return;
+  }
+  b=t.closest("[data-cat]");
+  if(b){catAction(b.dataset.cat,b.dataset.kd,+b.dataset.i);return;}
+});
+document.addEventListener("change",e=>{
+  if(e.target.classList&&e.target.classList.contains("cmes")&&e.target.value){MES=e.target.value;renderCartera();}
+});
 if(typeof appShown !== "undefined" && appShown) window.loadData();
 })();
 </script>
@@ -2054,6 +2081,33 @@ function balances(){
   if(o.barberia.q<0){o.mio.q+=o.barberia.q;o.barberia.q=0;}
   return o;
 }
+function openBal(){
+  const o={barberia:0,ahorro:0,mio:0};
+  let y=+START_DATE.slice(0,4),m=+START_DATE.slice(5,7);const cur=todayStr().slice(0,7);
+  for(let i=0;i<120;i++){
+    const k=y+"-"+String(m).padStart(2,"0");if(k>=cur)break;
+    const f=monthFin(k);
+    o.barberia+=f.reserve-f.gReg;o.ahorro+=f.ahorro;
+    m++;if(m>12){m=1;y++;}
+  }
+  CART.ingresos.forEach(i=>{if(mon(String(i.fecha))<cur&&o[i.bolsa]!==undefined)o[i.bolsa]+=num(i.monto);});
+  outG.forEach(g=>{const b=bolsaOfG(g.id);if(mon(String(g.fecha))<cur&&o[b]!==undefined)o[b]-=num(g.monto);});
+  o.barberia=Math.max(0,o.barberia);o.ahorro=Math.max(0,o.ahorro);
+  return o;
+}
+window.__carry=openBal;
+window.barStack=function(t,carry,cur,goal,cls,bcls){
+  const tot=goal+carry,done=carry+cur,falta=tot-done;
+  const pc=tot>0?Math.min(100,done/tot*100):0;
+  const wc=tot>0?Math.min(100,carry/tot*100):0;
+  const wm=Math.max(0,Math.min(100-wc,tot>0?cur/tot*100:0));
+  const col=bcls==="b"?"var(--save)":"var(--bad)";
+  return '<div class="row"><div class="rowTop"><div><div class="rowTitle">'+t+'</div>'+
+    '<div class="rowSub">'+money(done)+' de '+money(tot)+(falta>0.5?' · faltan '+money(falta):' · ¡cubierto!')+'</div>'+
+    '<div class="rowSub"><span style="color:var(--warn)">■</span> Sobrante anterior '+money(carry)+' · <span style="color:'+col+'">■</span> Este mes '+money(cur)+'</div></div>'+
+    '<div class="rowVal '+cls+'">'+pct(pc)+'</div></div>'+
+    '<div class="bar" style="display:flex"><i style="width:'+wc+'%;background:var(--warn);border-radius:6px 0 0 6px"></i><i class="'+bcls+'" style="width:'+wm+'%;border-radius:0 6px 6px 0"></i></div></div>';
+};  
 function balCards(){
   const b=balances(),tot=b.barberia.q+b.ahorro.q+b.mio.q;
   return '<div class="grid">'+card("En la barbería",money(b.barberia.q),"Fondo para gastos","bad")+card("En ahorro",money(b.ahorro.q),"No lo toques","save")+
@@ -2193,6 +2247,8 @@ async function catAction(a,kd,i){
 
 /* ---------- Enganche con el panel ---------- */
 const main=document.querySelector("main");
+const waSec=document.createElement("section");waSec.id="pg-wa";waSec.className="hidden";main.appendChild(waSec);
+["ajustes","precios","wa","mensajes"].forEach(n=>main.appendChild($("pg-"+n)));  
 const sec=document.createElement("section");sec.id="pg-cartera";sec.className="hidden";main.appendChild(sec);
 const _ld=window.loadData;
 window.loadData=async function(){await cargarCart();return _ld.apply(this,arguments);};
@@ -2274,7 +2330,7 @@ function show(p){
   });
 
   // Mostrar la sección correspondiente
-  const pagesToShow = (p === "ajustes") ? ["ajustes", "precios", "mensajes"] : [p];
+  const pagesToShow = (p === "ajustes") ? ["ajustes", "precios", "wa", "mensajes"] : [p];
   pagesToShow.forEach(i => {
     const s = $("pg-" + i);
     if (s) s.classList.remove("hidden");
@@ -2339,6 +2395,8 @@ function tidy(){
   const c=$("pg-cartera");
   if(c){const h=c.querySelector("h1");if(h)h.textContent="Carteras";const a=c.querySelector(":scope > .acts");if(a)a.remove();}
   const aj=$("pg-ajustes"),sv=aj&&aj.querySelector('[data-aj="save"]'),l=aj&&aj.querySelector(".lead");
+  const wab=aj&&Array.prototype.find.call(aj.querySelectorAll(":scope > .block"),b=>{const t=b.querySelector(".blockTitle");return t&&t.textContent.indexOf("Mi WhatsApp")===0;});
+if(wab){const w=$("pg-wa");w.innerHTML="";w.appendChild(wab);}
   if(sv&&l&&l.nextElementSibling!==sv){sv.style.margin="0 0 12px";l.after(sv);}
 }
 const _ra=window.renderAll;
