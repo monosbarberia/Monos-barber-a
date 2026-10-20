@@ -2230,7 +2230,6 @@ async function catAction(a,kd,i){
 const main=document.querySelector("main");
 const sec=document.createElement("section");sec.id="pg-cartera";sec.className="hidden";main.appendChild(sec);
 const nav=document.querySelector("nav.bottom");
-nav.insertAdjacentHTML("beforeend",'<button data-g="cartera"><span><svg viewBox="0 0 24 24"><rect x="3.5" y="6.5" width="17" height="12" rx="2"/><path d="M16 12.5h2.5M3.5 9.5h17"/></svg></span>Mi dinero</button>');
 function showCartera(){
   Array.prototype.forEach.call(main.children,s=>{if(s.tagName==="SECTION")s.classList.add("hidden");});
   $("pg-cartera").classList.remove("hidden");$("periods").classList.add("hidden");
@@ -2277,11 +2276,37 @@ if(typeof appShown!=="undefined"&&appShown)window.loadData();
 if(typeof renderAll!=="function"||typeof sb==="undefined") return;
 const main=document.querySelector("main");
 const PER=["resumen","dinero","clientes","agenda","noshows"];
-const NAV={
-  resumen:{label:"Resumen",icon:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',page:"resumen"},
-  stats:{label:"Estadísticas",icon:'<svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V4M19 20v-6"/></svg>',items:[["plan","Plan"],["dinero","Dinero"],["clientes","Clientes"],["agenda","Agenda"],["noshows","No-shows"],["sim","Simula"]]},
-  cartera:{label:"Carteras",icon:'<svg viewBox="0 0 24 24"><rect x="3.5" y="6.5" width="17" height="12" rx="2"/><path d="M16 12.5h2.5M3.5 9.5h17"/></svg>',page:"cartera"},
-  mas:{label:"Más",icon:'<svg viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></svg>',items:[["inventario","Inventario"],["ajustes","Ajustes"],["metas","Metas"],["compras","Compras"],["bloqueos","Bloquear días"],["respaldo","Respaldo"],["salir","Salir"]]}
+const NAV = {
+  resumen: {
+    label: "Resumen",
+    icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+    page: "resumen"
+  },
+  stats: {
+    label: "Estadísticas",
+    icon: '<svg viewBox="0 0 24 24"><path d="M5 20v-9M12 20V4M19 20v-6"/></svg>',
+    items: [
+      ["plan", "Plan"],
+      ["dinero", "Dinero"],
+      ["clientes", "Clientes"],
+      ["agenda", "Agenda"],
+      ["noshows", "No-shows"],
+      ["sim", "Simula"]
+    ]
+  },
+  mas: {
+    label: "Más",
+    icon: '<svg viewBox="0 0 24 24"><path d="M5 8h14M5 12h14M5 16h14"/></svg>',
+    items: [
+      ["inventario", "Inventario"],
+      ["ajustes", "Ajustes"],
+      ["metas", "Metas"],
+      ["compras", "Compras"],
+      ["bloqueos", "Bloquear días"],
+      ["respaldo", "Respaldo"],
+      ["salir", "Salir"]
+    ]
+  }
 };
 /* Ajustes muestra también Precios y Mensajes, en ese orden */
 main.insertBefore($("pg-precios"),$("pg-mensajes"));
