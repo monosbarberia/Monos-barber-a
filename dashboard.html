@@ -1732,42 +1732,67 @@ async function abrirFormularioProducto() {
       const unidad = m.querySelector("#invUnidad").value.trim() || "unidad";
 
       if (!nombre) {
-        m.err("Escribe el nombre del producto.");
-        return false;
-      }
-      return { nombre, stock_actual: stock, stock_minimo: minimo, unidad };
-    }
-  );
+async function abrirFormularioProducto() {
+  const html = `
+    <div class="field"><label>Nombre del producto</label>
+      <input id="invNombre" type="text" placeholder="Ej. Colonia, Cuchillas, Talco..."></div>
+    <div class="field"><label>Stock actual</label>
+      <input id="invStock" type="number" inputmode="decimal" value="0"></div>
+    <div class="field"><label>Stock mínimo (aviso cuando baje de este número)</label>
+      <input id="invMinimo" type="number" inputmode="decimal" value="2"></div>
+    <div class="field"><label>Unidad (opcional)</label>
+      <input id="invUnidad" type="text" placeholder="unidad, botella, caja..." value="unidad"></div>`;
 
+  const resultado = await sheet("Añadir producto", html, "Guardar producto", (m) => {
+    const nombre = m.querySelector("#invNombre").value.trim();
+    const stock = Number(m.querySelector("#invStock").value) || 0;
+    const minimo = Number(m.querySelector("#invMinimo").value) || 0;
+    const unidad = m.querySelector("#invUnidad").value.trim() || "unidad";
+    if (!nombre) { m.err("Escribe el nombre del producto."); return false; }
+    return { nombre, stock_actual: stock, stock_minimo: minimo, unidad };
+  });
   if (!resultado) return;
 
-  // Guardar en Supabase
   const { error } = await sb.from("inventario").insert({
     nombre: resultado.nombre,
     stock_actual: resultado.stock_actual,
     stock_minimo: resultado.stock_minimo,
     unidad: resultado.unidad
   });
-
-  if (error) {
-    alert("No se pudo guardar: " + error.message);
-    return;
-  }
+  if (error) { alert("No se pudo guardar: " + error.message); return; }
 
   toast("Producto añadido");
-  await loadData();           // recarga los datos
-  renderInventarioPg();       // vuelve a pintar la pantalla
+  await loadData();
 }
+
+function renderInventarioPg(){
+  const items = window.inventario || [];
+  const bajos = items.filter(i => Number(i.stock_actual) <= Number(i.stock_minimo));
+
+  let h = '<h1>Inventario</h1><p class="lead">Control de productos y stock de la barbería.</p>';
+  h += '<div class="grid" style="margin-bottom:14px">';
+  h += card("Productos", items.length, "En inventario");
+  h += card("Stock bajo", bajos.length, bajos.length ? "Hay que reponer" : "Todo bien", bajos.length ? "warn" : "ok");
+  h += '</div>';
+
+  if (items.length === 0) {
+    h += '<div class="block">' + empty("Todavía no hay productos. Añade el primero.") + '</div>';
+  } else {
+    h += '<div class="block">' + items.map(item => {
+      const stock = Number(item.stock_actual), min = Number(item.stock_minimo), bajo = stock <= min;
+      return row(esc(item.nombre),
+        (item.unidad || "unidad") + (item.notas ? " · " + esc(item.notas) : ""),
+        stock + (bajo ? " ⚠" : ""), bajo ? "warn" : "ok");
+    }).join("") + '</div>';
+  }
+
   h += '<button class="btn" style="margin-top:14px" id="btnAddProducto">+ Añadir producto</button>';
-  
   $("pg-inventario").innerHTML = h;
 
-// Botón de añadir producto
-const btn = document.getElementById("btnAddProducto");
-if (btn) {
-  btn.onclick = () => abrirFormularioProducto();
+  const b = document.getElementById("btnAddProducto");
+  if (b) b.onclick = () => abrirFormularioProducto();
 }
-
+        
 /* ---------- BLOQUEAR DÍAS ---------- */
 function blockedDays(){
   const map = {}, seen = new Set(), t = todayStr();
