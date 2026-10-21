@@ -1848,7 +1848,12 @@ async function borrarProducto(id) {
 }  
 
 function renderInventarioPg(){
-  const items = window.inventario || [];
+  const items = (window.inventario || []).slice().sort((a, b) => {
+    const aBajo = Number(a.stock_actual) <= Number(a.stock_minimo) ? 0 : 1;
+    const bBajo = Number(b.stock_actual) <= Number(b.stock_minimo) ? 0 : 1;
+    if (aBajo !== bBajo) return aBajo - bBajo;
+    return String(a.nombre).localeCompare(String(b.nombre));
+  });
   const bajos = items.filter(i => Number(i.stock_actual) <= Number(i.stock_minimo));
 
   let h = '<h1>Inventario</h1><p class="lead">Control de productos y stock de la barbería.</p>';
@@ -1869,8 +1874,8 @@ function renderInventarioPg(){
         (item.unidad || "unidad") + (item.notas ? " · " + esc(item.notas) : ""),
         stock + (bajo ? " ⚠" : ""),
         bajo ? "warn" : "ok",
-        '<button class="act" data-inv-minus="'+item.id+'">−1</button>' +
-        '<button class="act" data-inv-plus="'+item.id+'">+1</button>' +
+        '<button class="act" data-inv-minus="'+item.id+'">Se acabó (−1)</button>' +
+        '<button class="act" data-inv-plus="'+item.id+'">Compré (+1)</button>' +
         '<button class="act" data-inv-edit="'+item.id+'">Editar</button>' +
         '<button class="act red" data-inv-del="'+item.id+'">Borrar</button>'
       );
@@ -2342,13 +2347,20 @@ async function gastoSheet(g){
     const nombreGasto = (v.descripcion || "").trim();
     const prod = (window.inventario || []).find(x => norm(x.nombre) === norm(nombreGasto));
     if (prod) {
-      const quiere = await ask(
+      const cantidad = await sheet(
         "Sumar al inventario",
-        "«" + prod.nombre + "» está en tu inventario (stock actual: " + prod.stock_actual + ").\n\nComo acabas de comprarlo, ¿quieres sumarle 1 al stock?",
-        "Sí, sumar 1"
+        '<p class="lead">«' + esc(prod.nombre) + '» está en tu inventario (stock actual: ' + prod.stock_actual + ').</p>' +
+        '<div class="field"><label>¿Cuántas unidades compraste?</label>' +
+        '<input id="invQty" type="number" inputmode="decimal" value="1" min="1"></div>',
+        "Sumar al stock",
+        m => {
+          const n = Number(m.querySelector("#invQty").value) || 0;
+          if (n <= 0) { m.err("Pon un número mayor que 0."); return false; }
+          return { n };
+        }
       );
-      if (quiere) {
-        await cambiarStock(Number(prod.id), +1);
+      if (cantidad) {
+        await cambiarStock(Number(prod.id), cantidad.n);
       }
     }
   }
