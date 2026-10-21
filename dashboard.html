@@ -1825,11 +1825,12 @@ async function cambiarStock(id, delta) {
     return;
   }
 
-  item.stock_actual = nuevo;   // actualiza en memoria
-  renderInventarioPg();
-  toast(delta > 0 ? "Stock +1" : "Stock −1");
+  item.stock_actual = nuevo;
+  if (typeof renderInventarioPg === "function") renderInventarioPg();
+  toast(delta > 0 ? ("Stock +" + delta) : ("Stock " + delta));
 }
-
+window.cambiarStock = cambiarStock;
+  
 async function borrarProducto(id) {
   const item = (window.inventario || []).find(x => Number(x.id) === id);
   if (!item) return;
@@ -2367,7 +2368,7 @@ async function gastoSheet(g){
         }
       );
       if (cantidad && cantidad.n) {
-        await cambiarStock(Number(prod.id), cantidad.n);
+        await window.cambiarStock(Number(prod.id), cantidad.n);
       }
     } else if (nombreGasto && lista.length) {
       toast("Gasto guardado. No encontré «" + nombreGasto + "» en el inventario (el nombre debe parecerse al del producto).", 5000);
@@ -2525,7 +2526,6 @@ const NAV = {
       ["inventario", "Inventario"],
       ["ajustes", "Ajustes"],
       ["metas", "Metas"],
-      ["compras", "Compras"],
       ["bloqueos", "Bloquear días"],
       ["respaldo", "Respaldo"],
       ["salir", "Salir"]
