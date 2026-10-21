@@ -2341,27 +2341,36 @@ async function gastoSheet(g){
   else{const r=await sb.from("gastos").insert(rowv).select("id");if(r.error){alert("No se pudo guardar: "+r.error.message);return;}id=r.data&&r.data[0]&&r.data[0].id;}
   if(id!=null){if(v.bolsa==="barberia")delete CART.bolsaG[id];else CART.bolsaG[id]=v.bolsa;await guardarCart();}
   else if(v.bolsa!=="barberia")alert("El gasto se guardó, pero no pude fijar de qué bolsa sale. Edítalo y vuelve a elegirla.");
-  // Si es un producto del inventario, preguntar si descontar stock
-  // Si es un producto del inventario, preguntar si sumar stock (porque compraste)
-  if (!g) {   // solo en gastos nuevos
+  // Si es un producto del inventario, preguntar cuántas unidades sumar
+  if (!g) {
     const nombreGasto = (v.descripcion || "").trim();
-    const prod = (window.inventario || []).find(x => norm(x.nombre) === norm(nombreGasto));
+    const lista = window.inventario || [];
+    const nGasto = norm(nombreGasto);
+
+    // 1) coincidencia exacta  2) el nombre del producto está dentro del texto del gasto
+    let prod = lista.find(x => norm(x.nombre) === nGasto);
+    if (!prod && nGasto) {
+      prod = lista.find(x => nGasto.indexOf(norm(x.nombre)) >= 0 || norm(x.nombre).indexOf(nGasto) >= 0);
+    }
+
     if (prod) {
-      const cantidad = await sheet(
+      const cantidad = await mSheet(
         "Sumar al inventario",
         '<p class="lead">«' + esc(prod.nombre) + '» está en tu inventario (stock actual: ' + prod.stock_actual + ').</p>' +
         '<div class="field"><label>¿Cuántas unidades compraste?</label>' +
         '<input id="invQty" type="number" inputmode="decimal" value="1" min="1"></div>',
         "Sumar al stock",
         m => {
-          const n = Number(m.querySelector("#invQty").value) || 0;
-          if (n <= 0) { m.err("Pon un número mayor que 0."); return false; }
+          const n = Number(q(m, "#invQty").value) || 0;
+          if (n <= 0) return "Pon un número mayor que 0.";
           return { n };
         }
       );
-      if (cantidad) {
+      if (cantidad && cantidad.n) {
         await cambiarStock(Number(prod.id), cantidad.n);
       }
+    } else if (nombreGasto && lista.length) {
+      toast("Gasto guardado. No encontré «" + nombreGasto + "» en el inventario (el nombre debe parecerse al del producto).", 5000);
     }
   }
 
