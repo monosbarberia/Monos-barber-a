@@ -549,29 +549,59 @@ function weeksBlock(){
   return block("Mejor y peor semana", body, "Lunes a sábado, con propinas. Las semanas terminadas se comparan entre sí.");
 }
 function savingsBlock(){
-  const t = todayStr(), f = monthFin(t.slice(0,7)), d = dayFin(t), fondo = fundTotal(), hasS = SAVE_GOAL > 0;
+  const p = getPeriod();
+  const t = todayStr();
+  const f = monthFin(t.slice(0,7));
+  const d = dayFin(t);
+  const fondo = fundTotal();
+  const hasS = SAVE_GOAL > 0;
   const n1 = v => String(Math.round(v*10)/10);
-  const rB = f.doneB ? 0 : PCT_BARBER, rS = (hasS && f.doneS) ? 0 : SAVE_PCT;
-  const ah = (100 - rB) * rS / 100, tuyo = 100 - rB - ah;
-  let body = '<div class="note" style="margin:0 0 6px"><b>Por cada $100 que entran ahora: <span style="color:var(--bad)">$'+n1(rB)+' a la barbería</span>, <span style="color:var(--save)">$'+n1(ah)+' a ahorro</span> y <span style="color:var(--ok)">$'+n1(tuyo)+' son para ti</span>.</b></div>';
+  const rB = f.doneB ? 0 : PCT_BARBER;
+  const rS = (hasS && f.doneS) ? 0 : SAVE_PCT;
+  const ah = (100 - rB) * rS / 100;
+  const tuyo = 100 - rB - ah;
+
+  // Totales del período elegido
+  const list = reservas.filter(r => r.status === "cobrada" && r.fecha >= p.start && r.fecha <= p.end);
+  const ingPeriodo = list.reduce((s,r) => s + r.charged + r.tip, 0);
+  const gPeriodo = sumGastos(gastos.filter(g => String(g.fecha) >= p.start && String(g.fecha) <= p.end));
+
+  // Reparto del período (sumando día a día)
+  let resPeriodo = 0, ahPeriodo = 0, librePeriodo = 0;
+  const byDay = {};
+  list.forEach(r => { byDay[r.fecha] = (byDay[r.fecha] || 0) + r.charged + r.tip; });
+  Object.keys(byDay).sort().forEach(day => {
+    const df = dayFin(day);
+    resPeriodo += df.reserve;
+    ahPeriodo += df.ahorro;
+    librePeriodo += df.libre;
+  });
+
+  let body = '<div class="note" style="margin:0 0 6px"><b>Por cada $100 que entran ahora: <span style="color:var(--bad)">\( '+n1(rB)+' a la barbería</span>, <span style="color:var(--save)"> \)'+n1(ah)+' a ahorro</span> y <span style="color:var(--ok)">$'+n1(tuyo)+' son para ti</span>.</b></div>';
+
   if(f.doneB) body += '<div class="note" style="color:var(--ok)">✔ Los gastos de la barbería ya se cubrieron'+(f.doneBDay ? " (el "+niceDate(f.doneBDay)+")" : "")+': este mes ya no se separa más para ella.</div>';
   if(hasS && f.doneS) body += '<div class="note" style="color:var(--ok)">✔ La meta de ahorro del mes ya se cumplió'+(f.doneSDay ? " (el "+niceDate(f.doneSDay)+")" : "")+': este mes ya no se separa más ahorro.</div>';
-  body += '<div class="subTitle">De lo que entró hoy</div>' +
-    row("Entró hoy","cobrado + propinas",money(d.ing),"ok") +
-    row("Para la barbería","gastos e insumos",money(d.reserve),"bad") +
-    row("Ahorro ("+SAVE_PCT+"%)","no lo toques",money(d.ahorro),"save") +
-    row("Para ti hoy","puedes retirarlo",money(d.libre),"ok");
-  body += '<div class="sep"></div><div class="subTitle">Acumulado del mes</div>' +
+
+  body += '<div class="subTitle">En este período ('+esc(p.label)+')</div>' +
+    row("Entró","cobrado + propinas",money(ingPeriodo),"ok") +
+    row("Para la barbería","gastos e insumos",money(resPeriodo),"bad") +
+    row("Ahorro","no lo toques",money(ahPeriodo),"save") +
+    row("Para ti","puedes retirarlo",money(librePeriodo),"ok") +
+    row("Gastos del período","lo que anotaste",money(gPeriodo),"bad");
+
+  body += '<div class="sep"></div><div class="subTitle">Acumulado del mes (siempre)</div>' +
     row("Ingresos del mes","cobrado + propinas",money(f.ing),"ok") +
     row("Apartado este mes para la barbería","meta del mes "+money(BARBER_BUDGET),money(f.reserve),"bad") +
     row("Gastado (registrado)","lo que anotaste en Gastos",money(f.gReg),"bad") +
     row("En la barbería (ahora)","lo apartado menos lo gastado",money(fondo),"bad") +
     row("Ahorro del mes",hasS ? "meta "+money(SAVE_GOAL) : "sin tope",money(f.ahorro),"save") +
     row("Para ti este mes","ya sin barbería ni ahorro",money(f.libre),"ok");
+
   if(f.deficit>0) body += '<div class="note" style="margin-top:8px;color:var(--bad)">Gastaste '+money(f.deficit)+' más de lo reservado este mes; ya se descontó de tu retiro.</div>';
-  body += '<div class="note" style="margin-top:8px">Cada día el reparto se redondea a múltiplos de '+money(ROUND_STEP)+' para que puedas separarlo en billetes. Registra la renta y demás gastos fijos en Gastos para que el fondo sea real.</div>';
+  body += '<div class="note" style="margin-top:8px">Cada día el reparto se redondea a múltiplos de '+money(ROUND_STEP)+'. El bloque de arriba cambia según Hoy / Semana / Mes / Todo.</div>';
+
   return block("Ahorro y retiro", body,
-    "Cada día: el "+PCT_BARBER+"% de lo que cobras (con propinas) va a la barbería hasta completar "+money(BARBER_BUDGET)+" en el mes; cuando se completa, deja de separarse. Del resto del día se aparta el "+SAVE_PCT+"% para ahorro hasta llegar a la meta de "+(hasS ? money(SAVE_GOAL) : "ahorro (sin tope)")+" (si la barbería ya está cubierta, ese "+SAVE_PCT+"% se calcula sobre todo el día). Lo demás es tuyo desde el primer día. Todo se redondea a múltiplos de "+money(ROUND_STEP)+" (cámbialo en Ajustes). Lo que retires hoy y lo acumulado del mes se calculan por separado: no se descuentan los retiros que ya hiciste.");
+    "La parte de arriba sigue el filtro de período. La de abajo siempre muestra el mes en curso y el fondo acumulado.");
 }
 function productsBlock(){
   const adv = purchaseAdvice();
@@ -1682,37 +1712,71 @@ function renderComprasPg(){
     '<button class="btn" style="margin-top:12px" onclick="openExpense()">Anotar una compra</button>';
   $("pg-compras").innerHTML = h;
 }
-async function abrirFormularioProducto() {
+async function abrirFormularioProducto(item) {
+  const esEdicion = !!item;
   const html = `
-    <div class="field"><label>Nombre del producto</label>
-      <input id="invNombre" type="text" placeholder="Ej. Colonia, Cuchillas, Talco..."></div>
-    <div class="field"><label>Stock actual</label>
-      <input id="invStock" type="number" inputmode="decimal" value="0"></div>
-    <div class="field"><label>Stock mínimo (aviso cuando baje de este número)</label>
-      <input id="invMinimo" type="number" inputmode="decimal" value="2"></div>
-    <div class="field"><label>Unidad (opcional)</label>
-      <input id="invUnidad" type="text" placeholder="unidad, botella, caja..." value="unidad"></div>`;
+    <div class="field">
+      <label>Nombre del producto</label>
+      <input id="invNombre" type="text" placeholder="Ej. Colonia, Cuchillas, Talco..." value="${esc(item ? item.nombre : '')}">
+    </div>
+    <div class="field">
+      <label>Stock actual</label>
+      <input id="invStock" type="number" inputmode="decimal" value="${item ? Number(item.stock_actual) : 0}">
+    </div>
+    <div class="field">
+      <label>Stock mínimo (aviso cuando baje de este número)</label>
+      <input id="invMinimo" type="number" inputmode="decimal" value="${item ? Number(item.stock_minimo) : 2}">
+    </div>
+    <div class="field">
+      <label>Unidad (opcional)</label>
+      <input id="invUnidad" type="text" placeholder="unidad, botella, caja..." value="${esc(item ? (item.unidad || 'unidad') : 'unidad')}">
+    </div>
+  `;
 
-  const resultado = await sheet("Añadir producto", html, "Guardar producto", (m) => {
-    const nombre = m.querySelector("#invNombre").value.trim();
-    const stock = Number(m.querySelector("#invStock").value) || 0;
-    const minimo = Number(m.querySelector("#invMinimo").value) || 0;
-    const unidad = m.querySelector("#invUnidad").value.trim() || "unidad";
-    if (!nombre) { m.err("Escribe el nombre del producto."); return false; }
-    return { nombre, stock_actual: stock, stock_minimo: minimo, unidad };
-  });
+  const resultado = await sheet(
+    esEdicion ? "Editar producto" : "Añadir producto",
+    html,
+    "Guardar",
+    (m) => {
+      const nombre = m.querySelector("#invNombre").value.trim();
+      const stock = Number(m.querySelector("#invStock").value) || 0;
+      const minimo = Number(m.querySelector("#invMinimo").value) || 0;
+      const unidad = m.querySelector("#invUnidad").value.trim() || "unidad";
+      if (!nombre) {
+        m.err("Escribe el nombre del producto.");
+        return false;
+      }
+      return { nombre, stock_actual: stock, stock_minimo: minimo, unidad };
+    }
+  );
+
   if (!resultado) return;
 
-  const { error } = await sb.from("inventario").insert({
-    nombre: resultado.nombre,
-    stock_actual: resultado.stock_actual,
-    stock_minimo: resultado.stock_minimo,
-    unidad: resultado.unidad
-  });
-  if (error) { alert("No se pudo guardar: " + error.message); return; }
+  let error;
+  if (esEdicion) {
+    ({ error } = await sb.from("inventario").update({
+      nombre: resultado.nombre,
+      stock_actual: resultado.stock_actual,
+      stock_minimo: resultado.stock_minimo,
+      unidad: resultado.unidad
+    }).eq("id", item.id));
+  } else {
+    ({ error } = await sb.from("inventario").insert({
+      nombre: resultado.nombre,
+      stock_actual: resultado.stock_actual,
+      stock_minimo: resultado.stock_minimo,
+      unidad: resultado.unidad
+    }));
+  }
 
-  toast("Producto añadido");
+  if (error) {
+    alert("No se pudo guardar: " + error.message);
+    return;
+  }
+
+  toast(esEdicion ? "Producto actualizado" : "Producto añadido");
   await loadData();
+  renderInventarioPg();
 }
 
 function renderInventarioPg(){
@@ -1729,10 +1793,16 @@ function renderInventarioPg(){
     h += '<div class="block">' + empty("Todavía no hay productos. Añade el primero.") + '</div>';
   } else {
     h += '<div class="block">' + items.map(item => {
-      const stock = Number(item.stock_actual), min = Number(item.stock_minimo), bajo = stock <= min;
-      return row(esc(item.nombre),
+      const stock = Number(item.stock_actual);
+      const min = Number(item.stock_minimo);
+      const bajo = stock <= min;
+      return row(
+        esc(item.nombre),
         (item.unidad || "unidad") + (item.notas ? " · " + esc(item.notas) : ""),
-        stock + (bajo ? " ⚠" : ""), bajo ? "warn" : "ok");
+        stock + (bajo ? " ⚠" : ""),
+        bajo ? "warn" : "ok",
+        '<button class="act" data-inv-edit="'+item.id+'">Editar</button>'
+      );
     }).join("") + '</div>';
   }
 
@@ -1741,7 +1811,16 @@ function renderInventarioPg(){
 
   const b = document.getElementById("btnAddProducto");
   if (b) b.onclick = () => abrirFormularioProducto();
-}  
+
+  // Botones de editar
+  $("pg-inventario").querySelectorAll("[data-inv-edit]").forEach(btn => {
+    btn.onclick = () => {
+      const id = Number(btn.dataset.invEdit);
+      const item = (window.inventario || []).find(x => Number(x.id) === id);
+      if (item) abrirFormularioProducto(item);
+    };
+  });
+}
 /* ---------- BLOQUEAR DÍAS ---------- */
 function blockedDays(){
   const map = {}, seen = new Set(), t = todayStr();
