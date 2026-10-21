@@ -342,6 +342,27 @@ function purchaseAdvice(){
     }
     const lead = Math.max(3, Math.round(it.cycle*0.2)), early = lead + 7, left = it.left, can = fondo >= it.cost;
     const info = "Lo compras cada ~"+it.cycle+" días · "+money(it.cost)+". ";
+    // Si hay stock en inventario, úsalo para afinar el consejo
+    const inv = (window.inventario || []).find(x => norm(x.nombre) === norm(it.name));
+    if (inv) {
+      const stock = Number(inv.stock_actual);
+      const min = Number(inv.stock_minimo);
+      if (stock <= min) {
+        a.level = can ? "buy" : "urgent";
+        a.short = stock <= 0 ? "Sin stock" : "Stock bajo";
+        a.detail = info + "En inventario te quedan " + stock + " (mínimo " + min + "). " +
+          (can ? "El fondo alcanza: conviene reponer." : "El fondo aún no alcanza del todo.");
+        if (can) fondo -= it.cost;
+        return a;
+      }
+      // Si hay stock de sobra, no urge aunque el ciclo diga que "ya toca"
+      if (stock > min + 1 && left !== null && left <= lead) {
+        a.level = "ok";
+        a.short = "Hay stock";
+        a.detail = info + "Te quedan " + stock + " en inventario. Aunque el ciclo diga que ya toca, aún no urge.";
+        return a;
+      }
+    }
     if(left > early){
       a.short = "Aún no toca"; a.detail = info + "Te dura unos "+left+" días (≈ "+shortDate(addDays(t,left))+").";
     }else if(left <= lead){
@@ -1080,6 +1101,18 @@ aprender(x => { const {m, P, FIN} = x;
   let t = "Para cubrir la barbería del mes te faltan "+money(falta)+" (hay que cobrar unos "+money(need)+(n ? ", cerca de "+n+" clientes" : "")+").";
   t += P.eqDay ? " Al ritmo actual lo logras el día "+P.eqDay+"." : " Al ritmo actual no llegarías este mes: toca más clientes o más ticket.";
   return [{p:P.eqDay ? 5 : 9, tone:P.eqDay ? "" : "bad", t}]; });
+aprender(x => {
+  const items = window.inventario || [];
+  const bajos = items.filter(i => Number(i.stock_actual) <= Number(i.stock_minimo));
+  if (!bajos.length) return [];
+  return bajos.slice(0, 3).map(i => ({
+    p: 8,
+    tone: Number(i.stock_actual) <= 0 ? "bad" : "warn",
+    t: (Number(i.stock_actual) <= 0 ? "Sin stock: " : "Stock bajo: ") +
+       i.nombre + " (" + i.stock_actual + " " + (i.unidad || "ud") +
+       ", mínimo " + i.stock_minimo + "). Revisa Inventario o anota la compra."
+  }));
+});
 aprender(x => purchaseAdvice().filter(a => a.level === "buy" || a.level === "urgent").map(a => ({p:8, tone:"bad",
   t:a.level === "urgent" ? a.name+" ya te tocaba y el fondo no alcanza: cómpralo con los próximos cobros." : "Es hora de abastecer "+a.name+": el fondo lo cubre."})));
 aprender(x => { const n = x.CY.risk.length;
@@ -2304,17 +2337,18 @@ async function gastoSheet(g){
   if(id!=null){if(v.bolsa==="barberia")delete CART.bolsaG[id];else CART.bolsaG[id]=v.bolsa;await guardarCart();}
   else if(v.bolsa!=="barberia")alert("El gasto se guardó, pero no pude fijar de qué bolsa sale. Edítalo y vuelve a elegirla.");
   // Si es un producto del inventario, preguntar si descontar stock
+  // Si es un producto del inventario, preguntar si sumar stock (porque compraste)
   if (!g) {   // solo en gastos nuevos
     const nombreGasto = (v.descripcion || "").trim();
     const prod = (window.inventario || []).find(x => norm(x.nombre) === norm(nombreGasto));
     if (prod) {
       const quiere = await ask(
-        "Descontar del inventario",
-        "«" + prod.nombre + "» está en tu inventario (stock: " + prod.stock_actual + "). ¿Quieres restarle 1?",
-        "Sí, restar 1"
+        "Sumar al inventario",
+        "«" + prod.nombre + "» está en tu inventario (stock actual: " + prod.stock_actual + ").\n\nComo acabas de comprarlo, ¿quieres sumarle 1 al stock?",
+        "Sí, sumar 1"
       );
       if (quiere) {
-        await cambiarStock(Number(prod.id), -1);
+        await cambiarStock(Number(prod.id), +1);
       }
     }
   }
