@@ -1778,6 +1778,41 @@ async function abrirFormularioProducto(item) {
   await loadData();
   renderInventarioPg();
 }
+async function cambiarStock(id, delta) {
+  const item = (window.inventario || []).find(x => Number(x.id) === id);
+  if (!item) return;
+
+  const nuevo = Math.max(0, Number(item.stock_actual) + delta);
+  const { error } = await sb.from("inventario")
+    .update({ stock_actual: nuevo })
+    .eq("id", id);
+
+  if (error) {
+    alert("No se pudo actualizar: " + error.message);
+    return;
+  }
+
+  item.stock_actual = nuevo;   // actualiza en memoria
+  renderInventarioPg();
+  toast(delta > 0 ? "Stock +1" : "Stock −1");
+}
+
+async function borrarProducto(id) {
+  const item = (window.inventario || []).find(x => Number(x.id) === id);
+  if (!item) return;
+
+  if (!(await ask("Borrar producto", "¿Seguro que quieres borrar «" + item.nombre + "» del inventario?", "Borrar"))) return;
+
+  const { error } = await sb.from("inventario").delete().eq("id", id);
+  if (error) {
+    alert("No se pudo borrar: " + error.message);
+    return;
+  }
+
+  toast("Producto borrado");
+  await loadData();
+  renderInventarioPg();
+}  
 
 function renderInventarioPg(){
   const items = window.inventario || [];
@@ -1801,7 +1836,10 @@ function renderInventarioPg(){
         (item.unidad || "unidad") + (item.notas ? " · " + esc(item.notas) : ""),
         stock + (bajo ? " ⚠" : ""),
         bajo ? "warn" : "ok",
-        '<button class="act" data-inv-edit="'+item.id+'">Editar</button>'
+        '<button class="act" data-inv-minus="'+item.id+'">−1</button>' +
+        '<button class="act" data-inv-plus="'+item.id+'">+1</button>' +
+        '<button class="act" data-inv-edit="'+item.id+'">Editar</button>' +
+        '<button class="act red" data-inv-del="'+item.id+'">Borrar</button>'
       );
     }).join("") + '</div>';
   }
@@ -1809,16 +1847,27 @@ function renderInventarioPg(){
   h += '<button class="btn" style="margin-top:14px" id="btnAddProducto">+ Añadir producto</button>';
   $("pg-inventario").innerHTML = h;
 
-  const b = document.getElementById("btnAddProducto");
-  if (b) b.onclick = () => abrirFormularioProducto();
+  const btnAdd = document.getElementById("btnAddProducto");
+  if (btnAdd) btnAdd.onclick = () => abrirFormularioProducto();
 
-  // Botones de editar
+  // +1
+  $("pg-inventario").querySelectorAll("[data-inv-plus]").forEach(btn => {
+    btn.onclick = () => cambiarStock(Number(btn.dataset.invPlus), +1);
+  });
+  // −1
+  $("pg-inventario").querySelectorAll("[data-inv-minus]").forEach(btn => {
+    btn.onclick = () => cambiarStock(Number(btn.dataset.invMinus), -1);
+  });
+  // Editar
   $("pg-inventario").querySelectorAll("[data-inv-edit]").forEach(btn => {
     btn.onclick = () => {
-      const id = Number(btn.dataset.invEdit);
-      const item = (window.inventario || []).find(x => Number(x.id) === id);
+      const item = (window.inventario || []).find(x => Number(x.id) === Number(btn.dataset.invEdit));
       if (item) abrirFormularioProducto(item);
     };
+  });
+  // Borrar
+  $("pg-inventario").querySelectorAll("[data-inv-del]").forEach(btn => {
+    btn.onclick = () => borrarProducto(Number(btn.dataset.invDel));
   });
 }
 /* ---------- BLOQUEAR DÍAS ---------- */
@@ -2254,7 +2303,24 @@ async function gastoSheet(g){
   else{const r=await sb.from("gastos").insert(rowv).select("id");if(r.error){alert("No se pudo guardar: "+r.error.message);return;}id=r.data&&r.data[0]&&r.data[0].id;}
   if(id!=null){if(v.bolsa==="barberia")delete CART.bolsaG[id];else CART.bolsaG[id]=v.bolsa;await guardarCart();}
   else if(v.bolsa!=="barberia")alert("El gasto se guardó, pero no pude fijar de qué bolsa sale. Edítalo y vuelve a elegirla.");
-  toast(g?"Gasto actualizado":"Gasto guardado");await loadData();
+  // Si es un producto del inventario, preguntar si descontar stock
+  if (!g) {   // solo en gastos nuevos
+    const nombreGasto = (v.descripcion || "").trim();
+    const prod = (window.inventario || []).find(x => norm(x.nombre) === norm(nombreGasto));
+    if (prod) {
+      const quiere = await ask(
+        "Descontar del inventario",
+        "«" + prod.nombre + "» está en tu inventario (stock: " + prod.stock_actual + "). ¿Quieres restarle 1?",
+        "Sí, restar 1"
+      );
+      if (quiere) {
+        await cambiarStock(Number(prod.id), -1);
+      }
+    }
+  }
+
+  toast(g ? "Gasto actualizado" : "Gasto guardado");
+  await loadData();
 }
 async function borrarGasto(id){
   if(!(await ask("Borrar gasto","¿Seguro que quieres borrar este gasto?","Borrar")))return;
