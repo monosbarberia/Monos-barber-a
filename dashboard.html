@@ -1909,19 +1909,35 @@ function renderInventarioPg(){
     btn.onclick = () => borrarProducto(Number(btn.dataset.invDel));
   });
 }
-/* ---------- BLOQUEAR DÍAS ---------- */
+/* ---------- BLOQUEAR DÍAS Y HORAS ---------- */
 function blockedDays(){
   const map = {}, seen = new Set(), t = todayStr();
-  BLK.concat(bloqueos.filter(b => b.fecha >= t)).forEach(b => { if(seen.has(b.id)) return; seen.add(b.id); (map[b.fecha] = map[b.fecha] || []).push(b.id); });
-  return Object.keys(map).sort().map(f => ({fecha:f, ids:map[f]}));
+  BLK.concat(bloqueos.filter(b => b.fecha >= t)).forEach(b => {
+    if(seen.has(b.id)) return; seen.add(b.id);
+    const d = map[b.fecha] = map[b.fecha] || {fecha:b.fecha, ids:[], slots:[]};
+    d.ids.push(b.id); d.slots.push({id:b.id, turno:b.turno});
+  });
+  Object.keys(map).forEach(f => map[f].slots.sort((a,b) => (slotMin(a.turno)||0) - (slotMin(b.turno)||0)));
+  return Object.keys(map).sort().map(f => map[f]);
 }
 function renderBloqueosPg(force){
   if(DIRTY["pg-bloqueos"] && !force) return;
   const t = todayStr(), days = blockedDays();
-  let h = '<h1>Bloquear días</h1><p class="lead">Para vacaciones, enfermedad o un día libre: cierra los turnos en la web sin ocuparlos uno por uno.</p>';
-  h += '<div class="block">'+fld("blkFrom","Desde","date",t)+fld("blkTo","Hasta","date",t)+'<button class="btn" data-blk="go">Bloquear</button>'+
-    '<div class="note">No se bloquean los domingos. Los clientes que ya reservaron en esos días no se tocan.</div></div>';
-  h += block("Días bloqueados", days.length ? days.map(d => row(DAYS[parseD(d.fecha).getDay()]+" "+niceDate(d.fecha), d.ids.length+" turno(s) cerrados", "", "", '<button class="act red" data-unblk="'+d.fecha+'">Liberar día</button>')).join("") : empty("No hay días bloqueados."));
+  let h = '<h1>Bloquear días</h1><p class="lead">Cierra días completos o solo algunas horas, para que no salgan disponibles en la web.</p>';
+  h += block("Días completos",
+    fld("blkFrom","Desde","date",t)+fld("blkTo","Hasta","date",t)+'<button class="btn" data-blk="go">Bloquear días</button>'+
+    '<div class="note">No se bloquean los domingos. Las reservas que ya existen no se tocan.</div>');
+  h += block("Solo algunas horas",
+    fld("blkDay","Día","date",t)+
+    '<div class="subTitle">Marca las horas a cerrar</div>'+
+    '<div class="acts">'+SLOTS.map(s => '<label class="act"><input type="checkbox" class="blkS" value="'+s+'" style="margin-right:6px">'+s+'</label>').join("")+'</div>'+
+    '<div class="acts" style="margin:10px 0"><button class="act" data-blks="rest">Marcar hasta el cierre</button></div>'+
+    '<button class="btn" data-blks="go">Bloquear horas</button>'+
+    '<div class="note">Para terminar antes: marca la primera hora que ya no atiendes y toca «Marcar hasta el cierre».</div>');
+  h += block("Bloqueos actuales", days.length ? days.map(d => row(DAYS[parseD(d.fecha).getDay()]+" "+niceDate(d.fecha), d.ids.length+" turno(s) cerrados", "", "",
+    d.slots.map(s => '<button class="act" data-unslot="'+s.id+'">'+esc(s.turno)+' ✕</button>').join("")+
+    '<button class="act red" data-unblk="'+d.fecha+'">Liberar día</button>')).join("") : empty("No hay bloqueos."),
+    "Toca una hora para liberarla sola, o «Liberar día» para abrirlas todas.");
   $("pg-bloqueos").innerHTML = h;
 }
 async function bloquearDias(){
@@ -1939,6 +1955,35 @@ async function bloquearDias(){
   }
   DIRTY["pg-bloqueos"] = false; toast("Días bloqueados"); await loadData();
 }
+function marcarResto(){
+  const cbs = Array.prototype.slice.call(document.querySelectorAll("#pg-bloqueos .blkS"));
+  const i = cbs.findIndex(c => c.checked);
+  if(i < 0){ toast("Marca primero la hora desde la que cierras."); return; }
+  cbs.forEach((c, j) => { if(j >= i) c.checked = true; });
+  DIRTY["pg-bloqueos"] = true;
+}
+async function bloquearHoras(){
+  const day = $("blkDay").value, t = todayStr();
+  const sel = Array.prototype.map.call(document.querySelectorAll("#pg-bloqueos .blkS:checked"), x => x.value);
+  if(!day || day < t){ toast("Elige un día desde hoy en adelante."); return; }
+  if(parseD(day).getDay() === 0){ toast("Los domingos no hay turnos."); return; }
+  if(!sel.length){ toast("Marca al menos una hora."); return; }
+  const ocupadas = sel.filter(s => reservas.some(r => r.fecha === day && r.rows.some(x => x.turno === s)));
+  const libres = sel.filter(s => ocupadas.indexOf(s) < 0);
+  if(!libres.length){ toast("Esas horas ya tienen clientes reservados."); return; }
+  const msg = "Se cerrarán "+libres.length+" hora(s) del "+niceDate(day)+": "+libres.join(", ")+"."+
+    (ocupadas.length ? " No se tocan las que ya tienen cliente: "+ocupadas.join(", ")+"." : "");
+  if(!(await ask("Bloquear horas", msg, "Bloquear"))) return;
+  const rows = libres.map(s => ({fecha:day, turno:s, estado:"ocupado", nombre:"Bloqueado", notificado:true}));
+  const {error} = await sb.from("turnos").upsert(rows, {onConflict:"fecha,turno", ignoreDuplicates:true});
+  if(error){ alert("No se pudo bloquear: "+error.message+"\n\nSi dice 'policy', corre el SQL que te dejé en el chat."); return; }
+  DIRTY["pg-bloqueos"] = false; toast("Horas bloqueadas"); await loadData();
+}
+async function liberarHora(id){
+  const {data, error} = await sb.from("turnos").delete().eq("id", id).select("id");
+  if(error || !data || !data.length){ alert("No se pudo liberar la hora."+(error ? " "+error.message : " Falta el permiso de borrar en Supabase.")); return; }
+  toast("Hora liberada"); await loadData();
+}
 async function liberarDia(f){
   const d = blockedDays().find(x => x.fecha === f); if(!d) return;
   if(!(await ask("Liberar día", "Se abrirán los turnos bloqueados del "+niceDate(f)+" en la web.", "Liberar"))) return;
@@ -1946,6 +1991,7 @@ async function liberarDia(f){
   if(error){ alert("No se pudo liberar: "+error.message+"\n\nFalta el permiso de borrar: corre el SQL que te dejé en el chat."); return; }
   toast("Día liberado"); await loadData();
 }
+
 
 /* ---------- AJUSTES y MENSAJES ---------- */
 function renderAjustes(){
@@ -2140,6 +2186,9 @@ document.addEventListener("click", async e => {
   b = t.closest("[data-pa]"); if(b){ if(b.dataset.pa === "apply") await aplicarPreciosSql(); else if(await guardarPrecios()){ renderPrecios(true); toast("Precios guardados: la web y los atajos ya los usan", 5000); } return; }
   b = t.closest("[data-blk]"); if(b){ await bloquearDias(); return; }
   b = t.closest("[data-unblk]"); if(b){ await liberarDia(b.dataset.unblk); return; }
+  b = t.closest("[data-blks]"); if(b){ if(b.dataset.blks === "rest") marcarResto(); else await bloquearHoras(); return; }
+  b = t.closest("[data-unslot]"); if(b){ await liberarHora(b.dataset.unslot); return; }
+
   b = t.closest("[data-aj]"); if(b){
     if(b.dataset.aj === "save") await guardarAjustes();
     else{
