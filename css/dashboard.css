@@ -813,3 +813,24 @@ a.act {
     font-size: 26px;
   }
 }
+.field{ min-width:0; }
+
+input[type="date"],
+input[type="month"]{
+  -webkit-appearance:none;
+  appearance:none;
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  min-height:48px;
+  text-align:left;
+}
+
+input[type="date"]::-webkit-date-and-time-value,
+input[type="month"]::-webkit-date-and-time-value{
+  text-align:left;
+  margin:0;
+  min-width:0;
+}
