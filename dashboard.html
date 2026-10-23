@@ -487,7 +487,21 @@ function renderResumen(){
   if(alerts.length) h += block("Aviso de compras", alerts.map(a => row(esc(a.name), esc(a.detail), esc(a.short), LEVEL_CLS[a.level])).join(""),
     "Calculado con tus compras anteriores, el fondo de la barbería y cómo va la semana.");
 
+// Proyección de hoy según turnos agendados
+  const tHoy = todayStr();
+  const hoyList = reservas.filter(r => r.fecha === tHoy && r.status !== "noshow");
+  let proyHoy = 0, cobHoy = 0, nHoy = hoyList.length;
+  hoyList.forEach(r => {
+    if (r.status === "cobrada") {
+      cobHoy += r.charged + r.tip;
+      proyHoy += r.charged + r.tip;
+    } else {
+      proyHoy += (r.total || r.expected || 0);
+    }
+  });
+
   h += '<div class="grid" style="margin-top:12px">' +
+    card("Proyección de hoy", money(proyHoy), nHoy ? (nHoy + " turno(s) · ya cobrado " + money(cobHoy)) : "Sin turnos agendados hoy", "ok") +
     card("Ganancia neta", money(profit), "Cobrado + propinas − gastos ("+money(g)+")", "ok") +
     card("Clientes atendidos", s.cobradas.length, "Solo los cobrados") +
     card("Ticket promedio", money(s.ticket), "Por cliente cobrado", "ok") +
@@ -538,11 +552,16 @@ function goalHtml(){
   let body;
   if(!g) body = empty("No has configurado una meta para este mes.");
   else{
-    const f = monthFin(month), rev = f.ing, profit = rev - f.gReg;
+    const f = monthFin(month), rev = f.ing;
+    // "Para ti" = lo que queda tras barbería, ahorro y déficits (no el total ingresado)
+    const paraMi = f.libre;
     const gr = num(g.objetivo_ingresos), gp = num(g.objetivo_ganancia);
-    const pr = gr>0 ? Math.min(100,rev/gr*100) : 0, pp = gp>0 ? Math.min(100,profit/gp*100) : 0;
+    const pr = gr>0 ? Math.min(100,rev/gr*100) : 0;
+    const pp = gp>0 ? Math.min(100,paraMi/gp*100) : 0;
     const line = (t,a,b,pc) => '<div class="row"><div class="rowTop"><div><div class="rowTitle">'+t+'</div><div class="rowSub">'+money(a)+' de '+money(b)+(b>a?' · faltan '+money(b-a):' · ¡meta lograda!')+'</div></div><div class="rowVal ok">'+pct(pc)+'</div></div><div class="bar"><i style="width:'+pc+'%"></i></div></div>';
-    body = line("Dinero cobrado",rev,gr,pr) + line("Ganancia neta",profit,gp,pp);
+    body = line("Dinero cobrado",rev,gr,pr) +
+           line("Ganancia neta (para ti)",paraMi,gp,pp) +
+           '<div class="note" style="margin-top:6px">La ganancia neta ya descuenta lo apartado a la barbería y al ahorro. Es lo que realmente es tuyo este mes.</div>';
   }
   return body + '<button class="btnGhost" onclick="openGoal()">'+(g?"Cambiar meta":"Configurar meta")+'</button>';
 }
@@ -1830,6 +1849,74 @@ async function cambiarStock(id, delta) {
   toast(delta > 0 ? ("Stock +" + delta) : ("Stock " + delta));
 }
 window.cambiarStock = cambiarStock;
+  async function comprarProducto(item) {
+  if (!item) return;
+
+  const html =
+    '<p class="lead">Vas a registrar la compra de «' + esc(item.nombre) + '» y sumarla al stock.</p>' +
+    '<div class="field"><label>Fecha</label><input id="cpFecha" type="date" value="' + todayStr() + '"></div>' +
+    '<div class="field"><label>¿Cuántas unidades compraste?</label><input id="cpQty" type="number" inputmode="decimal" value="1" min="1"></div>' +
+    '<div class="field"><label>Monto total pagado</label><input id="cpMonto" type="number" inputmode="decimal" placeholder="Ej. 350"></div>' +
+    '<div class="field"><label>¿De dónde sale el dinero?</label><select id="cpBolsa">' +
+      '<option value="barberia" selected>Barbería</option>' +
+      '<option value="ahorro">Ahorro</option>' +
+      '<option value="mio">Para ti</option>' +
+    '</select></div>';
+
+  const v = await sheet(
+    "Registrar compra",
+    html,
+    "Guardar compra",
+    m => {
+      const fecha = m.querySelector("#cpFecha").value;
+      const qty = Number(m.querySelector("#cpQty").value) || 0;
+      const monto = num(m.querySelector("#cpMonto").value);
+      const bolsa = m.querySelector("#cpBolsa").value;
+      if (!fecha) { m.err("Elige la fecha."); return false; }
+      if (qty <= 0) { m.err("Pon al menos 1 unidad."); return false; }
+      if (monto <= 0) { m.err("Escribe el monto que pagaste."); return false; }
+      return { fecha, qty, monto, bolsa };
+    }
+  );
+  if (!v) return;
+
+  // 1) Guardar el gasto
+  const { data, error } = await sb.from("gastos").insert({
+    fecha: v.fecha,
+    categoria: "productos",
+    descripcion: item.nombre,
+    monto: v.monto
+  }).select("id");
+
+  if (error) {
+    alert("No se pudo guardar el gasto: " + error.message);
+    return;
+  }
+
+  // 2) Si eligió otra bolsa que no sea barbería, intentar marcarlo (si existe el sistema de carteras)
+  const gastoId = data && data[0] && data[0].id;
+  if (gastoId && v.bolsa !== "barberia") {
+    try {
+      // Se guarda en ajustes/cartera si está disponible; si no, el gasto queda en barbería por defecto
+      const cartRaw = localStorage.getItem("monos_cartera");
+      if (cartRaw) {
+        const cart = JSON.parse(cartRaw);
+        cart.bolsaG = cart.bolsaG || {};
+        cart.bolsaG[gastoId] = v.bolsa;
+        localStorage.setItem("monos_cartera", JSON.stringify(cart));
+        await sb.from("ajustes").upsert({ clave: "cartera", valor: cart }, { onConflict: "clave" });
+      }
+    } catch (e) { console.error(e); }
+  }
+
+  // 3) Sumar al stock
+  await window.cambiarStock(Number(item.id), v.qty);
+
+  toast("Compra registrada: " + money(v.monto) + " · stock +" + v.qty);
+  await loadData();
+  if (typeof renderInventarioPg === "function") renderInventarioPg();
+}
+window.comprarProducto = comprarProducto;
   
 async function borrarProducto(id) {
   const item = (window.inventario || []).find(x => Number(x.id) === id);
@@ -1889,9 +1976,12 @@ function renderInventarioPg(){
   const btnAdd = document.getElementById("btnAddProducto");
   if (btnAdd) btnAdd.onclick = () => abrirFormularioProducto();
 
-  // +1
+  // Compré (+1) → registra gasto + suma stock
   $("pg-inventario").querySelectorAll("[data-inv-plus]").forEach(btn => {
-    btn.onclick = () => cambiarStock(Number(btn.dataset.invPlus), +1);
+    btn.onclick = () => {
+      const item = (window.inventario || []).find(x => Number(x.id) === Number(btn.dataset.invPlus));
+      if (item) comprarProducto(item);
+    };
   });
   // −1
   $("pg-inventario").querySelectorAll("[data-inv-minus]").forEach(btn => {
