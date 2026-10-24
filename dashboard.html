@@ -2318,7 +2318,8 @@ if(typeof appShown !== "undefined" && appShown) window.loadData();
 if(typeof renderAll!=="function"||typeof sb==="undefined"||!window.__admin) return;
 
 const BOLSAS=[["barberia","Barbería"],["ahorro","Ahorro"],["mio","Para ti"]];
-const bn=k=>(BOLSAS.find(b=>b[0]===k)||BOLSAS[0])[1];
+const bn=k=>k==="repartir"?"Repartir":(BOLSAS.find(b=>b[0]===k)||BOLSAS[0])[1];
+const BOLSAS_I=BOLSAS.concat([["repartir","Repartir (barbería, ahorro y para ti)"]]);
 const DEF={catG:["productos","mantenimiento de máquinas","navajas","otros"],catI:["Venta de productos","Otros ingresos"],bolsaG:{},ingresos:[]};
 let CART=JSON.parse(JSON.stringify(DEF)), outG=[], MES=todayStr().slice(0,7), FIL="todo";
 
@@ -2356,6 +2357,62 @@ const ask=(t,x,ok)=>mSheet(esc(t),'<p class="lead">'+esc(x)+'</p>',ok||"Aceptar"
 const F=(id,l,type,val)=>'<div class="field"><label for="'+id+'">'+l+'</label><input id="'+id+'" type="'+type+'"'+(type==="number"?' inputmode="decimal"':'')+' value="'+esc(val==null?"":val)+'"></div>';
 const SEL=(id,l,opts,val)=>'<div class="field"><label for="'+id+'">'+l+'</label><select id="'+id+'">'+opts.map(o=>{const v=Array.isArray(o)?o[0]:o,t=Array.isArray(o)?o[1]:o;return '<option value="'+esc(v)+'"'+(v===val?" selected":"")+'>'+esc(t)+'</option>';}).join("")+'</select></div>';
 const q=(m,s)=>m.querySelector(s);
+  /* ---------- DESHACER ---------- */
+let UNDO=null;
+function setUndo(label,fn){
+  UNDO={label,fn};
+  let el=$("xUndo");
+  if(!el){el=document.createElement("div");el.id="xUndo";
+    el.style.cssText="position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:200;background:var(--sheet);border:1px solid var(--gold);border-radius:14px;padding:12px 14px;display:flex;gap:10px;align-items:center;justify-content:space-between;box-shadow:0 10px 30px rgba(0,0,0,.5)";
+    document.body.appendChild(el);}
+  el.innerHTML='<span></span><button class="act good">Deshacer</button>';
+  el.firstChild.textContent=label;
+  el.lastChild.onclick=doUndo; el.style.display="flex";
+  clearTimeout(setUndo._t); setUndo._t=setTimeout(()=>{el.style.display="none";},10000);
+}
+async function doUndo(){
+  const el=$("xUndo"); if(el) el.style.display="none";
+  if(!UNDO){toast("No hay nada que deshacer.");return;}
+  const u=UNDO; UNDO=null;
+  const ok=await u.fn();
+  if(ok!==false){toast("Deshecho ✓");await loadData();}
+}
+window.__undo=doUndo;
+async function restoreTurnos(snap){
+  const {data}=await sb.from("turnos").select("id").in("id",snap.map(x=>x.id));
+  const have=new Set((data||[]).map(x=>x.id));
+  for(const row of snap){
+    const {id,...rest}=row;
+    const r=have.has(id)?await sb.from("turnos").update(rest).eq("id",id):await sb.from("turnos").insert(rest);
+    if(r.error){alert("No se pudo deshacer: "+r.error.message+"\n(Si era un turno cancelado, puede que otra persona ya lo reservara.)");return false;}
+  }
+}
+/* Deshacer en Cobrar / Propina / No-show / Cancelar... */
+const _act=window.act;
+const ACT_LBL={cobrar:"Cobro guardado",propina:"Propina guardada",noshow:"Marcado no-show",cancelar:"Turno cancelado",nspaid:"No-show cobrado",quitarns:"No-show quitado"};
+window.act=async function(a,k){
+  if(String(k).indexOf("x:")===0){toast("Es un ingreso extra: edítalo o bórralo en Carteras → Movimientos.",5000);return;}
+  const r=reservas.find(x=>x.key===k);
+  const rowsOf=()=>reservas.filter(x=>x.client===r.client).flatMap(x=>x.rows);
+  const snap=r?JSON.parse(JSON.stringify(rowsOf())):null;
+  await _act.apply(this,arguments);
+  if(!snap) return;
+  if(JSON.stringify(rowsOf())!==JSON.stringify(snap))
+    setUndo(ACT_LBL[a]||"Cambio hecho",()=>restoreTurnos(snap));
+};
+/* Ingresos "Repartir": cuentan como cliente cobrado */
+const _br=window.buildReservas;
+window.buildReservas=function(){
+  _br();
+  CART.ingresos.forEach(i=>{
+    if(i.bolsa!=="repartir") return;
+    const f=String(i.fecha).slice(0,10); if(f<START_DATE) return;
+    const nombre=i.cliente||"Cliente extra", ph=digits(i.tel), m=num(i.monto);
+    reservas.push({key:"x:"+i.id,rows:[],synth:true,fecha:f,nombre,telefono:i.tel||"",
+      client:ph?"p:"+ph:"n:"+norm(nombre),services:[i.cat],total:m,expected:m,charged:m,tip:0,
+      charge:true,noShow:false,noShowPaid:false,turno:"Extra",passed:true,status:"cobrada"});
+  });
+};
 
 /* ---------- Datos ---------- */
 const bolsaOfG=id=>CART.bolsaG[id]||"barberia";
@@ -2409,7 +2466,7 @@ function balCards(){
 }
 function movs(){
   const L=[];
-  reservas.filter(r=>r.status==="cobrada"&&mon(r.fecha)===MES).forEach(r=>L.push({t:"cobro",f:r.fecha,k:r.key,title:r.nombre,sub:"Cobro de servicio"+(r.tip?" · propina "+money(r.tip):""),val:r.charged+r.tip}));
+  reservas.filter(r=>r.status==="cobrada"&&!r.synth&&mon(r.fecha)===MES).forEach(r=>L.push({t:"cobro",f:r.fecha,k:r.key,title:r.nombre,sub:"Cobro de servicio"+(r.tip?" · propina "+money(r.tip):""),val:r.charged+r.tip}));
   CART.ingresos.filter(i=>mon(String(i.fecha))===MES).forEach(i=>L.push({t:"ingreso",f:String(i.fecha).slice(0,10),k:i.id,title:i.desc||i.cat,sub:i.cat+" · va a "+bn(i.bolsa),val:num(i.monto)}));
   allG().filter(g=>mon(String(g.fecha))===MES).forEach(g=>L.push({t:"gasto",f:String(g.fecha).slice(0,10),k:g.id,title:g.descripcion||g.categoria||"Gasto",sub:(g.categoria||"otros")+" · sale de "+bn(bolsaOfG(g.id)),val:-num(g.monto)}));
   L.sort((a,b)=>b.f.localeCompare(a.f));return L;
@@ -2530,9 +2587,17 @@ async function gastoSheet(g){
 }
 async function borrarGasto(id){
   if(!(await ask("Borrar gasto","¿Seguro que quieres borrar este gasto?","Borrar")))return;
+  const old=allG().find(x=>x.id===id), bol=CART.bolsaG[id];
   const r=await sb.from("gastos").delete().eq("id",id);if(r.error){alert("No se pudo borrar: "+r.error.message);return;}
   if(CART.bolsaG[id]){delete CART.bolsaG[id];await guardarCart();}
   toast("Gasto borrado");await loadData();
+  if(old)setUndo("Gasto borrado",async()=>{
+    const {id:_i,...rest}=old;
+    const x=await sb.from("gastos").insert(rest).select("id");
+    if(x.error){alert("No se pudo deshacer: "+x.error.message);return false;}
+    const nid=x.data&&x.data[0]&&x.data[0].id;
+    if(nid!=null&&bol&&bol!=="barberia"){CART.bolsaG[nid]=bol;await guardarCart();}
+  });
 }
 window.openExpense=function(){gastoSheet();};
 window.delExpense=function(id){borrarGasto(id);};
@@ -2544,35 +2609,41 @@ async function ingresoSheet(i){
   const v=await mSheet(i?"Editar ingreso":"Añadir ingreso",
     F("iFecha","Fecha","date",i?String(i.fecha).slice(0,10):todayStr())+SEL("iCat","Categoría",cats,i?i.cat:cats[0])+
     F("iDesc","Detalle (opcional)","text",i?i.desc:"")+F("iMonto","Monto","number",i?num(i.monto):"")+
-    SEL("iBol","¿A dónde va este dinero?",BOLSAS,i?i.bolsa:"mio"),"Guardar",m=>{
+    SEL("iBol","¿A dónde va este dinero?",BOLSAS_I,i?i.bolsa:"mio")+
+    F("iCli","Si eliges Repartir: nombre del cliente (opcional)","text",(i&&i.cliente)||"")+
+    F("iTel","Teléfono del cliente (opcional)","tel",(i&&i.tel)||""),"Guardar",m=>{
       const monto=num(q(m,"#iMonto").value),fecha=q(m,"#iFecha").value;
       if(!fecha||monto<=0)return "Escribe una fecha y un monto mayor que 0.";
-      return {fecha,cat:q(m,"#iCat").value,desc:q(m,"#iDesc").value.trim(),monto,bolsa:q(m,"#iBol").value};});
+      const bolsa=q(m,"#iBol").value,rep=bolsa==="repartir";
+      return {fecha,cat:q(m,"#iCat").value,desc:q(m,"#iDesc").value.trim(),monto,bolsa,
+        cliente:rep?q(m,"#iCli").value.trim():"",tel:rep?q(m,"#iTel").value.trim():""};});
   if(!v)return;
   if(i)Object.assign(i,v);else CART.ingresos.push(Object.assign({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5)},v));
   await guardarCart();toast(i?"Ingreso actualizado":"Ingreso guardado");window.renderAll();
 }
 async function ingresoDel(id){
   if(!(await ask("Borrar ingreso","¿Seguro que quieres borrar este ingreso?","Borrar")))return;
+  const old=CART.ingresos.find(x=>x.id===id);
   CART.ingresos=CART.ingresos.filter(x=>x.id!==id);await guardarCart();toast("Ingreso borrado");window.renderAll();
+  if(old)setUndo("Ingreso borrado",async()=>{CART.ingresos.push(old);await guardarCart();window.renderAll();});
 }
 
 /* ---------- Cobros de clientes (editar / borrar) ---------- */
 async function cobroEdit(key){
   const r=reservas.find(x=>x.key===key);if(!r)return;
+  const snap=JSON.parse(JSON.stringify(r.rows));
   const v=await mSheet("Editar cobro de "+esc(r.nombre),F("cPrecio","Dinero cobrado","number",r.charged)+F("cProp","Propina","number",r.tip||""),"Guardar",m=>{
     const p=num(q(m,"#cPrecio").value);if(p<0)return "El monto no puede ser negativo.";return {p,t:num(q(m,"#cProp").value)};});
   if(!v)return;const ids=r.rows.map(x=>x.id);
   let ok=await updRows([ids[0]],{precio_cobrado:v.p,propina:v.t});
   if(ok&&ids.length>1)ok=await updRows(ids.slice(1),{precio_cobrado:0,propina:0});
-  if(ok){toast("Cobro actualizado");await loadData();}
-}
+if(ok){toast("Cobro actualizado");await loadData();setUndo("Cobro editado",()=>restoreTurnos(snap));}
+  
 async function cobroDel(key){
   const r=reservas.find(x=>x.key===key);if(!r)return;
   if(!(await ask("Borrar cobro","Se quita el cobro de "+r.nombre+" ("+money(r.charged+r.tip)+"). El cliente vuelve a la lista de «por cobrar». Si en realidad no vino, después márcalo como no-show o cancélalo.","Borrar cobro")))return;
   const ok=await updRows(r.rows.map(x=>x.id),{precio_cobrado:null,propina:0});
-  if(ok){toast("Cobro borrado");await loadData();}
-}
+  if(ok){toast("Cobro borrado");await loadData();setUndo("Cobro borrado",()=>restoreTurnos(snap));}
 
 /* ---------- Categorías ---------- */
 async function catAction(a,kd,i){
@@ -2684,6 +2755,7 @@ const NAV = {
       ["metas", "Metas"],
       ["bloqueos", "Bloquear días"],
       ["respaldo", "Respaldo"],
+      ["deshacer","Deshacer último cambio"],
       ["salir", "Salir"]
     ]
   }
@@ -2749,7 +2821,8 @@ nav.addEventListener("click",e=>{
   pop.classList.remove("hidden");shade.classList.remove("hidden");
 });
 pop.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
-  if(b.dataset.go==="salir"){closePop();$("logoutBtn").click();return;}show(b.dataset.go);});
+if(b.dataset.go==="deshacer"){closePop();window.__undo();return;}  
+if(b.dataset.go==="salir"){closePop();$("logoutBtn").click();return;}show(b.dataset.go);});
 shade.addEventListener("click",closePop);
 
 /* Limpieza de pantallas después de cada render */
