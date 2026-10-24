@@ -2435,12 +2435,19 @@ function repartoBlock(){
 function catBlock(kd){
   const arr=kd==="g"?CART.catG:CART.catI;
   return block(kd==="g"?"Categorías de gastos":"Categorías de ingresos",
-    arr.map((c,i)=>row(esc(c),"","","",(kd==="g"&&norm(c)==="otros")?'<span class="note">Fija (no se puede cambiar)</span>':
-      '<button class="act" data-cat="edit" data-kd="'+kd+'" data-i="'+i+'">Editar</button><button class="act red" data-cat="del" data-kd="'+kd+'" data-i="'+i+'">Borrar</button>')).join("")+
+    arr.map((c,i)=>{
+      const fija = kd==="g" && norm(c)==="otros";
+      const acts = fija
+        ? '<span class="note">Fija (no se puede cambiar)</span>'
+        : '<button class="act" data-cat="up" data-kd="'+kd+'" data-i="'+i+'"'+(i===0?' disabled':'')+'>↑</button>'+
+          '<button class="act" data-cat="down" data-kd="'+kd+'" data-i="'+i+'"'+(i===arr.length-1?' disabled':'')+'>↓</button>'+
+          '<button class="act" data-cat="edit" data-kd="'+kd+'" data-i="'+i+'">Editar</button>'+
+          '<button class="act red" data-cat="del" data-kd="'+kd+'" data-i="'+i+'">Borrar</button>';
+      return row(esc(c),"","","" ,acts);
+    }).join("")+
     '<button class="btnGhost" data-cat="add" data-kd="'+kd+'">+ Añadir categoría</button>',
-    kd==="g"?"Si cambias el nombre, también se cambia en los gastos que ya anotaste. Si borras una, los gastos viejos conservan su nombre.":"Úsalas para los ingresos que no son cobros de clientes (por ejemplo, venta de productos).");
+    kd==="g"?"Si cambias el nombre, también se cambia en los gastos que ya anotaste. Si borras una, los gastos viejos conservan su nombre. Usa ↑ ↓ para cambiar el orden.":"Úsalas para los ingresos que no son cobros de clientes. Usa ↑ ↓ para cambiar el orden.");
 }
-
 /* ---------- Pantallas ---------- */
 function sobresBlock(){
   const b=balances(),CR=openBal(),f=monthFin(todayStr().slice(0,7));
@@ -2581,6 +2588,12 @@ async function catAction(a,kd,i){
   }else if(a==="del"){
     if(!(await ask("Borrar categoría","Se quita «"+old+"» de la lista. Los movimientos que ya la usan no se borran.","Borrar")))return;
     arr.splice(i,1);
+  }else if(a==="up"){
+    if(i<=0)return;
+    const t=arr[i-1]; arr[i-1]=arr[i]; arr[i]=t;
+  }else if(a==="down"){
+    if(i>=arr.length-1)return;
+    const t=arr[i+1]; arr[i+1]=arr[i]; arr[i]=t;
   }
   await guardarCart();if(kd==="g")await loadData();else window.renderAll();
 }
