@@ -167,7 +167,7 @@ function splitServices(text){
 }
 const hasCharge = row => row.precio_cobrado !== null && row.precio_cobrado !== undefined;
 
-function buildReservas(){
+window.buildReservas = function(){
   const map = new Map(); bloqueos = [];
   turnos.forEach(row => {
     if(!row.fecha || !ISO.test(row.fecha) || row.fecha < START_DATE) return;
@@ -617,7 +617,7 @@ function savingsBlock(){
     librePeriodo += df.libre;
   });
 
-  let body = '<div class="note" style="margin:0 0 6px"><b>Por cada $100 que entran ahora: <span style="color:var(--bad)">\( '+n1(rB)+' a la barbería</span>, <span style="color:var(--save)"> \)'+n1(ah)+' a ahorro</span> y <span style="color:var(--ok)">$'+n1(tuyo)+' son para ti</span>.</b></div>';
+  let body = '<div class="note" style="margin:0 0 6px"><b>Por cada $100 que entran ahora: '<div class="note" style="margin:0 0 6px"><b>Por cada $100 que entran ahora: <span style="color:var(--bad)">$'+n1(rB)+' a la barbería</span>, <span style="color:var(--save)">$'+n1(ah)+' a ahorro</span> y <span style="color:var(--ok)">$'+n1(tuyo)+' son para ti</span>.</b></div>' y <span style="color:var(--ok)">$'+n1(tuyo)+' son para ti</span>.</b></div>';
 
   if(f.doneB) body += '<div class="note" style="color:var(--ok)">✔ Los gastos de la barbería ya se cubrieron'+(f.doneBDay ? " (el "+niceDate(f.doneBDay)+")" : "")+': este mes ya no se separa más para ella.</div>';
   if(hasS && f.doneS) body += '<div class="note" style="color:var(--ok)">✔ La meta de ahorro del mes ya se cumplió'+(f.doneSDay ? " (el "+niceDate(f.doneSDay)+")" : "")+': este mes ya no se separa más ahorro.</div>';
@@ -741,7 +741,7 @@ function renderNoShows(){
   $("pg-noshows").innerHTML = h;
 }
 
-function renderAll(){ _fin = {}; killCharts(); buildReservas(); renderResumen(); renderDinero(); renderClientes(); renderAgenda(); renderNoShows(); }
+function renderAll(){ _fin = {}; killCharts(); window.buildReservas(); renderResumen(); renderDinero(); renderClientes(); renderAgenda(); renderNoShows(); }
 
 /* ---------- Datos ---------- */
 async function fetchAll(table){
