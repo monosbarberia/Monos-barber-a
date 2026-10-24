@@ -1620,7 +1620,7 @@ async function maybeAutoCierre(){
 }
 
 /* ---------- Ficha del cliente ---------- */
-function openFicha(key){
+async function openFicha(key){
   const cl = buildClients().find(c => c.key === key); if(!cl) return;
   const rs = reservas.filter(r => r.client === key).sort((a,b) => byTime(b,a));
   const cob = rs.filter(r => r.status === "cobrada"), tot = cob.reduce((s,r) => s + r.charged, 0);
