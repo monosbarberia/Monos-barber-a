@@ -1620,15 +1620,19 @@ async function maybeAutoCierre(){
 }
 
 /* ---------- Ficha del cliente ---------- */
-async function openFicha(key){
+function openFicha(key){
   const cl = buildClients().find(c => c.key === key); if(!cl) return;
   const rs = reservas.filter(r => r.client === key).sort((a,b) => byTime(b,a));
   const cob = rs.filter(r => r.status === "cobrada"), tot = cob.reduce((s,r) => s + r.charged, 0);
+  const tipsTotal = cob.reduce((s,r) => s + r.tip, 0);
+  const discTotal = cob.reduce((s,r) => { const d = r.expected - r.charged; return s + (d > 0 ? d : 0); }, 0);
   const owed = rs.filter(r => r.status === "noshow" && !r.noShowPaid), owedAmt = owed.reduce((s,r) => s + owedOf(r), 0);
   const svc = {}; cob.forEach(r => r.services.forEach(s => { const k = norm(s); svc[k] = svc[k] || {l:s, n:0}; svc[k].n++; }));
   const top = Object.values(svc).sort((a,b) => b.n - a.n).slice(0,4).map(x => esc(x.l)+" ("+x.n+")").join(", ") || "—";
   let html = row("Visitas", cl.telefono ? esc(cl.telefono) : "Sin teléfono", String(cl.visits), "ok") +
     row("Ha gastado", "Ticket promedio "+money(cob.length ? tot/cob.length : 0), money(tot), "ok") +
+    row("Propinas", "Total dejado en propinas", money(tipsTotal), tipsTotal ? "ok" : "") +
+    row("Descuentos", "Total de descuentos aplicados", money(discTotal), discTotal ? "warn" : "") +
     row("Última visita", "Servicios más pedidos: "+top, cl.last ? niceDate(cl.last) : "—", "") +
     row("No-shows", owed.length ? "Debe "+money(owedAmt) : "Sin deudas", String(cl.noshows), cl.noshows ? "bad" : "");
   html += '<div class="field" style="margin-top:12px"><label for="fiNota">📌 Nota fija (ej. "navaja en los lados")</label><textarea id="fiNota" rows="3" style="width:100%;background:var(--input);border:1px solid var(--line);border-radius:10px;padding:12px;color:inherit;font:inherit;outline:none">'+esc(NOTAS[key] || "")+'</textarea></div>';
