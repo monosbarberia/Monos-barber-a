@@ -262,19 +262,32 @@ function splitDay(ing, acc){
 }
 function monthFin(month){
   if(_fin[month]) return _fin[month];
-  const rs = reservas.filter(r => r.status === "cobrada" && r.fecha.slice(0,7) === month);
-  const ing = rs.reduce((s,r) => s + r.charged + r.tip, 0);
+  // Cobros reales de clientes (sin sintéticos)
+  const rs = reservas.filter(r => r.status === "cobrada" && !r.synth && r.fecha.slice(0,7) === month);
   const gReg = sumGastos(gastos.filter(x => String(x.fecha).slice(0,7) === month));
-  const perDay = {}; rs.forEach(r => { perDay[r.fecha] = (perDay[r.fecha] || 0) + r.charged + r.tip; });
+  const perDay = {};
+  rs.forEach(r => { perDay[r.fecha] = (perDay[r.fecha] || 0) + r.charged + r.tip; });
+  // Ingresos manuales con "Repartir": se suman al día y se reparten con las mismas reglas
+  try {
+    const extras = (window.__repartirIngresos && window.__repartirIngresos()) || [];
+    extras.forEach(i => {
+      const f = String(i.fecha || "").slice(0, 10);
+      if (!ISO.test(f) || f.slice(0, 7) !== month || f < START_DATE) return;
+      const m = num(i.monto);
+      if (m <= 0) return;
+      perDay[f] = (perDay[f] || 0) + m;
+    });
+  } catch (e) {}
+  const ing = Object.keys(perDay).reduce((s, d) => s + perDay[d], 0);
   const days = {}, acc = {reserve:0, ahorro:0}; let doneBDay = null, doneSDay = null;
   Object.keys(perDay).sort().forEach(d => {
     const x = splitDay(perDay[d], acc);
     acc.reserve += x.reserve; acc.ahorro += x.ahorro; days[d] = x;
-    if(doneBDay === null && BARBER_BUDGET > 0 && acc.reserve >= BARBER_BUDGET - 0.5) doneBDay = d;
-    if(doneSDay === null && SAVE_GOAL > 0 && acc.ahorro >= SAVE_GOAL - 0.5) doneSDay = d;
+    if (doneBDay === null && BARBER_BUDGET > 0 && acc.reserve >= BARBER_BUDGET - 0.5) doneBDay = d;
+    if (doneSDay === null && SAVE_GOAL > 0 && acc.ahorro >= SAVE_GOAL - 0.5) doneSDay = d;
   });
   const reserve = acc.reserve, ahorro = acc.ahorro, resto = ing - reserve;
-  const deficit = Math.max(0, gReg - reserve);               // gastos que pasaron lo reservado (salen de tu retiro)
+  const deficit = Math.max(0, gReg - reserve);
   const libre = Math.max(0, resto - ahorro - deficit);
   return _fin[month] = {ing, gReg, reserve, resto, ahorro, deficit, libre, fondo: reserve - gReg, days,
     doneB: doneBDay !== null, doneS: doneSDay !== null, doneBDay, doneSDay};
@@ -2399,17 +2412,25 @@ window.act=async function(a,k){
   if(JSON.stringify(rowsOf())!==JSON.stringify(snap))
     setUndo(ACT_LBL[a]||"Cambio hecho",()=>restoreTurnos(snap));
 };
-/* Ingresos "Repartir": cuentan como cliente cobrado */
-const _br=window.buildReservas;
-window.buildReservas=function(){
+/* Ingresos "Repartir": se listan en resumen y se reparten con las mismas reglas del día */
+window.__repartirIngresos = function(){
+  return (CART.ingresos || []).filter(i => i && i.bolsa === "repartir");
+};
+const _br = window.buildReservas;
+window.buildReservas = function(){
   _br();
-  CART.ingresos.forEach(i=>{
-    if(i.bolsa!=="repartir") return;
-    const f=String(i.fecha).slice(0,10); if(f<START_DATE) return;
-    const nombre=i.cliente||"Cliente extra", ph=digits(i.tel), m=num(i.monto);
-    reservas.push({key:"x:"+i.id,rows:[],synth:true,fecha:f,nombre,telefono:i.tel||"",
-      client:ph?"p:"+ph:"n:"+norm(nombre),services:[i.cat],total:m,expected:m,charged:m,tip:0,
-      charge:true,noShow:false,noShowPaid:false,turno:"Extra",passed:true,status:"cobrada"});
+  CART.ingresos.forEach(i => {
+    if (i.bolsa !== "repartir") return;
+    const f = String(i.fecha).slice(0, 10);
+    if (!ISO.test(f) || f < START_DATE) return;
+    const nombre = i.cliente || "Cliente extra", ph = digits(i.tel), m = num(i.monto);
+    if (m <= 0) return;
+    reservas.push({
+      key: "x:" + i.id, rows: [], synth: true, fecha: f, nombre, telefono: i.tel || "",
+      client: ph ? "p:" + ph : "n:" + norm(nombre), services: [i.cat || "Extra"],
+      total: m, expected: m, charged: m, tip: 0,
+      charge: true, noShow: false, noShowPaid: false, turno: "Extra", passed: true, status: "cobrada"
+    });
   });
 };
 
@@ -2632,6 +2653,9 @@ async function ingresoSheet(i){
       return {fecha,cat:q(m,"#iCat").value,desc:q(m,"#iDesc").value.trim(),monto,bolsa,
         cliente:rep?q(m,"#iCli").value.trim():"",tel:rep?q(m,"#iTel").value.trim():""};});
   if(!v)return;
+  v.fecha = String(v.fecha).slice(0, 10);
+  v.monto = num(v.monto);
+  v.bolsa = v.bolsa || "mio";
   if(i)Object.assign(i,v);else CART.ingresos.push(Object.assign({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5)},v));
   await guardarCart();toast(i?"Ingreso actualizado":"Ingreso guardado");window.renderAll();
 }
