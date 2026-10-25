@@ -1,5 +1,5 @@
 // Service Worker básico para Mono's Panel
-const CACHE_NAME = "monos-panel-v1";
+const CACHE_NAME = "Finanzas-Barberia-v1";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
