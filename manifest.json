@@ -1,6 +1,6 @@
 {
-  "name": "Mono's Barbería - Panel",
-  "short_name": "Mono's Panel",
+  "name": "Finanzas Barberia",
+  "short_name": "Administración",
   "description": "Panel de estadísticas y gestión de Mono's Barbería",
   "start_url": "./dashboard.html",
   "display": "standalone",
