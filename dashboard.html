@@ -2478,9 +2478,23 @@ function movBlock(){
     '<button class="act" data-mv="edit" data-t="'+x.t+'" data-k="'+esc(x.k)+'">Editar</button><button class="act red" data-mv="del" data-t="'+x.t+'" data-k="'+esc(x.k)+'">Borrar</button>')).join(""):empty("No hay movimientos este mes.");
   return block("Movimientos del mes",
     '<div class="field"><label>Mes</label><input type="month" class="cmes" value="'+MES+'"></div><div class="periods" style="margin:0 0 8px">'+chips+'</div>'+
-    '<div class="note" style="margin:0 0 6px">Entró '+money(ing)+' · Salió '+money(gas)+'</div>'+rows+
+    '<div class="note" style="margin:0 0 6px">Entró '+money(ing)+' · Salió '+money(gas)+'</div>'+
+    '<div id="movRes">'+rows+'</div>'+
     '<div class="acts" style="margin-top:10px"><button class="act good" data-cart="gasto">+ Gasto</button><button class="act good" data-cart="ingreso">+ Ingreso</button></div>',
-    "Aquí ves todo lo que entra y sale. Toca Editar para corregir un movimiento o Borrar si te equivocaste. Borrar un cobro lo devuelve a «por cobrar».");
+    "Aquí ves los últimos movimientos. Si hay más de 10, desliza hacia abajo en la lista. Toca Editar para corregir o Borrar si te equivocaste.");
+}
+const MOV_VISIBLE = 10;
+function fitMovList(){
+  const box = $("movRes"); if(!box) return;
+  const rows = Array.prototype.filter.call(box.children, x => x.classList.contains("row"));
+  if(rows.length <= MOV_VISIBLE){ box.style.maxHeight = "none"; box.style.overflowY = "visible"; return; }
+  box.style.overflowY = "auto";
+  box.style.paddingRight = "6px";
+  box.style.scrollbarWidth = "thin";
+  box.style.scrollbarColor = "var(--gold) rgba(255,255,255,0.1)";
+  if(!box.offsetParent){ box.style.maxHeight = ""; return; }
+  let hgt = 0; for(let i = 0; i < MOV_VISIBLE; i++) hgt += rows[i].offsetHeight;
+  if(hgt > 0) box.style.maxHeight = hgt + "px";
 }
 function repartoBlock(){
   const b=balances();
@@ -2521,6 +2535,7 @@ function sobresBlock(){
 function renderCartera(){
   $("pg-cartera").innerHTML='<h1>Mi dinero</h1><p class="lead">Lo que tiene cada sobre ahora mismo.</p>'+
     sobresBlock()+movBlock()+catBlock("g")+catBlock("i");
+  requestAnimationFrame(fitMovList);
 }
 function injectHoy(){
   const lead=$("pg-hoy")&&$("pg-hoy").querySelector(".lead");if(!lead)return;
