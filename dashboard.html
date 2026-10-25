@@ -2490,8 +2490,7 @@ function movs(){
   CART.ingresos.filter(i=>mon(String(i.fecha))===MES).forEach(i=>L.push({t:"ingreso",f:String(i.fecha).slice(0,10),k:i.id,title:i.desc||i.cat,sub:i.cat+" · va a "+bn(i.bolsa),val:num(i.monto)}));
   allG().filter(g=>mon(String(g.fecha))===MES).forEach(g=>L.push({t:"gasto",f:String(g.fecha).slice(0,10),k:g.id,title:g.descripcion||g.categoria||"Gasto",sub:(g.categoria||"otros")+" · sale de "+bn(bolsaOfG(g.id)),val:-num(g.monto)}));
   L.sort((a,b)=>b.f.localeCompare(a.f));return L;
-}
-function movBlock(){
+}function movBlock(){
   const all=movs(),L=all.filter(x=>FIL==="todo"||(FIL==="ing"?x.val>=0:x.val<0));
   const ing=all.filter(x=>x.val>=0).reduce((s,x)=>s+x.val,0),gas=-all.filter(x=>x.val<0).reduce((s,x)=>s+x.val,0);
   const chips=[["todo","Todo"],["ing","Ingresos"],["gas","Gastos"]].map(c=>'<button class="period'+(FIL===c[0]?" on":"")+'" data-fil="'+c[0]+'">'+c[1]+'</button>').join("");
@@ -2500,9 +2499,8 @@ function movBlock(){
   return block("Movimientos del mes",
     '<div class="field"><label>Mes</label><input type="month" class="cmes" value="'+MES+'"></div><div class="periods" style="margin:0 0 8px">'+chips+'</div>'+
     '<div class="note" style="margin:0 0 6px">Entró '+money(ing)+' · Salió '+money(gas)+'</div>'+
-    '<div id="movRes">'+rows+'</div>'+
-    '<div class="acts" style="margin-top:10px"><button class="act good" data-cart="gasto">+ Gasto</button><button class="act good" data-cart="ingreso">+ Ingreso</button></div>',
-    "Aquí ves los últimos movimientos. Si hay más de 10, desliza hacia abajo en la lista. Toca Editar para corregir o Borrar si te equivocaste.");
+    '<div id="movRes">'+rows+'</div>',
+    "Aquí ves los últimos 10. Si hay más, desliza la lista hacia abajo.");
 }
 const MOV_VISIBLE = 10;
 function fitMovList(){
