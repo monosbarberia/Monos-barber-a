@@ -834,3 +834,17 @@ input[type="month"]::-webkit-date-and-time-value{
   margin:0;
   min-width:0;
 }
+#movRes {
+  max-height: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) rgba(255,255,255,0.1);
+}
+#movRes::-webkit-scrollbar { width: 6px; }
+#movRes::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 6px;
+}
