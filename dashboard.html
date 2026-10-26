@@ -183,7 +183,7 @@ window.buildReservas = function(){
     if(!phone && !financial){ bloqueos.push(row); return; }
     const key = row.reserva_id ? "r:"+row.reserva_id : "i:"+row.id;
     if(!map.has(key)) map.set(key, {key, rows:[], fecha:row.fecha, nombre:row.nombre||"Sin nombre", telefono:row.telefono||"",
-      client: phone ? "p:"+phone : "n:"+norm(row.nombre), services:[], total:0, expected:0, charged:0, tip:0,
+      client: phone ? "p:"+phone+":"+norm(row.nombre) : "n:"+norm(row.nombre), services:[], total:0, expected:0, charged:0, tip:0,
       charge:false, noShow:false, noShowPaid:false});
     const r = map.get(key);
     r.rows.push(row);
@@ -2441,7 +2441,7 @@ window.buildReservas = function(){
     if (m <= 0) return;
     reservas.push({
       key: "x:" + i.id, rows: [], synth: true, fecha: f, nombre, telefono: i.tel || "",
-      client: ph ? "p:" + ph : "n:" + norm(nombre), services: [i.cat || "Extra"],
+     client: ph ? "p:" + ph + ":" + norm(nombre) : "n:" + norm(nombre), services: [i.cat || "Extra"],
       total: m, expected: m, charged: m, tip: 0,
       charge: true, noShow: false, noShowPaid: false, turno: "Extra", passed: true, status: "cobrada"
     });
