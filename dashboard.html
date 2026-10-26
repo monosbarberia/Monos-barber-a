@@ -847,32 +847,6 @@ function leave(){
 /* ---------- Eventos ---------- */
 $("loginBtn").addEventListener("click", login);
 $("password").addEventListener("keydown", e => { if(e.key==="Enter") login(); });
-// logoutBtn y refreshBtn ya no existen en el header
-  const b = $("refreshBtn");
-  if (b.disabled) return;
-
-  b.disabled = true;
-  b.classList.add("spinning");
-  b.textContent = "Actualizando";
-
-  const t0 = Date.now();
-  try {
-    await loadData();
-  } catch (e) {
-    console.error(e);
-  }
-
-  const wait = 800 - (Date.now() - t0);
-  if (wait > 0) await new Promise(r => setTimeout(r, wait));
-
-  b.classList.remove("spinning");
-  b.textContent = "Listo ✓";
-
-  setTimeout(() => {
-    b.textContent = "Actualizar";
-    b.disabled = false;
-  }, 1100);
-});
 $("saveExpense").addEventListener("click", saveExpense);
 $("saveGoal").addEventListener("click", saveGoal);
 document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => closeModal(b.dataset.close)));
