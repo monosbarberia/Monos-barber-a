@@ -27,10 +27,13 @@
 
 <section id="app" class="hidden">
   <header class="top">
-    <div class="topRow"><img src="logo.png" alt="Mono's" class="brandLogo">      <div class="topBtns">
+        <div class="topRow">
+      <img src="logo.png" alt="Mono's" class="brandLogo">
+      <div class="topBtns">
         <button class="chip" id="topGasto" data-cart="gasto">+ Gasto</button>
         <button class="chip" id="topIngreso" data-cart="ingreso">+ Ingreso</button>
       </div>
+    </div>
     <div class="periods" id="periods">
       <button class="period on" data-p="today">Hoy</button><button class="period" data-p="week">Esta semana</button>
       <button class="period" data-p="month">Este mes</button><button class="period" data-p="all">Todo</button>
@@ -844,8 +847,7 @@ function leave(){
 /* ---------- Eventos ---------- */
 $("loginBtn").addEventListener("click", login);
 $("password").addEventListener("keydown", e => { if(e.key==="Enter") login(); });
-$("logoutBtn").addEventListener("click", async () => { await sb.auth.signOut(); });
-$("refreshBtn").addEventListener("click", async () => {
+// logoutBtn y refreshBtn ya no existen en el header
   const b = $("refreshBtn");
   if (b.disabled) return;
 
