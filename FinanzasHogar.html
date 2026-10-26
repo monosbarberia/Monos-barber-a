@@ -89,7 +89,7 @@ button:disabled{opacity:.4}
 
 <script>
 const SB_URL="https://ldxxflhwpyzldisydhmd.supabase.co", SB_KEY="sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
-const catsG=()=>cfg.catG.map(x=>x.n),fijasC=()=>cfg.catG.filter(x=>x.f).map(x=>x.n),rd10=v=>Math.round(v/10)*10;
+const catsG=()=>cfg.catG.map(x=>x.n),fijasC=()=>cfg.catG.filter(x=>x.f).map(x=>x.n),rd10=v=>Math.round(v/5)*5;
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 const num=v=>{const n=Number(String(v??"").replace(",","."));return Number.isFinite(n)?n:0};
@@ -104,7 +104,7 @@ function slotMin(t){const m=String(t||"").trim().toUpperCase().match(/^(\d{1,2})
 function passed(f,t){const n=today();if(f<n)return true;if(f>n)return false;const m=slotMin(t);if(m===null)return false;const d=new Date();return m<=d.getHours()*60+d.getMinutes()}
 
 const sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
-let movs=[],turnos=[],gb=[],CB={},B={},RES=[],_fin={},charts={},tab="res";
+let movs=[],turnos=[],gb=[],CB={},B={},RES=[],CART_ING=[],_fin={},charts={},tab="res";
 let cfg={piso:8000,wa:false,cartera0:0,cartDesde:"",pctF:40,pctA:10,pctD:0,pctM:10,fondoMeses:3,fijosPorMes:{},metas:[],deudas:[],
  catG:[{n:"Vivienda",f:1},{n:"Servicios",f:1},{n:"Comida",p:"vital"},{n:"Transporte",p:"vital"},{n:"Salud",p:"vital"},{n:"Hogar"},{n:"Ocio"},{n:"Educación"},{n:"Otros"}],
  catI:["Extra","Venta","Regalo","Otros"],tarjetas:[]};
@@ -134,9 +134,20 @@ async function load(){
   B={start:ISO.test(cb.start_date)?cb.start_date:"2026-10-08",budget:num(cb.barber_budget)>0?num(cb.barber_budget):12000,
    pb:num(cb.barber_pct)>0&&num(cb.barber_pct)<=100?num(cb.barber_pct):50,ps:cb.save_pct!==undefined&&cb.save_pct!==""?num(cb.save_pct):10,
    rd:num(cb.round_step)>=1?num(cb.round_step):10,goal:cb.save_goal!==undefined&&cb.save_goal!==""?num(cb.save_goal):(num(cb.ahorro_meta)>0?num(cb.ahorro_meta):8800)};
-  turnos=await all("turnos",q=>q.gte("fecha",B.start).lte("fecha","2999-12-31"));
+    turnos=await all("turnos",q=>q.gte("fecha",B.start).lte("fecha","2999-12-31"));
   const g=await all("gastos");
   gb=g.filter(x=>String(x.fecha)>=B.start&&!/^(aporte|devolucion) personal/.test(String(x.descripcion||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")));
+  // Ingresos de la barbería que cuentan para "para mí": Repartir y mio
+  CART_ING=[];
+  try{
+    const cart=await sb.from("ajustes").select("valor").eq("clave","cartera").limit(1);
+    if(cart.data&&cart.data.length&&cart.data[0].valor&&Array.isArray(cart.data[0].valor.ingresos))
+      CART_ING=cart.data[0].valor.ingresos.filter(i=>i&&num(i.monto)>0&&(i.bolsa==="repartir"||i.bolsa==="mio"));
+    else{
+      const l=localStorage.getItem("monos_cartera");
+      if(l){const j=JSON.parse(l);if(j&&Array.isArray(j.ingresos))CART_ING=j.ingresos.filter(i=>i&&num(i.monto)>0&&(i.bolsa==="repartir"||i.bolsa==="mio"));}
+    }
+  }catch(e){}
   build();lastOk=Date.now();live("idle");
  }catch(e){live("bad","Sin conexión");$("err").innerHTML='<div class="card bad">No se pudieron leer los datos: '+esc(e.message||e)+'</div>'}
 }
@@ -168,16 +179,33 @@ function netMonth(m){
  if(_fin[m])return _fin[m];
  const rs=RES.filter(r=>r.st==="cobrada"&&r.fecha.slice(0,7)===m), per={};
  rs.forEach(r=>per[r.fecha]=(per[r.fecha]||0)+r.ch+r.tip);
+ // Ingresos "Repartir" de la barbería: se tratan como cobro del día (se dividen igual)
+ CART_ING.forEach(i=>{
+  if(i.bolsa!=="repartir")return;
+  const f=String(i.fecha||"").slice(0,10);
+  if(f.slice(0,7)!==m||f<B.start)return;
+  per[f]=(per[f]||0)+num(i.monto);
+ });
  const acc={reserve:0,ahorro:0},days={};
  Object.keys(per).sort().forEach(d=>{const x=splitDay(per[d],acc);acc.reserve+=x.reserve;acc.ahorro+=x.ahorro;days[d]=x.libre});
  const ing=sum(Object.values(per)), gReg=sum(gb.filter(x=>String(x.fecha).slice(0,7)===m).map(x=>num(x.monto)));
- const deficit=Math.max(0,gReg-acc.reserve), libre=Math.max(0,ing-acc.reserve-acc.ahorro-deficit);
+ const deficit=Math.max(0,gReg-acc.reserve);
+ let libre=Math.max(0,ing-acc.reserve-acc.ahorro-deficit);
+ // Ingresos "mio / para mí" de la barbería: van enteros a tu ganancia (sin dividir)
+ CART_ING.forEach(i=>{
+  if(i.bolsa!=="mio")return;
+  const f=String(i.fecha||"").slice(0,10);
+  if(f.slice(0,7)!==m||f<B.start)return;
+  libre+=num(i.monto);
+  days[f]=(days[f]||0)+num(i.monto);
+ });
  return _fin[m]={libre,days};
 }
 /* Predicción del mes en ganancia neta (misma idea que el "Plan" de la barbería) */
 function proj(m){
  const t=today(),C=RES.filter(r=>r.st==="cobrada"),by={};
  C.forEach(r=>by[r.fecha]=(by[r.fecha]||0)+r.ch+r.tip);
+ CART_ING.forEach(i=>{const f=String(i.fecha||"").slice(0,10);if(f>=B.start)by[f]=(by[f]||0)+num(i.monto);});
  const wd={};for(let d=1;d<=6;d++)wd[d]={s:0,w:0};let aS=0,aN=0;
  Object.keys(by).forEach(f=>{if(f>=t)return;const d=dow(f);if(!d)return;const w=Math.pow(.85,Math.floor(diff(f,t)/7));wd[d].s+=by[f]*w;wd[d].w+=w;aS+=by[f];aN++});
  const avg=aN?aS/aN:0,wa=d=>wd[d]&&wd[d].w?wd[d].s/wd[d].w:avg;
