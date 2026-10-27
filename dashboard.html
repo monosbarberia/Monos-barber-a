@@ -303,7 +303,7 @@ function buildClients(){
     if(r.status==="noshow") c.noshows++;
     if(r.status==="futura") c.future = true;
     if(r.status==="cobrada"){   // solo cobradas son visitas
-    c.visits++; c.revenue += serviceOf(r);
+  c.visits++; c.revenue += serviceOf(r);
       if(!c.first || r.fecha<c.first) c.first = r.fecha;
       if(!c.last || r.fecha>c.last) c.last = r.fecha;
       if(r.fecha>=p.start && r.fecha<=p.end){ c.pVisits++; c.pRevenue += serviceOf(r); }
@@ -560,8 +560,7 @@ function renderResumen(){
   const topSvc = Object.values(s.svc).sort((a,b) => b.n-a.n)[0];
 
   let h = '<h1>Resumen</h1><p class="lead">Cómo va la barbería '+esc(p.label)+'.</p>';
-  h += '<div class="hero"><div class="cap">Dinero cobrado '+esc(p.label)+'</div><div class="big">'+money(s.revenue)+'</div><div class="note">Solo cuenta cobros registrados. Propinas aparte: '+money(s.tips)+'.</div></div>';
-
+  h += '<div class="hero"><div class="cap">Dinero cobrado '+esc(p.label)+'</div><div class="big">'+money(s.revenue)+'</div><div class="note">Solo servicios de barbería. Propinas: '+money(s.tips)+'. Productos (café/ponquecitos) aparte.</div></div>';
   // Aviso de compras (solo si hay algo que hacer)
   const alerts = purchaseAdvice().filter(a => a.level==="buy" || a.level==="urgent");
   if(alerts.length) h += block("Aviso de compras", alerts.map(a => row(esc(a.name), esc(a.detail), esc(a.short), LEVEL_CLS[a.level])).join(""),
@@ -572,13 +571,16 @@ function renderResumen(){
   const hoyList = reservas.filter(r => r.fecha === tHoy && r.status !== "noshow");
   let proyHoy = 0, cobHoy = 0, nHoy = hoyList.length;
   hoyList.forEach(r => {
-    if (r.status === "cobrada") {
-      cobHoy += r.charged + r.tip;
-      proyHoy += r.charged + r.tip;
-    } else {
-      proyHoy += (r.total || r.expected || 0);
-    }
-  });
+  if (r.status === "cobrada") {
+    cobHoy += serviceOf(r) + r.tip;
+    proyHoy += serviceOf(r) + r.tip;
+  } else {
+    // Quitar productos del total pendiente si ya están en los servicios
+    let prod = 0;
+    (r.services || []).forEach(n => { if(isProductoAparte(n)) prod += precioProducto(n); });
+    proyHoy += Math.max(0, (r.total || r.expected || 0) - prod);
+  }
+});
 
   h += '<div class="grid" style="margin-top:12px">' +
     card("Proyección de hoy", money(proyHoy), nHoy ? (nHoy + " turno(s) · ya cobrado " + money(cobHoy)) : "Sin turnos agendados hoy", "ok") +
@@ -589,9 +591,11 @@ function renderResumen(){
     card("Por cobrar", money(s.pendAmount), s.pend.length+" pendiente(s)"+(s.pendUnknown?" · "+s.pendUnknown+" sin monto":""), "warn") +
     card("No-shows", s.noshows.length, pct(due ? s.noshows.length/due*100 : 0)+" de las citas") +
     card("Ocupación", pct(occ.pct), occ.used+" de "+occ.avail+" turnos") +
-    card("Propinas", money(s.tips), esc(p.label), "ok") + '</div>';
+    card("Propinas", money(s.tips), esc(p.label), "ok") + 
+    card("Productos (café / ponquecitos)", money(s.products || 0), "Solo visual · no se reparte ni cuenta en la barbería", "ok") + 
+    '</div>';
 
-  const byDay = {}; s.cobradas.forEach(r => { byDay[r.fecha] = (byDay[r.fecha]||0) + r.charged; });
+  const byDay = {}; s.cobradas.forEach(r => { byDay[r.fecha] = (byDay[r.fecha]||0) + serviceOf(r); });
   const dayKeys = Object.keys(byDay).sort();
   h += block("Cobros por día", dayKeys.length ? canvas("chDay") : empty("Todavía no hay cobros en este período."));
 
@@ -1450,7 +1454,7 @@ async function loadAll(){
   CFG = r[0] || {}; NOTAS = r[1] || {}; MSGS = r[2] || {}; ESTADO = r[3] || {};
   try{
     const p = await sb.from("precios").select("servicio,precio,orden").order("orden");
-    if(!p.error){
+if(!p.error){
   PRECIOS = (p.data || []).map(x => ({n:x.servicio, p:num(x.precio)}));
   window.PRECIOS = PRECIOS;
 }
@@ -1772,7 +1776,7 @@ async function guardarPrecios(){
     const d = await sb.from("precios").delete().in("servicio", gone).select("servicio");
     if(d.error) alert("Se guardaron los precios, pero no se pudieron quitar los servicios eliminados: "+d.error.message);
   }
-  PRECIOS = list.map(r => ({n:r.servicio, p:r.precio})); DIRTY["pg-precios"] = false;
+  PRECIOS = list.map(r => ({n:r.servicio, p:r.precio})); window.PRECIOS = PRECIOS; DIRTY["pg-precios"] = false;
   return true;
 }
 async function aplicarPreciosSql(){
