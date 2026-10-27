@@ -1540,6 +1540,13 @@ async function openCobrar(r){
   if(nota) html += '<div class="msg" style="margin:0 0 12px;background:rgba(245,201,110,.14);border:1px solid rgba(245,201,110,.5);color:var(--warn)">📌 '+esc(nota)+'</div>';
   if(debt.length) html += '<div class="msg" style="margin:0 0 12px;background:rgba(255,129,116,.14);border:1px solid rgba(255,129,116,.45);color:#ffd2cc"><b>Ojo: debe '+debt.length+' no-show.</b> Faltó el '+debt.map(x => niceDate(x.fecha)).join(", ")+'.'+
     '<label class="xsv" style="border:0;padding:8px 0 0"><input type="checkbox" id="xNsOn"><span>Me lo pagó ahora</span><input type="number" inputmode="decimal" class="xpr" id="xNsAmt" value="'+(debtAmt||"")+'"></label></div>';
+ const prods = (r.services || []).filter(isProductoAparte);
+if(prods.length){
+  const monProd = prods.reduce((s,n) => s + precioProducto(n), 0);
+  html += '<div class="msg" style="margin:0 0 12px;background:rgba(203,178,106,.12);border:1px solid rgba(203,178,106,.4)">'+
+    'Productos aparte: <b>'+esc(prods.join(", "))+'</b> ('+money(monProd)+'). '+
+    'Se cobran al cliente, pero en Resumen solo se visualizan y no entran en el reparto de la barbería.</div>';
+} 
   html += '<div class="subTitle" style="margin-top:0">Servicios</div>';
   html += names.length ? names.map((n,i) => '<label class="xsv"><input type="checkbox" class="xsc" data-i="'+i+'"'+(isSel(n)?" checked":"")+'><span>'+esc(n)+'</span><input type="number" inputmode="decimal" class="xpr xsp" data-i="'+i+'" value="'+(priceOf(n)||"")+'"></label>').join("")
     : '<div class="note">Aún no hay lista de precios (Negocio ▾ → Precios). Escribe el precio abajo.</div>';
