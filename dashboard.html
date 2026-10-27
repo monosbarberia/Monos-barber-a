@@ -687,13 +687,13 @@ function savingsBlock(){
 
   // Totales del período elegido
   const list = reservas.filter(r => r.status === "cobrada" && r.fecha >= p.start && r.fecha <= p.end);
-  const ingPeriodo = list.reduce((s,r) => s + r.charged + r.tip, 0);
+  const ingPeriodo = list.reduce((s,r) => s + serviceOf(r) + r.tip, 0);
   const gPeriodo = sumGastos(gastos.filter(g => String(g.fecha) >= p.start && String(g.fecha) <= p.end));
 
   // Reparto del período (sumando día a día)
   let resPeriodo = 0, ahPeriodo = 0, librePeriodo = 0;
   const byDay = {};
-  list.forEach(r => { byDay[r.fecha] = (byDay[r.fecha] || 0) + r.charged + r.tip; });
+  list.forEach(r => { byDay[r.fecha] = (byDay[r.fecha] || 0) + serviceOf(r) + r.tip; });
   Object.keys(byDay).sort().forEach(day => {
     const df = dayFin(day);
     resPeriodo += df.reserve;
