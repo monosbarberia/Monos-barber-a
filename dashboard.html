@@ -181,8 +181,15 @@ function isProductoAparte(name){
 
 // Precio desde la tabla precios de Supabase (PRECIOS)
 function precioProducto(name){
-  const f = PRECIOS.find(x => norm(x.n) === norm(name));
-  return f ? num(f.p) : 0;
+  // PRECIOS vive en el bloque admin; usamos window si hace falta
+  const list = (typeof PRECIOS !== "undefined" && PRECIOS) || window.PRECIOS || [];
+  const f = list.find(x => norm(x.n) === norm(name));
+  if (f) return num(f.p);
+  // Respaldo si aún no cargaron los precios
+  const k = norm(name);
+  if (k.indexOf("cafe") >= 0) return 40;
+  if (k.indexOf("ponque") >= 0) return 100;
+  return 0;
 }
 
 // Cuánto de esta reserva es de productos aparte
