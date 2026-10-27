@@ -303,10 +303,10 @@ function buildClients(){
     if(r.status==="noshow") c.noshows++;
     if(r.status==="futura") c.future = true;
     if(r.status==="cobrada"){   // solo cobradas son visitas
-      c.visits++; c.revenue += r.charged;
+    c.visits++; c.revenue += serviceOf(r);
       if(!c.first || r.fecha<c.first) c.first = r.fecha;
       if(!c.last || r.fecha>c.last) c.last = r.fecha;
-      if(r.fecha>=p.start && r.fecha<=p.end){ c.pVisits++; c.pRevenue += r.charged; }
+      if(r.fecha>=p.start && r.fecha<=p.end){ c.pVisits++; c.pRevenue += serviceOf(r); }
     }
   });
   return [...map.values()];
@@ -333,7 +333,7 @@ function monthFin(month){
   const rs = reservas.filter(r => r.status === "cobrada" && !r.synth && r.fecha.slice(0,7) === month);
   const gReg = sumGastos(gastos.filter(x => String(x.fecha).slice(0,7) === month));
   const perDay = {};
-  rs.forEach(r => { perDay[r.fecha] = (perDay[r.fecha] || 0) + r.charged + r.tip; });
+  rs.forEach(r => { perDay[r.fecha] = (perDay[r.fecha] || 0) + serviceOf(r) + r.tip; });
   // Ingresos manuales con "Repartir": se suman al día y se reparten con las mismas reglas
   try {
     const extras = (window.__repartirIngresos && window.__repartirIngresos()) || [];
@@ -959,7 +959,7 @@ const MIN_COBRADAS_HORARIOS = 15; // clientes cobrados que necesito antes de opi
 
 /* ---------- Utilidades ---------- */
 let ap = [];                                   // aportes y devoluciones de tu dinero personal
-const ingOf = r => r.charged + r.tip;
+const ingOf = r => serviceOf(r) + r.tip;
 const isAp = g => { const d = norm(g.descripcion); return d.indexOf("aporte personal") === 0 || d.indexOf("devolucion personal") === 0; };
 const isDevol = g => norm(g.descripcion).indexOf("devolucion personal") === 0;
 const isProdGasto = g => norm(g.categoria) !== "otros" && num(g.monto) > 0;
@@ -1450,7 +1450,10 @@ async function loadAll(){
   CFG = r[0] || {}; NOTAS = r[1] || {}; MSGS = r[2] || {}; ESTADO = r[3] || {};
   try{
     const p = await sb.from("precios").select("servicio,precio,orden").order("orden");
-    if(!p.error) PRECIOS = (p.data || []).map(x => ({n:x.servicio, p:num(x.precio)}));
+    if(!p.error){
+  PRECIOS = (p.data || []).map(x => ({n:x.servicio, p:num(x.precio)}));
+  window.PRECIOS = PRECIOS;
+}
   }catch(e){}
   applyCfg(); window.setMsgs(MSGS);
   BLK = [];
