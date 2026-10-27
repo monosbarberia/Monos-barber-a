@@ -571,14 +571,15 @@ function renderResumen(){
   const hoyList = reservas.filter(r => r.fecha === tHoy && r.status !== "noshow");
   let proyHoy = 0, cobHoy = 0, nHoy = hoyList.length;
   hoyList.forEach(r => {
+  // Proyección = lo agendado (precio esperado/total), sin productos aparte. No cambia al cobrar.
+  let prod = 0;
+  (r.services || []).forEach(n => { if(isProductoAparte(n)) prod += precioProducto(n); });
+  const esperado = Math.max(0, (r.total || r.expected || 0) - prod);
+  proyHoy += esperado;
+
+  // Cobrado real del día (solo barbería + propina)
   if (r.status === "cobrada") {
     cobHoy += serviceOf(r) + r.tip;
-    proyHoy += serviceOf(r) + r.tip;
-  } else {
-    // Quitar productos del total pendiente si ya están en los servicios
-    let prod = 0;
-    (r.services || []).forEach(n => { if(isProductoAparte(n)) prod += precioProducto(n); });
-    proyHoy += Math.max(0, (r.total || r.expected || 0) - prod);
   }
 });
 
