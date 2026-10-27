@@ -171,7 +171,33 @@ function splitServices(text){
   return out;
 }
 const hasCharge = row => row.precio_cobrado !== null && row.precio_cobrado !== undefined;
+// Productos que se cobran al cliente pero NO entran en la contabilidad de la barbería
+const PRODUCTOS_APARTE = ["cafe expresso", "café expresso", "ponquecito casero"];
 
+function isProductoAparte(name){
+  const k = norm(name);
+  return PRODUCTOS_APARTE.some(p => k === p || k.indexOf(p) >= 0);
+}
+
+// Precio desde la tabla precios de Supabase (PRECIOS)
+function precioProducto(name){
+  const f = PRECIOS.find(x => norm(x.n) === norm(name));
+  return f ? num(f.p) : 0;
+}
+
+// Cuánto de esta reserva es de productos aparte
+function productsOf(r){
+  let s = 0;
+  (r.services || []).forEach(n => {
+    if(isProductoAparte(n)) s += precioProducto(n);
+  });
+  // No puede ser más de lo cobrado
+  return Math.min(s, num(r.charged));
+}
+
+// Dinero que SÍ cuenta para la barbería
+const serviceOf = r => Math.max(0, num(r.charged) - productsOf(r));
+  
 window.buildReservas = function(){
   const map = new Map(); bloqueos = [];
   turnos.forEach(row => {
@@ -206,6 +232,7 @@ window.buildReservas = function(){
     else if(r.charge) r.status = "cobrada";
     else if(r.passed) r.status = "pendiente";
     else r.status = "futura";
+    r.products = productsOf(r);
   });
 }
 
@@ -213,20 +240,48 @@ function resumen(list){
   const cobradas = list.filter(r => r.status==="cobrada");
   const pend = list.filter(r => r.status==="pendiente");
   const noshows = list.filter(r => r.status==="noshow");
-  let revenue = 0, tips = 0, expected = 0, disc = 0, extra = 0;
+  let revenue = 0, tips = 0, expected = 0, disc = 0, extra = 0, products = 0;
+
   cobradas.forEach(r => {
-    revenue += r.charged; tips += r.tip;
-    if(r.expected > 0){ expected += r.expected; const d = r.charged - r.expected; if(d<0) disc += -d; else extra += d; }
-    else expected += r.charged;
+    const prod = r.products || productsOf(r);
+    const svc  = Math.max(0, r.charged - prod);   // solo barbería
+    products += prod;
+    revenue  += svc;
+    tips     += r.tip;
+
+    // expected / descuentos / extras solo sobre la parte de servicios
+    const expSvc = Math.max(0, (r.expected || 0) - prod);
+    if(expSvc > 0){
+      expected += expSvc;
+      const d = svc - expSvc;
+      if(d < 0) disc += -d; else extra += d;
+    } else {
+      expected += svc;
+    }
   });
+
+  // Servicios realizados: NO contar café ni ponquecito
   const svc = {}; let svcTotal = 0;
-  cobradas.forEach(r => r.services.forEach(s => {   // SOLO cobradas
-    const k = norm(s); if(!svc[k]) svc[k] = {label:s,n:0}; svc[k].n++; svcTotal++;
+  cobradas.forEach(r => r.services.forEach(s => {
+    if(isProductoAparte(s)) return;
+    const k = norm(s);
+    if(!svc[k]) svc[k] = {label:s, n:0};
+    svc[k].n++; svcTotal++;
   }));
+
   let pendAmount = 0, pendUnknown = 0;
-  pend.forEach(r => { const a = r.total || r.expected || 0; if(a>0) pendAmount += a; else pendUnknown++; });
-  return {cobradas, pend, noshows, revenue, tips, expected, disc, extra, svc, svcTotal, pendAmount, pendUnknown,
-          ticket: cobradas.length ? revenue/cobradas.length : 0};
+  pend.forEach(r => {
+    const a = r.total || r.expected || 0;
+    if(a > 0) pendAmount += a; else pendUnknown++;
+  });
+
+  return {
+    cobradas, pend, noshows,
+    revenue, tips, expected, disc, extra,
+    products,                    // ← NUEVO: solo para mostrar
+    svc, svcTotal, pendAmount, pendUnknown,
+    ticket: cobradas.length ? revenue / cobradas.length : 0
+  };
 }
 const gastosPeriodo = () => { const p = getPeriod(); return gastos.filter(g => String(g.fecha)>=p.start && String(g.fecha)<=p.end); };
 const sumGastos = l => l.reduce((s,g) => s + num(g.monto), 0);
