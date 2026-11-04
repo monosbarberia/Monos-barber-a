@@ -649,6 +649,12 @@
     </script>
 
     <script>
+        // Al refrescar (o volver a la página) siempre empieza arriba, en el logo
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+        window.scrollTo(0, 0);
+        window.addEventListener('pageshow', function() { window.scrollTo(0, 0); });
+
         const WHATSAPP_NUMBER = '5358592776';
 
         const dateInput = document.getElementById('date');
