@@ -417,7 +417,29 @@
         .confirm-box {
             background-color: var(--dark-forest-green);
             text-align: center;
+            position: relative;
         }
+        .confirm-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid rgba(203, 178, 106, 0.6);
+            background: transparent;
+            color: var(--elegant-gold);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.6em;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: all 0.2s;
+        }
+        .confirm-close:hover { background: rgba(203, 178, 106, 0.2); border-color: var(--elegant-gold); }
         .confirm-box p { font-size: 1.15em; line-height: 1.5; margin: 0 0 22px; }
         .confirm-box .confirm-note { font-size: 0.95em; opacity: 0.7; margin: 18px 0 0; }
         .confirm-btn {
@@ -602,13 +624,14 @@
     <!-- ============================================= -->
     <!-- PANTALLA DE CONFIRMACIÓN: reserva guardada + botones de WhatsApp -->
     <!-- ============================================= -->
-    <div class="confirm-overlay" id="confirmBox">
+    <div class="confirm-overlay" id="confirmBox" onclick="if (event.target === this) cerrarConfirmacion()">
         <div class="content-box confirm-box">
+            <button type="button" class="confirm-close" onclick="cerrarConfirmacion()" aria-label="Cerrar">&times;</button>
             <h3 class="section-title">¡Reserva guardada!</h3>
             <p>Tu turno ya quedó apartado. Falta un último paso: envía el mensaje por WhatsApp para confirmar tu cita.</p>
             <a id="waApp" class="action-btn confirm-btn primary" href="#">Enviar por WhatsApp</a>
             <a id="waWeb" class="action-btn confirm-btn" href="#" target="_blank" rel="noopener">Si no abre, toca aquí</a>
-            <p class="confirm-note">Si tienes mala señal, puedes volver a tocar el botón cuando mejore la conexión. No necesitas reservar de nuevo.</p>
+            <p class="confirm-note">Si tienes mala señal, puedes volver a tocar el botón cuando mejore la conexión. No necesitas reservar de nuevo. Al cerrar esta ventana podrás reservar otro turno.</p>
         </div>
     </div>
 
@@ -1048,6 +1071,27 @@ Quiero pedir una cita en
 
             document.getElementById('confirmBox').classList.add('open');
         }
+
+        // Cierra la pantalla de confirmación y deja la web lista para reservar otro turno
+        function cerrarConfirmacion() {
+            document.getElementById('confirmBox').classList.remove('open');
+
+            // Limpia servicios, extras, fecha, horario y términos (se conservan nombre y teléfono)
+            document.querySelectorAll('.service-item.selected').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('input[name="service"], #cafeCheck, #ponqueCheck').forEach(cb => { cb.checked = false; });
+            dateInput.value = '';
+            acceptTerms.checked = false;
+            submitBtn.textContent = 'Solicitar Cita';
+
+            updateSummary();
+            updateTimeSlots();
+            document.getElementById('servicios').scrollIntoView({ behavior: 'smooth' });
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('confirmBox').classList.contains('open')) {
+                cerrarConfirmacion();
+            }
+        });
 
         // ---- Lista única de precios ----
         // Los precios se leen de la tabla "precios" de Supabase. Si algo falla,
