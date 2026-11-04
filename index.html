@@ -400,6 +400,40 @@
             box-shadow: none;
         }
 
+        /* ---- Pantalla de confirmación (reserva guardada) ---- */
+        .confirm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            background: rgba(0, 0, 0, 0.88);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+        .confirm-overlay.open { display: flex; }
+        .confirm-box {
+            background-color: var(--dark-forest-green);
+            text-align: center;
+        }
+        .confirm-box p { font-size: 1.15em; line-height: 1.5; margin: 0 0 22px; }
+        .confirm-box .confirm-note { font-size: 0.95em; opacity: 0.7; margin: 18px 0 0; }
+        .confirm-btn {
+            display: block;
+            box-sizing: border-box;
+            width: 100%;
+            padding: 16px 10px;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+        .confirm-btn.primary {
+            background-color: var(--elegant-gold);
+            color: var(--dark-forest-green);
+        }
+        .confirm-btn.primary:hover { background-color: var(--elegant-gold-hover); }
+
         @media (max-width: 600px) {
             .hero-title { font-size: 1.8em; letter-spacing: 2px; }
             .content-box { padding: 30px 20px; }
@@ -566,6 +600,19 @@
     </form>
 
     <!-- ============================================= -->
+    <!-- PANTALLA DE CONFIRMACIÓN: reserva guardada + botones de WhatsApp -->
+    <!-- ============================================= -->
+    <div class="confirm-overlay" id="confirmBox">
+        <div class="content-box confirm-box">
+            <h3 class="section-title">¡Reserva guardada!</h3>
+            <p>Tu turno ya quedó apartado. Falta un último paso: envía el mensaje por WhatsApp para confirmar tu cita.</p>
+            <a id="waApp" class="action-btn confirm-btn primary" href="#">Enviar por WhatsApp</a>
+            <a id="waWeb" class="action-btn confirm-btn" href="#" target="_blank" rel="noopener">Si no abre, toca aquí</a>
+            <p class="confirm-note">Si tienes mala señal, puedes volver a tocar el botón cuando mejore la conexión. No necesitas reservar de nuevo.</p>
+        </div>
+    </div>
+
+    <!-- ============================================= -->
     <!-- SUPABASE: inicialización y conexión a la base de datos -->
     <!-- ============================================= -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -579,6 +626,8 @@
     </script>
 
     <script>
+        const WHATSAPP_NUMBER = '5358592776';
+
         const dateInput = document.getElementById('date');
         const timeSelect = document.getElementById('time');
         const acceptTerms = document.getElementById('acceptTerms');
@@ -863,7 +912,7 @@
         phoneInput.addEventListener('input', validateSubmit);
 
         // Ocupa el/los turnos en Supabase. Si Supabase lo rechaza (limite semanal
-        // superado o el turno se acaba de ocupar), avisa al cliente y no abre WhatsApp.
+        // superado o el turno se acaba de ocupar), avisa al cliente y no muestra WhatsApp.
         async function crearReserva() {
             const nombre = nameInput.value.trim();
             const telefono = phoneInput.value.trim();
@@ -912,9 +961,16 @@
 
             const textoOriginal = submitBtn.textContent;
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Enviando Whatsapp...';
+            submitBtn.textContent = 'Guardando reserva...';
 
-            const { error } = await window.supabaseClient.from('turnos').insert(filas);
+            let error = null;
+            try {
+                const res = await window.supabaseClient.from('turnos').insert(filas);
+                error = res.error;
+            } catch (e) {
+                // Sin conexión: el fetch falla y lanza excepción
+                error = { message: 'network', code: 'NETWORK' };
+            }
 
             if (error) {
                 submitBtn.textContent = textoOriginal;
@@ -925,15 +981,21 @@
                 } else if (error.code === '23505') {
                     alert('Ese horario se acaba de ocupar. Elige otro turno disponible.');
                     updateTimeSlots();
+                } else if (error.code === 'NETWORK') {
+                    alert('No hay conexión en este momento. Revisa tu señal e intenta de nuevo.');
                 } else {
                     alert('No se pudo completar la reserva. Intenta de nuevo en unos segundos.');
                 }
                 return;
             }
 
+            // Reserva guardada: el botón queda bloqueado para evitar reservas duplicadas
+            submitBtn.textContent = 'Reserva guardada';
             sendToWhatsApp(nombre, telefono);
         }
 
+        // Prepara los enlaces de WhatsApp y muestra la pantalla de confirmación.
+        // El cliente puede tocar el botón las veces que haga falta si falla la señal.
         function sendToWhatsApp(nombre, telefono) {
             const rawDate = dateInput.value;
             const time = timeSelect.value;
@@ -962,10 +1024,29 @@
                 }
             });
 
-            const turnoTexto = time;
+            // Mensaje en texto normal; se codifica completo una sola vez
+            const texto =
+`¡Hola Felix!
+Quiero pedir una cita en
+*Mono's Barberia Holguin*
 
-            const msg = `¡Hola Felix!%0AQuiero pedir una cita en%0A*Mono's Barberia Holguin*%0A%0A👤Nombre: ${encodeURIComponent(nombre)}%0A📱Telefono: ${encodeURIComponent(telefono)}%0A📍Direccion: Maceo 254 e/ Cables y Angel Guerra%0A📆Fecha: ${formattedDate}%0A🕙Horario: ${turnoTexto}%0A☕️Servicio: ${selected.join(', ')}%0A⌛️Duracion aprox: ${duration}%0A💰Total a pagar: $${total}`;
-            window.open(`https://wa.me/5358592776?text=${msg}`, '_blank');
+👤Nombre: ${nombre}
+📱Telefono: ${telefono}
+📍Direccion: Maceo 254 e/ Cables y Angel Guerra
+📆Fecha: ${formattedDate}
+🕙Horario: ${time}
+☕️Servicio: ${selected.join(', ')}
+⌛️Duracion aprox: ${duration}
+💰Total a pagar: $${total}`;
+
+            const msg = encodeURIComponent(texto);
+
+            // whatsapp:// abre la app directamente, sin cargar ninguna pagina web
+            document.getElementById('waApp').href = `whatsapp://send?phone=${WHATSAPP_NUMBER}&text=${msg}`;
+            // Respaldo: enlace web (sirve en computadora o si la app no abre)
+            document.getElementById('waWeb').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+
+            document.getElementById('confirmBox').classList.add('open');
         }
 
         // ---- Lista única de precios ----
