@@ -400,13 +400,115 @@
             box-shadow: none;
         }
 
+        /* ================= RETOQUE VISUAL ================= */
+        :root {
+            --cream: #f3ead2;
+            --gold-grad: linear-gradient(135deg, #a8893f 0%, #e8d596 35%, #cbb26a 60%, #9c7e36 100%);
+            --gold-text-grad: linear-gradient(180deg, #f1e0a3 0%, #cbb26a 50%, #a98b40 100%);
+        }
+
+        /* Fondo: mismo verde, con luz suave arriba y textura de cuero */
+        body {
+            background-color: var(--dark-forest-green);
+            background-image:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='l' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.05 0.055' numOctaves='4' seed='7' stitchTiles='stitch' result='t'/%3E%3CfeDiffuseLighting in='t' lighting-color='%23d9e4d0' surfaceScale='2.2'%3E%3CfeDistantLight azimuth='235' elevation='58'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23l)' opacity='0.5'/%3E%3C/svg%3E"),
+                radial-gradient(ellipse at 50% 0%, #2c5638 0%, #1c3823 55%, #183020 100%);
+            background-blend-mode: multiply, normal;
+        }
+
+        /* Títulos con efecto dorado metálico */
+        .hero-title, .about-title, .section-title {
+            background: var(--gold-text-grad);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-logo-img {
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)) drop-shadow(0 0 18px rgba(203,178,106,0.2));
+        }
+
+        /* Textos pequeños más legibles (crema, sin transparencias que los apaguen) */
+        .hero-subtitle { opacity: 1; color: var(--cream); }
+        .about-text, .terms-box, .checkbox-container { color: var(--cream); }
+        .siguenos { opacity: 1; color: rgba(243, 234, 210, 0.85); font-size: 0.95em; }
+        .address strong { opacity: 1; }
+        .field-hint { opacity: 1; color: rgba(243, 234, 210, 0.8); font-size: 0.95em; }
+        .section-arrow { opacity: 0.85; }
+        .info-tooltip { color: var(--cream); }
+        input[type="date"], input[type="text"], input[type="tel"], select { color: var(--cream); }
+        input[type="text"]::placeholder, input[type="tel"]::placeholder { color: rgba(243, 234, 210, 0.6); }
+        select option { color: var(--cream); }
+        input[type="date"]::-webkit-datetime-edit-text,
+        input[type="date"]::-webkit-datetime-edit-month-field,
+        input[type="date"]::-webkit-datetime-edit-day-field,
+        input[type="date"]::-webkit-datetime-edit-year-field { color: var(--cream); }
+        input[type="date"]:focus, input[type="text"]:focus, input[type="tel"]:focus, select:focus {
+            box-shadow: 0 0 0 3px rgba(203, 178, 106, 0.25);
+        }
+
+        /* Tarjetas y servicios con un poco más de presencia */
+        .content-box {
+            background-color: rgba(203, 178, 106, 0.06);
+            border-color: rgba(203, 178, 106, 0.3);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(243, 234, 210, 0.08);
+        }
+        .service-item:hover { border-color: var(--elegant-gold); background-color: rgba(0,0,0,0.25); }
+        .service-item.selected {
+            background: var(--gold-grad);
+            box-shadow: 0 0 18px rgba(203, 178, 106, 0.3);
+        }
+
+        /* Botones dorados con brillo y destello cada 3 segundos */
+        .btn-submit, .confirm-btn.primary {
+            position: relative;
+            overflow: hidden;
+            background: var(--gold-grad);
+            color: var(--dark-forest-green);
+        }
+        .btn-submit:not(:disabled) {
+            box-shadow: 0 5px 18px rgba(0,0,0,0.35), 0 0 22px rgba(203, 178, 106, 0.28);
+        }
+        .btn-submit:hover:not(:disabled), .confirm-btn.primary:hover {
+            background: var(--gold-grad);
+            filter: brightness(1.1);
+            color: var(--dark-forest-green);
+        }
+        .btn-submit:disabled {
+            background: rgba(203, 178, 106, 0.15);
+            color: rgba(243, 234, 210, 0.55);
+        }
+        .btn-submit:not(:disabled)::after, .confirm-btn.primary::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -75%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+            transform: skewX(-20deg);
+            animation: sheen 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes sheen {
+            0% { left: -75%; }
+            30% { left: 130%; }
+            100% { left: 130%; }
+        }
+        .action-btn:hover { box-shadow: 0 0 16px rgba(203, 178, 106, 0.35); }
+
+        /* Aparición suave al bajar */
+        .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease; }
+        .reveal.visible { opacity: 1; transform: none; }
+
         /* ---- Pantalla de confirmación (reserva guardada) ---- */
         .confirm-overlay {
             display: none;
             position: fixed;
             inset: 0;
             z-index: 500;
-            background: rgba(0, 0, 0, 0.88);
+            background: rgba(8, 18, 11, 0.88);
+            backdrop-filter: blur(4px);
             align-items: center;
             justify-content: center;
             padding: 20px;
@@ -415,9 +517,11 @@
         }
         .confirm-overlay.open { display: flex; }
         .confirm-box {
-            background-color: var(--dark-forest-green);
+            background: linear-gradient(180deg, #25492f 0%, #1c3823 100%);
+            border-color: rgba(203, 178, 106, 0.5);
             text-align: center;
             position: relative;
+            margin: auto;
         }
         .confirm-close {
             position: absolute;
@@ -440,21 +544,54 @@
             transition: all 0.2s;
         }
         .confirm-close:hover { background: rgba(203, 178, 106, 0.2); border-color: var(--elegant-gold); }
-        .confirm-box p { font-size: 1.15em; line-height: 1.5; margin: 0 0 22px; }
-        .confirm-box .confirm-note { font-size: 0.95em; opacity: 0.7; margin: 18px 0 0; }
+        .confirm-box .section-title { margin-top: 8px; }
+
+        .confirm-steps { display: flex; flex-direction: column; gap: 16px; margin: 0 0 26px; text-align: left; }
+        .confirm-step { display: flex; align-items: flex-start; gap: 14px; font-size: 1.15em; line-height: 1.4; color: var(--cream); }
+        .confirm-step strong { color: #fff; }
+        .step-num {
+            flex-shrink: 0;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--gold-grad);
+            color: var(--dark-forest-green);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1px;
+        }
+        .confirm-ask-text { font-size: 1.2em; line-height: 1.5; color: var(--cream); margin: 0 0 24px; }
+        .confirm-note { font-size: 1em; line-height: 1.4; color: rgba(243, 234, 210, 0.8); margin: 16px 0 0; }
+
         .confirm-btn {
             display: block;
             box-sizing: border-box;
             width: 100%;
             padding: 16px 10px;
             margin-bottom: 12px;
-            font-size: 1.1em;
+            font-size: 1.15em;
+            font-family: 'Cormorant Garamond', serif;
+            cursor: pointer;
+            background: transparent;
         }
-        .confirm-btn.primary {
-            background-color: var(--elegant-gold);
-            color: var(--dark-forest-green);
+        .confirm-link {
+            background: none;
+            border: none;
+            color: var(--cream);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.05em;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 8px;
+            margin-top: 4px;
         }
-        .confirm-btn.primary:hover { background-color: var(--elegant-gold-hover); }
+
+        @media (prefers-reduced-motion: reduce) {
+            .reveal { opacity: 1; transform: none; transition: none; }
+            .btn-submit::after, .confirm-btn.primary::after, .section-arrow { animation: none; }
+        }
 
         @media (max-width: 600px) {
             .hero-title { font-size: 1.8em; letter-spacing: 2px; }
@@ -624,14 +761,28 @@
     <!-- ============================================= -->
     <!-- PANTALLA DE CONFIRMACIÓN: reserva guardada + botones de WhatsApp -->
     <!-- ============================================= -->
-    <div class="confirm-overlay" id="confirmBox" onclick="if (event.target === this) cerrarConfirmacion()">
+    <div class="confirm-overlay" id="confirmBox" onclick="if (event.target === this) pedirCierre()">
         <div class="content-box confirm-box">
-            <button type="button" class="confirm-close" onclick="cerrarConfirmacion()" aria-label="Cerrar">&times;</button>
-            <h3 class="section-title">¡Reserva guardada!</h3>
-            <p>Tu turno ya quedó apartado. Falta un último paso: envía el mensaje por WhatsApp para confirmar tu cita.</p>
-            <a id="waApp" class="action-btn confirm-btn primary" href="#">Enviar por WhatsApp</a>
-            <a id="waWeb" class="action-btn confirm-btn" href="#" target="_blank" rel="noopener">Si no abre, toca aquí</a>
-            <p class="confirm-note">Si tienes mala señal, puedes volver a tocar el botón cuando mejore la conexión. No necesitas reservar de nuevo. Al cerrar esta ventana podrás reservar otro turno.</p>
+            <button type="button" class="confirm-close" onclick="pedirCierre()" aria-label="Cerrar">&times;</button>
+
+            <div id="confirmMain">
+                <h3 class="section-title">¡Tu cita está agendada!</h3>
+                <div class="confirm-steps">
+                    <div class="confirm-step"><span class="step-num">&#10003;</span><span>Tu turno ya quedó reservado. No necesitas reservar otra vez.</span></div>
+                    <div class="confirm-step"><span class="step-num">2</span><span>Falta un paso: toca el botón de abajo y <strong>envíanos el mensaje por WhatsApp</strong>. Ya viene escrito, solo presiona enviar.</span></div>
+                    <div class="confirm-step"><span class="step-num">3</span><span>Cuando lo recibamos, te llegará un mensaje de agradecimiento por tu cita.</span></div>
+                </div>
+                <a id="waApp" class="action-btn confirm-btn primary" href="#">Abrir WhatsApp</a>
+                <p class="confirm-note">Si tienes mala señal, vuelve a tocar el botón cuando mejore.</p>
+            </div>
+
+            <div id="confirmAsk" hidden>
+                <h3 class="section-title">Antes de cerrar</h3>
+                <p class="confirm-ask-text">¿Ya nos avisaste por WhatsApp de tu reserva?<br>Si no lo has hecho, toca el botón y envía el mensaje.</p>
+                <a id="waApp2" class="action-btn confirm-btn primary" href="#">Abrir WhatsApp</a>
+                <button type="button" class="action-btn confirm-btn" onclick="cerrarConfirmacion()">Sí, ya lo envié</button>
+                <button type="button" class="confirm-link" onclick="volverConfirmacion()">Volver</button>
+            </div>
         </div>
     </div>
 
@@ -1071,14 +1222,24 @@ Quiero pedir una cita en
             const msg = encodeURIComponent(texto);
 
             // whatsapp:// abre la app directamente, sin cargar ninguna pagina web
-            document.getElementById('waApp').href = `whatsapp://send?phone=${WHATSAPP_NUMBER}&text=${msg}`;
-            // Respaldo: enlace web (sirve en computadora o si la app no abre)
-            document.getElementById('waWeb').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`;
+            const enlace = `whatsapp://send?phone=${WHATSAPP_NUMBER}&text=${msg}`;
+            document.getElementById('waApp').href = enlace;
+            document.getElementById('waApp2').href = enlace;
 
+            volverConfirmacion();
             document.getElementById('confirmBox').classList.add('open');
         }
 
         // Cierra la pantalla de confirmación y deja la web lista para reservar otro turno
+        // Al intentar cerrar (X, tocar afuera o Escape) primero se pregunta si ya envió el mensaje
+        function pedirCierre() {
+            document.getElementById('confirmMain').hidden = true;
+            document.getElementById('confirmAsk').hidden = false;
+        }
+        function volverConfirmacion() {
+            document.getElementById('confirmAsk').hidden = true;
+            document.getElementById('confirmMain').hidden = false;
+        }
         function cerrarConfirmacion() {
             document.getElementById('confirmBox').classList.remove('open');
 
@@ -1095,9 +1256,21 @@ Quiero pedir una cita en
         }
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && document.getElementById('confirmBox').classList.contains('open')) {
-                cerrarConfirmacion();
+                pedirCierre();
             }
         });
+
+        // Aparición suave de las secciones al bajar (el inicio se ve de inmediato)
+        (function() {
+            const els = document.querySelectorAll('.about-section, #servicios > .content-box, #reserva > .content-box');
+            if (!('IntersectionObserver' in window)) return;
+            const io = new IntersectionObserver(function(entries) {
+                entries.forEach(function(en) {
+                    if (en.isIntersecting) { en.target.classList.add('visible'); io.unobserve(en.target); }
+                });
+            }, { threshold: 0.1 });
+            els.forEach(function(el) { el.classList.add('reveal'); io.observe(el); });
+        })();
 
         // ---- Lista única de precios ----
         // Los precios se leen de la tabla "precios" de Supabase. Si algo falla,
