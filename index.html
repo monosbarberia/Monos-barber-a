@@ -411,9 +411,10 @@
         body {
             background-color: var(--dark-forest-green);
             background-image:
-                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='l' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.05 0.055' numOctaves='4' seed='7' stitchTiles='stitch' result='t'/%3E%3CfeDiffuseLighting in='t' lighting-color='%23d9e4d0' surfaceScale='2.2'%3E%3CfeDistantLight azimuth='235' elevation='58'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23l)' opacity='0.5'/%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' seed='11' stitchTiles='stitch' result='t'/%3E%3CfeDiffuseLighting in='t' lighting-color='%23e4ecdb' surfaceScale='1.3'%3E%3CfeDistantLight azimuth='235' elevation='62'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.55'/%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Cfilter id='p' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.09' numOctaves='2' seed='5' stitchTiles='stitch' result='t'/%3E%3CfeDiffuseLighting in='t' lighting-color='%23e4ecdb' surfaceScale='1.1'%3E%3CfeDistantLight azimuth='235' elevation='65'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='0.3'/%3E%3C/svg%3E"),
                 radial-gradient(ellipse at 50% 0%, #2c5638 0%, #1c3823 55%, #183020 100%);
-            background-blend-mode: multiply, normal;
+            background-blend-mode: multiply, multiply, normal;
         }
 
         /* Títulos con efecto dorado metálico */
@@ -454,47 +455,36 @@
             box-shadow: 0 15px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(243, 234, 210, 0.08);
         }
         .service-item:hover { border-color: var(--elegant-gold); background-color: rgba(0,0,0,0.25); }
-        .service-item.selected {
-            background: var(--gold-grad);
-            box-shadow: 0 0 18px rgba(203, 178, 106, 0.3);
-        }
+        .service-item.selected { box-shadow: 0 0 18px rgba(203, 178, 106, 0.3); }
 
-        /* Botones dorados con brillo y destello cada 3 segundos */
-        .btn-submit, .confirm-btn.primary {
-            position: relative;
-            overflow: hidden;
-            background: var(--gold-grad);
-            color: var(--dark-forest-green);
-        }
-        .btn-submit:not(:disabled) {
-            box-shadow: 0 5px 18px rgba(0,0,0,0.35), 0 0 22px rgba(203, 178, 106, 0.28);
-        }
-        .btn-submit:hover:not(:disabled), .confirm-btn.primary:hover {
-            background: var(--gold-grad);
-            filter: brightness(1.1);
-            color: var(--dark-forest-green);
-        }
-        .btn-submit:disabled {
-            background: rgba(203, 178, 106, 0.15);
-            color: rgba(243, 234, 210, 0.55);
-        }
-        .btn-submit:not(:disabled)::after, .confirm-btn.primary::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -75%;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.55), transparent);
-            transform: skewX(-20deg);
-            animation: sheen 3s ease-in-out infinite;
-            pointer-events: none;
-        }
+        /* Dorado compartido: la luz viene siempre de la esquina superior izquierda y el
+           destello cruza de forma continua los botones que están juntos (ver refreshGold en el JS) */
+        @property --sh { syntax: '<number>'; inherits: true; initial-value: 0; }
         @keyframes sheen {
-            0% { left: -75%; }
-            30% { left: 130%; }
-            100% { left: 130%; }
+            0% { --sh: 0; }
+            40% { --sh: 1; }
+            100% { --sh: 1; }
         }
+        #bookingForm, .confirm-overlay { animation: sheen 3s ease-in-out infinite; }
+
+        .service-item.selected, .gold-input.filled, .btn-submit:not(:disabled), .confirm-btn.primary {
+            --p: calc(-15% + var(--sh) * 130%);
+            background-color: #cbb26a;
+            background-image:
+                linear-gradient(110deg, transparent calc(var(--p) - 10%), rgba(255, 255, 255, 0.6) var(--p), transparent calc(var(--p) + 10%)),
+                linear-gradient(135deg, #f1e1a6 0%, #cbb26a 40%, #b79c52 70%, #8f7430 100%);
+            background-size: var(--gw, 100%) var(--gh, 100%);
+            background-position: calc(var(--gx, 0px) * -1) calc(var(--gy, 0px) * -1);
+            background-repeat: no-repeat;
+            background-origin: border-box;
+            border-color: var(--elegant-gold);
+            color: var(--dark-forest-green);
+        }
+        .gold-input.filled { font-weight: 700; caret-color: var(--dark-forest-green); box-shadow: 0 0 18px rgba(203, 178, 106, 0.3); }
+        .btn-submit:not(:disabled) { box-shadow: 0 5px 18px rgba(0,0,0,0.35), 0 0 22px rgba(203, 178, 106, 0.28); }
+        .btn-submit:hover:not(:disabled), .confirm-btn.primary:hover { filter: brightness(1.08); }
+        .btn-submit:disabled { color: rgba(243, 234, 210, 0.55); }
+        .service-item { transition: background-color 0.3s, border-color 0.3s, color 0.3s, box-shadow 0.3s; }
         .action-btn:hover { box-shadow: 0 0 16px rgba(203, 178, 106, 0.35); }
 
         /* Aparición suave al bajar */
@@ -588,9 +578,50 @@
             margin-top: 4px;
         }
 
+        /* ---- Cuero: viñeta, costura dorada y capitoné detrás del logo ---- */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background: radial-gradient(ellipse at 50% 35%, transparent 45%, rgba(5, 14, 8, 0.45) 100%);
+        }
+        .content-box { position: relative; }
+        .content-box::before {
+            content: '';
+            position: absolute;
+            inset: 9px;
+            border: 1.5px dashed rgba(203, 178, 106, 0.55);
+            border-radius: 5px;
+            pointer-events: none;
+        }
+        .confirm-close { top: 16px; right: 16px; }
+
+        #inicio > :not(.section-arrow) { position: relative; z-index: 1; }
+        #inicio::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.7;
+            --boton: #f1e1a6 0, #b79c52 2.5px, #6d5a26 3.5px, rgba(0, 0, 0, 0.5) 5px, transparent 7px;
+            background-image:
+                radial-gradient(circle at 50% 50%, var(--boton)),
+                radial-gradient(circle at 0 0, var(--boton)),
+                radial-gradient(circle at 100% 0, var(--boton)),
+                radial-gradient(circle at 0 100%, var(--boton)),
+                radial-gradient(circle at 100% 100%, var(--boton)),
+                linear-gradient(45deg, transparent 48.6%, rgba(0, 0, 0, 0.4) 49.4%, rgba(243, 234, 210, 0.12) 50.6%, transparent 51.4%),
+                linear-gradient(135deg, transparent 48.6%, rgba(0, 0, 0, 0.4) 49.4%, rgba(243, 234, 210, 0.12) 50.6%, transparent 51.4%);
+            background-size: 100px 100px;
+            -webkit-mask-image: radial-gradient(ellipse at 50% 45%, #000 25%, transparent 72%);
+            mask-image: radial-gradient(ellipse at 50% 45%, #000 25%, transparent 72%);
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .reveal { opacity: 1; transform: none; transition: none; }
-            .btn-submit::after, .confirm-btn.primary::after, .section-arrow { animation: none; }
+            #bookingForm, .confirm-overlay, .section-arrow { animation: none; }
         }
 
         @media (max-width: 600px) {
@@ -785,6 +816,20 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Aparición suave de las secciones: se repite al bajar, al subir y al volver a bajar
+        (function() {
+            const els = document.querySelectorAll('.hero-logo-container, .hero-title, .hero-subtitle, .about-section, #servicios > .content-box, #reserva > .content-box');
+            if (!('IntersectionObserver' in window)) return;
+            const io = new IntersectionObserver(function(entries) {
+                entries.forEach(function(en) {
+                    en.target.classList.toggle('visible', en.intersectionRatio >= 0.15);
+                });
+            }, { threshold: 0.15 });
+            els.forEach(function(el) { el.classList.add('reveal'); io.observe(el); });
+        })();
+    </script>
 
     <!-- ============================================= -->
     <!-- SUPABASE: inicialización y conexión a la base de datos -->
@@ -1083,6 +1128,8 @@
             const nameOk = nameInput.value.trim().length > 0;
             const phoneOk = /^[0-9]{8}$/.test(phoneInput.value.trim());
             submitBtn.disabled = !(anyService && dateInput.value && timeSelect.value && acceptTerms.checked && nameOk && phoneOk);
+            syncFilled();
+            refreshGold();
         }
 
         dateInput.addEventListener('change', updateTimeSlots);
@@ -1228,17 +1275,63 @@ Quiero pedir una cita en
 
             volverConfirmacion();
             document.getElementById('confirmBox').classList.add('open');
+            refreshGold();
         }
 
-        // Cierra la pantalla de confirmación y deja la web lista para reservar otro turno
+        // Nombre y teléfono se ponen dorados cuando tienen contenido
+        function syncFilled() {
+            [nameInput, phoneInput].forEach(function(inp) {
+                inp.classList.add('gold-input');
+                inp.classList.toggle('filled', inp.value.trim().length > 0);
+            });
+        }
+
+        // Agrupa los elementos dorados que están pegados (menos de 32px) y les da el mismo
+        // "lienzo": el degradado y el destello se ven como si fueran un solo botón.
+        function refreshGold() {
+            const sel = '.service-item.selected, .gold-input.filled, .btn-submit:not(:disabled), .confirm-btn.primary';
+            const todos = Array.prototype.slice.call(document.querySelectorAll(sel))
+                .map(function(el) { return { el: el, r: el.getBoundingClientRect(), modal: !!el.closest('#confirmBox') }; })
+                .filter(function(o) { return o.r.width > 0; })
+                .sort(function(a, b) { return a.r.top - b.r.top; });
+
+            [false, true].forEach(function(esModal) {
+                const grupos = [];
+                todos.filter(function(o) { return o.modal === esModal; }).forEach(function(o) {
+                    const g = grupos[grupos.length - 1];
+                    if (g && o.r.top - g.bottom <= 32) {
+                        g.items.push(o);
+                        g.bottom = Math.max(g.bottom, o.r.bottom);
+                        g.left = Math.min(g.left, o.r.left);
+                        g.right = Math.max(g.right, o.r.right);
+                    } else {
+                        grupos.push({ items: [o], top: o.r.top, bottom: o.r.bottom, left: o.r.left, right: o.r.right });
+                    }
+                });
+                grupos.forEach(function(g) {
+                    g.items.forEach(function(o) {
+                        o.el.style.setProperty('--gx', (o.r.left - g.left) + 'px');
+                        o.el.style.setProperty('--gy', (o.r.top - g.top) + 'px');
+                        o.el.style.setProperty('--gw', (g.right - g.left) + 'px');
+                        o.el.style.setProperty('--gh', (g.bottom - g.top) + 'px');
+                    });
+                });
+            });
+        }
+        window.addEventListener('resize', refreshGold);
+        window.addEventListener('load', refreshGold);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(refreshGold);
+
         // Al intentar cerrar (X, tocar afuera o Escape) primero se pregunta si ya envió el mensaje
         function pedirCierre() {
             document.getElementById('confirmMain').hidden = true;
             document.getElementById('confirmAsk').hidden = false;
+            refreshGold();
         }
         function volverConfirmacion() {
             document.getElementById('confirmAsk').hidden = true;
             document.getElementById('confirmMain').hidden = false;
+            refreshGold();
         }
         function cerrarConfirmacion() {
             document.getElementById('confirmBox').classList.remove('open');
@@ -1259,18 +1352,6 @@ Quiero pedir una cita en
                 pedirCierre();
             }
         });
-
-        // Aparición suave de las secciones al bajar (el inicio se ve de inmediato)
-        (function() {
-            const els = document.querySelectorAll('.about-section, #servicios > .content-box, #reserva > .content-box');
-            if (!('IntersectionObserver' in window)) return;
-            const io = new IntersectionObserver(function(entries) {
-                entries.forEach(function(en) {
-                    if (en.isIntersecting) { en.target.classList.add('visible'); io.unobserve(en.target); }
-                });
-            }, { threshold: 0.1 });
-            els.forEach(function(el) { el.classList.add('reveal'); io.observe(el); });
-        })();
 
         // ---- Lista única de precios ----
         // Los precios se leen de la tabla "precios" de Supabase. Si algo falla,
