@@ -465,9 +465,9 @@
             40% { --sh: 1; }
             100% { --sh: 1; }
         }
-        #bookingForm, .confirm-overlay, .top-nav { animation: sheen 3s ease-in-out infinite; }
+        #bookingForm, #como-reservar, .confirm-overlay, .top-nav { animation: sheen 3s ease-in-out infinite; }
 
-        .service-item.selected, .gold-input.filled, .btn-submit:not(:disabled), .confirm-btn.primary, .nav-toggle.open {
+        .service-item.selected, .field-wrap.filled, .btn-submit:not(:disabled), .confirm-btn.primary, .nav-toggle.open, .how-go {
             --p: calc(-15% + var(--sh) * 130%);
             background-color: #cbb26a;
             background-image:
@@ -481,7 +481,22 @@
             color: var(--dark-forest-green);
         }
         .nav-toggle.open { font-weight: 700; box-shadow: 0 0 18px rgba(203, 178, 106, 0.35); }
-        .gold-input.filled { font-weight: 700; caret-color: var(--dark-forest-green); box-shadow: 0 0 18px rgba(203, 178, 106, 0.3); }
+        .field-wrap {
+            border: 1px solid rgba(203, 178, 106, 0.5);
+            border-radius: 6px;
+            background-color: rgba(0, 0, 0, 0.25);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .field-wrap input[type="text"], .field-wrap input[type="tel"],
+        .field-wrap input[type="text"]:focus, .field-wrap input[type="tel"]:focus {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+        .field-wrap:focus-within { border-color: var(--elegant-gold); box-shadow: 0 0 0 3px rgba(203, 178, 106, 0.25); }
+        .field-wrap.filled { box-shadow: 0 0 18px rgba(203, 178, 106, 0.3); }
+        .field-wrap.filled input { color: var(--dark-forest-green); font-weight: 700; caret-color: var(--dark-forest-green); }
+        .how-go { font-weight: 700; }
         .btn-submit:not(:disabled) { box-shadow: 0 5px 18px rgba(0,0,0,0.35), 0 0 22px rgba(203, 178, 106, 0.28); }
         .btn-submit:hover:not(:disabled), .confirm-btn.primary:hover { filter: brightness(1.08); }
         .btn-submit:disabled { color: rgba(243, 234, 210, 0.55); }
@@ -496,7 +511,7 @@
         .confirm-overlay {
             display: none;
             position: fixed;
-            inset: 0;
+            top: 0; right: 0; bottom: 0; left: 0;
             z-index: 500;
             background: rgba(8, 18, 11, 0.88);
             backdrop-filter: blur(4px);
@@ -583,7 +598,7 @@
         body::before {
             content: '';
             position: fixed;
-            inset: 0;
+            top: 0; right: 0; bottom: 0; left: 0;
             z-index: -1;
             pointer-events: none;
             background: radial-gradient(ellipse at 50% 35%, transparent 45%, rgba(5, 14, 8, 0.45) 100%);
@@ -592,7 +607,7 @@
         .content-box::before {
             content: '';
             position: absolute;
-            inset: 9px;
+            top: 9px; right: 9px; bottom: 9px; left: 9px;
             border: 1.5px dashed rgba(203, 178, 106, 0.55);
             border-radius: 5px;
             pointer-events: none;
@@ -603,7 +618,7 @@
         #inicio::before {
             content: '';
             position: absolute;
-            inset: 0;
+            top: 0; right: 0; bottom: 0; left: 0;
             pointer-events: none;
             opacity: 0.7;
             --boton: #f1e1a6 0, #b79c52 2.5px, #6d5a26 3.5px, rgba(0, 0, 0, 0.5) 5px, transparent 7px;
@@ -616,10 +631,32 @@
                 linear-gradient(45deg, transparent 48.6%, rgba(0, 0, 0, 0.4) 49.4%, rgba(243, 234, 210, 0.12) 50.6%, transparent 51.4%),
                 linear-gradient(135deg, transparent 48.6%, rgba(0, 0, 0, 0.4) 49.4%, rgba(243, 234, 210, 0.12) 50.6%, transparent 51.4%);
             background-size: 100px 100px;
-            -webkit-mask-image: radial-gradient(ellipse 90% 40% at 50% 45%, transparent 55%, #000 100%);
-            mask-image: radial-gradient(ellipse 90% 40% at 50% 45%, transparent 55%, #000 100%);
+            -webkit-mask-image: radial-gradient(ellipse 110% 45% at 50% 45%, transparent 36%, #000 66%, #000 76%, transparent 100%);
+            mask-image: radial-gradient(ellipse 110% 45% at 50% 45%, transparent 36%, #000 66%, #000 76%, transparent 100%);
         }
 
+        #como-reservar { min-height: 0; padding: 70px 20px 90px; }
+        .how-summary { display: block; list-style: none; cursor: pointer; text-align: center; padding: 6px 0; -webkit-tap-highlight-color: transparent; }
+        .how-summary::-webkit-details-marker { display: none; }
+        .how-title {
+            display: block;
+            font-size: 1.5em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: var(--gold-text-grad);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+        }
+        .how-hint { display: block; margin-top: 8px; font-size: 1.05em; color: var(--cream); }
+        .how-hint .t-open { display: none; }
+        .how-details[open] .how-hint .t-open { display: inline; }
+        .how-details[open] .how-hint .t-closed { display: none; }
+        .how-chevron { display: inline-block; transition: transform 0.3s; }
+        .how-details[open] .how-chevron { transform: rotate(180deg); }
+        .how-details[open] .how-summary { border-bottom: 1px solid rgba(203, 178, 106, 0.25); padding-bottom: 16px; margin-bottom: 22px; }
         .how-intro { font-size: 1.2em; line-height: 1.5; color: var(--cream); text-align: center; margin: 0 0 24px; }
         .how-warning {
             border-left: 4px solid var(--elegant-gold);
@@ -637,7 +674,7 @@
 
         @media (prefers-reduced-motion: reduce) {
             .reveal { opacity: 1; transform: none; transition: none; }
-            #bookingForm, .confirm-overlay, .top-nav, .section-arrow { animation: none; }
+            #bookingForm, #como-reservar, .confirm-overlay, .top-nav, .section-arrow { animation: none; }
         }
 
         @media (max-width: 600px) {
@@ -697,22 +734,23 @@
 
     <section class="page-section" id="como-reservar">
         <div class="content-box">
-            <h3 class="section-title">Cómo reservar tu cita</h3>
-            <p class="how-intro">Es muy fácil. Sigue estos pasos uno por uno y tu cita queda lista.</p>
-            <div class="confirm-steps">
-                <div class="confirm-step"><span class="step-num">1</span><span><strong>Elige tus servicios.</strong> Toca lo que quieres hacerte (corte, barba, peinado...). Cuando lo tocas se pone dorado: eso quiere decir que está elegido. El botón <strong>!</strong> te explica en qué consiste cada servicio.</span></div>
-                <div class="confirm-step"><span class="step-num">2</span><span><strong>Escribe tu nombre y tu teléfono</strong> (8 números). Solo lo usamos para confirmar tu cita.</span></div>
-                <div class="confirm-step"><span class="step-num">3</span><span><strong>Elige el día y la hora.</strong> Solo te salen los horarios que están libres. Los domingos estamos cerrados.</span></div>
-                <div class="confirm-step"><span class="step-num">4</span><span><strong>Marca que aceptas las condiciones</strong> y toca el botón dorado <strong>«Solicitar Cita»</strong>.</span></div>
-                <div class="confirm-step"><span class="step-num">5</span><span><strong>Toca «Abrir WhatsApp» y envía el mensaje.</strong> Se abre WhatsApp con el mensaje ya escrito. Tú solo tienes que presionar enviar.</span></div>
-                <div class="confirm-step"><span class="step-num">6</span><span><strong>¡Listo!</strong> Te llegará un mensaje de agradecimiento confirmando tu cita.</span></div>
-            </div>
-            <div class="how-warning"><strong>Importante:</strong> cuando aparece «Tu cita está agendada», tu turno ya está guardado. <strong>No reserves otra vez.</strong> Solo falta enviar el mensaje por WhatsApp. Si no puedes venir, avísanos con tiempo.</div>
-            <a href="#servicios" class="action-btn how-go">Empezar a reservar</a>
-        </div>
-        <div class="section-arrow">
-            <span>Ver servicios</span>
-            <span class="arrow">&#8595;</span>
+            <details class="how-details">
+                <summary class="how-summary">
+                    <span class="how-title">Cómo reservar tu cita</span>
+                    <span class="how-hint"><span class="t-closed">Toca aquí para ver los pasos</span><span class="t-open">Toca aquí para cerrar</span> <span class="how-chevron">&#9662;</span></span>
+                </summary>
+                <p class="how-intro">Es muy fácil. Sigue estos pasos uno por uno y tu cita queda lista.</p>
+                <div class="confirm-steps">
+                    <div class="confirm-step"><span class="step-num">1</span><span><strong>Elige tus servicios.</strong> Toca lo que quieres hacerte (corte, barba, peinado...). Cuando lo tocas se pone dorado: eso quiere decir que está elegido. El botón <strong>!</strong> te explica en qué consiste cada servicio.</span></div>
+                    <div class="confirm-step"><span class="step-num">2</span><span><strong>Escribe tu nombre y tu teléfono</strong> (8 números). Solo lo usamos para confirmar tu cita.</span></div>
+                    <div class="confirm-step"><span class="step-num">3</span><span><strong>Elige el día y la hora.</strong> Solo te salen los horarios que están libres. Los domingos estamos cerrados.</span></div>
+                    <div class="confirm-step"><span class="step-num">4</span><span><strong>Marca que aceptas las condiciones</strong> y toca el botón dorado <strong>«Solicitar Cita»</strong>.</span></div>
+                    <div class="confirm-step"><span class="step-num">5</span><span><strong>Toca «Abrir WhatsApp» y envía el mensaje.</strong> Se abre WhatsApp con el mensaje ya escrito. Tú solo tienes que presionar enviar.</span></div>
+                    <div class="confirm-step"><span class="step-num">6</span><span><strong>¡Listo!</strong> Te llegará un mensaje de agradecimiento confirmando tu cita.</span></div>
+                </div>
+                <div class="how-warning"><strong>Importante:</strong> cuando aparece «Tu cita está agendada», tu turno ya está guardado. <strong>No reserves otra vez.</strong> Solo falta enviar el mensaje por WhatsApp. Si no puedes venir, avísanos con tiempo.</div>
+                <a href="#servicios" class="action-btn how-go">Empezar a reservar</a>
+            </details>
         </div>
     </section>
 
@@ -787,10 +825,10 @@
             <div class="content-box">
                 <h3 class="section-title">Tus Datos</h3>
                 <div class="form-group">
-                    <input type="text" class="gold-input" id="clientName" placeholder="Nombre" required maxlength="60" autocomplete="name">
+                    <div class="field-wrap"><input type="text" id="clientName" placeholder="Nombre" required maxlength="60" autocomplete="name"></div>
                 </div>
                 <div class="form-group">
-                    <input type="tel" class="gold-input" id="clientPhone" placeholder="Teléfono (8 dígitos)" required pattern="[0-9]{8}" maxlength="8" inputmode="numeric" autocomplete="tel">
+                    <div class="field-wrap"><input type="tel" id="clientPhone" placeholder="Teléfono (8 dígitos)" required pattern="[0-9]{8}" maxlength="8" inputmode="numeric" autocomplete="tel"></div>
                     <span class="field-hint">Su número solo se usará para confirmar su cita y evitar reservas duplicadas</span>
                 </div>
 
@@ -890,6 +928,15 @@
         window.addEventListener('pageshow', function() { window.scrollTo(0, 0); });
 
         const WHATSAPP_NUMBER = '5358592776';
+
+        // randomUUID no existe en teléfonos viejos; este respaldo funciona en todos
+        function nuevoUUID() {
+            if (window.crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = (window.crypto && crypto.getRandomValues) ? (crypto.getRandomValues(new Uint8Array(1))[0] & 15) : Math.floor(Math.random() * 16);
+                return (c === 'x' ? r : ((r & 3) | 8)).toString(16);
+            });
+        }
 
         const dateInput = document.getElementById('date');
         const timeSelect = document.getElementById('time');
@@ -1218,7 +1265,7 @@
                 }
             });
 
-            const reservaId = crypto.randomUUID();
+            const reservaId = nuevoUUID();
             const turnosAOcupar = getSlotsForBooking(turnoSeleccionado);
             const filas = turnosAOcupar.map(turno => ({
                 fecha,
@@ -1327,15 +1374,15 @@ Quiero pedir una cita en
         // Nombre y teléfono se ponen dorados cuando tienen contenido
         function syncFilled() {
             [nameInput, phoneInput].forEach(function(inp) {
-                inp.classList.add('gold-input');
-                inp.classList.toggle('filled', inp.value.trim().length > 0);
+                const w = inp.closest('.field-wrap');
+                if (w) w.classList.toggle('filled', inp.value.trim().length > 0);
             });
         }
 
         // Agrupa los elementos dorados que están pegados (menos de 32px) y les da el mismo
         // "lienzo": el degradado y el destello se ven como si fueran un solo botón.
         function refreshGold() {
-            const sel = '.service-item.selected, .gold-input.filled, .btn-submit:not(:disabled), .confirm-btn.primary, .nav-toggle.open';
+            const sel = '.service-item.selected, .field-wrap.filled, .btn-submit:not(:disabled), .confirm-btn.primary, .nav-toggle.open, .how-go';
             const todos = Array.prototype.slice.call(document.querySelectorAll(sel))
                 .map(function(el) { return { el: el, r: el.getBoundingClientRect(), ctx: el.closest('#confirmBox') ? 'm' : (el.closest('.top-nav') ? 'n' : 'p') }; })
                 .filter(function(o) { return o.r.width > 0; })
@@ -1365,6 +1412,7 @@ Quiero pedir una cita en
             });
         }
         window.addEventListener('resize', refreshGold);
+        document.querySelector('.how-details').addEventListener('toggle', refreshGold);
         window.addEventListener('load', function() { syncFilled(); refreshGold(); });
         if (document.fonts && document.fonts.ready) document.fonts.ready.then(refreshGold);
 
