@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>Mono's Barbería | Cortes Clásicos y Reserva Online</title>
+    <meta name="description" content="Bienvenido a Mono's Barbería. Especialistas en cortes de caballero, barbas y estilo vintage. Reserva tu cita fácilmente desde nuestra web.">
+    <meta name="keywords" content="barbería, corte de cabello, Mono's Barbería, barbero, reserva de citas, barber shop">
+    <meta name="author" content="Félix">
+    <meta property="og:title" content="Mono's Barbería">
+    <meta property="og:description" content="Agenda tu cita para un corte de nivel profesional.">
+    <meta property="og:image" content="https://monosbarberia.github.io/Monos-barber-a/logo.jpg">
+    <meta property="og:url" content="https://monosbarberia.github.io/Monos-barber-a/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="icon" type="image/png" sizes="520x520" href="favicon.jpg">
+    <link rel="apple-touch-icon" sizes="520x520" href="favicon.jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --dark: #1c3823;
+            --gold: #cbb26a;
+            --gold-hover: #e0cca0;
+            --soft: rgba(203, 178, 106, 0.08);
+            --border: rgba(203, 178, 106, 0.28);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; height: 100%; }
+        body {
+            background: var(--dark);
+            color: var(--gold);
+            font-family: 'Cormorant Garamond', serif;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== PANTALLAS ===== */
+        .screen {
+            display: none;
+            min-height: 100vh;
+            min-height: 100dvh;
+            flex-direction: column;
+            padding: 24px 18px 40px;
+        }
+        .screen.active { display: flex; }
+
+        /* ===== HOME ===== */
+        #home {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            gap: 0;
+        }
+        .logo-wrap {
+            margin-bottom: 10px;
+        }
+        .logo-wrap img {
+            max-width: 220px;
+            width: 70%;
+            height: auto;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.45));
+        }
+        .home-title {
+            font-size: 1.85em;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin: 0 0 4px;
+            line-height: 1.15;
+        }
+        .home-sub {
+            font-size: 1.05em;
+            font-style: italic;
+            opacity: 0.7;
+            margin: 0 0 18px;
+        }
+        .welcome-box {
+            max-width: 340px;
+            width: 100%;
+            font-size: 0.98em;
+            line-height: 1.45;
+            opacity: 0.85;
+            margin: 0 auto 22px;
+            text-align: center;
+        }
+        .slogan {
+            font-style: italic;
+            font-size: 1.05em;
+            margin: 10px 0 0;
+            opacity: 0.9;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 340px;
+            background: var(--soft);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 22px 18px 20px;
+            margin-bottom: 18px;
+        }
+        .login-card label {
+            display: block;
+            font-size: 0.78em;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            opacity: 0.65;
+            margin-bottom: 6px;
+            text-align: left;
+        }
+        .field {
+            width: 100%;
+            background: rgba(0,0,0,0.22);
+            border: 1px solid var(--border);
+            color: var(--gold);
+            font-family: inherit;
+            font-size: 1.15em;
+            padding: 14px 14px;
+            border-radius: 8px;
+            outline: none;
+            margin-bottom: 14px;
+            transition: border-color 0.2s;
+        }
+        .field:focus { border-color: var(--gold); }
+        .field::placeholder { color: rgba(203,178,106,0.4); }
+        .field.filled { border-color: rgba(203,178,106,0.65); }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--gold);
+            color: var(--dark);
+            border: none;
+            font-family: inherit;
+            font-size: 1.2em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+        }
+        .btn-primary:active { background: var(--gold-hover); }
+        .btn-primary:disabled {
+            background: rgba(203,178,106,0.18);
+            color: rgba(203,178,106,0.4);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .quick-links {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 340px;
+            margin-top: 4px;
+        }
+        .quick-btn {
+            flex: 1;
+            text-align: center;
+            text-decoration: none;
+            color: var(--gold);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 6px;
+            font-size: 0.85em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+        .quick-btn:active { background: rgba(203,178,106,0.12); }
+
+        /* ===== BOOKING ===== */
+        #booking {
+            padding-top: 16px;
+            padding-bottom: 50px;
+        }
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            max-width: 480px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .back-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--gold);
+            font-family: inherit;
+            font-size: 0.9em;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .client-chip {
+            font-size: 0.95em;
+            opacity: 0.85;
+            text-align: right;
+            max-width: 60%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .content {
+            max-width: 480px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .section-title {
+            font-size: 1.25em;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin: 0 0 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .service-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+        .service-row { display: flex; align-items: center; gap: 8px; }
+        .service-item {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.18);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px 16px;
+            font-size: 1.12em;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+        .service-item input { position: absolute; opacity: 0; pointer-events: none; }
+        .service-item.selected {
+            background: var(--gold);
+            color: var(--dark);
+            font-weight: 700;
+            border-color: var(--gold);
+        }
+        .info-btn {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            border: 1px solid rgba(203,178,106,0.55);
+            background: transparent;
+            color: var(--gold);
+            font-family: inherit;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0;
+        }
+
+        .form-group { margin-bottom: 14px; }
+        input[type="date"], select {
+            width: 100%;
+            background: rgba(0,0,0,0.22);
+            border: 1px solid var(--border);
+            color: var(--gold);
+            font-family: inherit;
+            font-size: 1.15em;
+            padding: 14px;
+            border-radius: 8px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        select:disabled { opacity: 0.5; }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(75%) sepia(40%) saturate(400%) hue-rotate(5deg);
+            cursor: pointer;
+        }
+        select option { background: #1c3823; color: var(--gold); }
+
+        .live-summary {
+            background: rgba(0,0,0,0.28);
+            border-left: 4px solid var(--gold);
+            border-radius: 8px;
+            padding: 16px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .terms-box {
+            background: rgba(0,0,0,0.18);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 0.98em;
+            line-height: 1.45;
+            margin-bottom: 18px;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .checkbox-container input {
+            width: 20px; height: 20px;
+            accent-color: var(--gold);
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: var(--gold);
+            color: var(--dark);
+            border: none;
+            font-family: inherit;
+            font-size: 1.25em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 5px 16px rgba(0,0,0,0.3);
+        }
+        .btn-submit:disabled {
+            background: rgba(203,178,106,0.15);
+            color: rgba(203,178,106,0.4);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* ===== TOOLTIP ===== */
+        .info-tooltip {
+            display: none;
+            position: fixed;
+            z-index: 300;
+            background: rgba(18, 38, 22, 0.98);
+            border: 1px solid rgba(203,178,106,0.5);
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 1em;
+            line-height: 1.45;
+            color: var(--gold);
+            box-shadow: 0 8px 28px rgba(0,0,0,0.5);
+            max-width: 260px;
+            pointer-events: none;
+        }
+        .info-tooltip.visible { display: block; }
+
+        /* ===== CONFIRMACIÓN ===== */
+        .confirm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 22, 14, 0.92);
+            z-index: 400;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .confirm-overlay.open { display: flex; }
+        .confirm-box {
+            background: var(--dark);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 28px 22px;
+            max-width: 360px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .confirm-box h3 {
+            margin: 0 0 12px;
+            font-size: 1.4em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .confirm-box p { margin: 0 0 18px; line-height: 1.5; opacity: 0.9; }
+        .confirm-btns { display: flex; flex-direction: column; gap: 10px; }
+        .confirm-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1.05em;
+            font-weight: 700;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+        }
+        .confirm-btn.primary {
+            background: var(--gold);
+            color: var(--dark);
+        }
+        .confirm-btn.secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--gold);
+        }
+
+        /* ===== UTIL ===== */
+        .hidden { display: none !important; }
+        @media (max-width: 360px) {
+            .home-title { font-size: 1.55em; letter-spacing: 2px; }
+            .logo-wrap img { max-width: 180px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="info-tooltip" id="globalTooltip"></div>
+
+    <!-- ========== PANTALLA 1: INICIO + LOGIN ========== -->
+    <div id="home" class="screen active">
+        <div class="logo-wrap">
+            <img src="logo.png" alt="Mono's Barbería" decoding="async">
+        </div>
+        <h1 class="home-title">Mono's Barbería</h1>
+        <p class="home-sub">Holguín · +300 clientes satisfechos</p>
+
+        <div class="welcome-box">
+            Estás en el lugar ideal para una experiencia de primer nivel.
+            Dirigida por Félix y Paola. Elegancia clásica con estilo moderno.
+            <div class="slogan">Para que luzcas limpio, fino, mono...</div>
+        </div>
+
+        <div class="login-card">
+            <label for="clientName">Tu nombre</label>
+            <input type="text" id="clientName" class="field" placeholder="Nombre completo" maxlength="60" autocomplete="name" required>
+
+            <label for="clientPhone">Teléfono (8 dígitos)</label>
+            <input type="tel" id="clientPhone" class="field" placeholder="5xxxxxxx" pattern="[0-9]{8}" maxlength="8" inputmode="numeric" autocomplete="tel" required>
+
+            <button type="button" class="btn-primary" id="btnStart" disabled>Agendar turno</button>
+        </div>
+
+        <div class="quick-links">
+            <a href="https://www.google.com/maps/search/?api=1&query=Monos+Barberia+Holguin" target="_blank" rel="noopener" class="quick-btn">Ubicación</a>
+            <a href="https://www.instagram.com/monos_barberia_holguin" target="_blank" rel="noopener" class="quick-btn">Instagram</a>
+            <a href="https://www.facebook.com/profile.php?id=61550881144010" target="_blank" rel="noopener" class="quick-btn">Facebook</a>
+        </div>
+    </div>
+
+    <!-- ========== PANTALLA 2: RESERVA ========== -->
+    <div id="booking" class="screen">
+        <div class="top-bar">
+            <button type="button" class="back-btn" id="btnBack">← Inicio</button>
+            <div class="client-chip" id="clientChip"></div>
+        </div>
+
+        <form id="bookingForm" class="content">
+            <h3 class="section-title">Elige tus servicios</h3>
+            <div class="service-list">
+                <div class="service-row">
+                    <label class="service-item" onclick="toggleService(this, 'main-cut')">
+                        <span><input type="checkbox" name="service" value="Corte sencillo" data-price="400" data-group="main-cut" data-name="Corte sencillo"> Corte sencillo</span>
+                        <span>$400</span>
+                    </label>
+                    <button type="button" class="info-btn" data-info="Corte con tijera o con máquina sencillo. También puede ser un afeitado completo de cabeza.">!</button>
+                </div>
+                <div class="service-row">
+                    <label class="service-item" onclick="toggleService(this, 'main-cut')">
+                        <span><input type="checkbox" name="service" value="Degradado" data-price="650" data-group="main-cut" data-name="Degradado"> Degradado</span>
+                        <span>$650</span>
+                    </label>
+                    <button type="button" class="info-btn" data-info="Corte degradado desde el cero o desde el afeitado, hasta el número que desee, según el tipo de corte y estilo que se vaya a realizar.">!</button>
+                </div>
+                <div class="service-row">
+                    <label class="service-item" onclick="toggleService(this, 'addon')">
+                        <span><input type="checkbox" name="service" value="Barba" data-price="150" data-group="addon" data-name="Barba"> Barba</span>
+                        <span>$150</span>
+                    </label>
+                    <button type="button" class="info-btn" data-info="Perfilado de barba o afeitado completo, según la preferencia del cliente.">!</button>
+                </div>
+                <div class="service-row">
+                    <label class="service-item" onclick="toggleService(this, 'addon')">
+                        <span><input type="checkbox" name="service" value="Diseño Personalizado" data-price="100" data-group="addon" data-name="Diseño Personalizado"> Diseño Personalizado</span>
+                        <span>$100</span>
+                    </label>
+                    <button type="button" class="info-btn" data-info="Diseño personalizado que puede incluir dibujos o figuras a elección del cliente.">!</button>
+                </div>
+                <div class="service-row">
+                    <label class="service-item" onclick="toggleService(this, 'addon')">
+                        <span><input type="checkbox" name="service" value="Peinado" data-price="200" data-group="addon" data-name="Peinado"> Peinado</span>
+                        <span>$200</span>
+                    </label>
+                    <button type="button" class="info-btn" data-info="Peinado y estilizado con los productos disponibles en el momento.">!</button>
+                </div>
+            </div>
+
+            <h3 class="section-title">Opciones adicionales</h3>
+            <div class="service-list" style="margin-bottom: 22px;">
+                <label class="service-item" style="border-color: rgba(203,178,106,0.7);" onclick="toggleExtra(this, 'cafeCheck')">
+                    <span><input type="checkbox" id="cafeCheck" data-price="40" data-name="Café expresso"> Café expresso</span>
+                    <span>+$40</span>
+                </label>
+                <label class="service-item" style="border-color: rgba(203,178,106,0.7);" onclick="toggleExtra(this, 'ponqueCheck')">
+                    <span><input type="checkbox" id="ponqueCheck" data-price="100" data-name="Ponquecito casero"> Ponquecito casero</span>
+                    <span>+$100</span>
+                </label>
+            </div>
+
+            <h3 class="section-title">Fecha y horario</h3>
+            <div class="form-group">
+                <input type="date" id="date" required>
+            </div>
+            <div class="form-group">
+                <select id="time" required disabled>
+                    <option value="">Selecciona fecha primero...</option>
+                </select>
+            </div>
+
+            <div class="live-summary">
+                <div>
+                    <div style="font-style:italic; opacity:0.75; font-size:0.9em;">Tiempo estimado</div>
+                    <div id="live-duration" style="font-size:1.1em; margin-top:3px;">--</div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-style:italic; opacity:0.75; font-size:0.9em;">Total</div>
+                    <div id="live-total" style="font-weight:700; font-size:1.45em; color:#fff;">$0</div>
+                </div>
+            </div>
+
+            <div class="terms-box">
+                <strong style="display:block; margin-bottom:6px; color:#fff;">Términos de reserva</strong>
+                Para respetar el tiempo de todos, agradecemos que llegue puntual. Si no puede asistir, infórmanos con antelación para ceder el turno; de no hacerlo se le cobrará en la próxima cita como si se le hubiera realizado el servicio.
+                <label class="checkbox-container">
+                    <input type="checkbox" id="acceptTerms">
+                    <span>He leído y acepto las condiciones</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn" disabled>Solicitar cita</button>
+        </form>
+    </div>
+
+    <!-- ========== CONFIRMACIÓN ========== -->
+    <div class="confirm-overlay" id="confirmBox">
+        <div class="confirm-box">
+            <div id="confirmMain">
+                <h3>Tu cita está agendada</h3>
+                <p>Tu turno ya quedó guardado. Solo falta enviarnos el mensaje por WhatsApp para confirmar.</p>
+                <div class="confirm-btns">
+                    <a id="waApp" class="confirm-btn primary" href="#">Abrir WhatsApp</a>
+                    <button type="button" class="confirm-btn secondary" onclick="pedirCierre()">Cerrar</button>
+                </div>
+            </div>
+            <div id="confirmAsk" class="hidden">
+                <h3>¿Ya enviaste el mensaje?</h3>
+                <p>Si aún no lo enviaste, vuelve y tócalo. Si ya lo enviaste, puedes cerrar.</p>
+                <div class="confirm-btns">
+                    <a id="waApp2" class="confirm-btn primary" href="#">Abrir WhatsApp otra vez</a>
+                    <button type="button" class="confirm-btn secondary" onclick="cerrarConfirmacion()">Ya lo envié, cerrar</button>
+                    <button type="button" class="confirm-btn secondary" onclick="volverConfirmacion()">Volver</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+    <script>
+        const SUPABASE_URL = "https://ldxxflhwpyzldisydhmd.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
+        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        window.firebaseReady = true;
+        document.dispatchEvent(new Event('firebase-ready'));
+    </script>
+
+    <script>
+        // ===== CONFIG =====
+        const WHATSAPP_NUMBER = '5358592776';
+
+        // ===== ELEMENTOS =====
+        const homeScreen = document.getElementById('home');
+        const bookingScreen = document.getElementById('booking');
+        const nameInput = document.getElementById('clientName');
+        const phoneInput = document.getElementById('clientPhone');
+        const btnStart = document.getElementById('btnStart');
+        const btnBack = document.getElementById('btnBack');
+        const clientChip = document.getElementById('clientChip');
+        const dateInput = document.getElementById('date');
+        const timeSelect = document.getElementById('time');
+        const acceptTerms = document.getElementById('acceptTerms');
+        const submitBtn = document.getElementById('submitBtn');
+        const liveTotal = document.getElementById('live-total');
+        const liveDuration = document.getElementById('live-duration');
+        const tooltip = document.getElementById('globalTooltip');
+        const bookingForm = document.getElementById('bookingForm');
+
+        // ===== UTIL =====
+        function nuevoUUID() {
+            if (window.crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = (window.crypto && crypto.getRandomValues) ? (crypto.getRandomValues(new Uint8Array(1))[0] & 15) : Math.floor(Math.random() * 16);
+                return (c === 'x' ? r : ((r & 3) | 8)).toString(16);
+            });
+        }
+        function getTodayStr() {
+            const n = new Date();
+            return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+        }
+        dateInput.setAttribute('min', getTodayStr());
+
+        function slotToMinutes(slot) {
+            const m = slot.match(/^(\d{1,2}):(\d{2}) (AM|PM)$/);
+            if (!m) return 0;
+            let h = parseInt(m[1]) % 12;
+            if (m[3] === 'PM') h += 12;
+            return h * 60 + parseInt(m[2]);
+        }
+        function slotYaPaso(slot) {
+            const n = new Date();
+            return slotToMinutes(slot) <= n.getHours() * 60 + n.getMinutes();
+        }
+        function formatTime12h(h, m) {
+            const period = h >= 12 ? 'PM' : 'AM';
+            let h12 = h % 12;
+            if (h12 === 0) h12 = 12;
+            return `${h12}:${String(m).padStart(2,'0')} ${period}`;
+        }
+        function buildAllSlots() {
+            const slots = [];
+            const ranges = [
+                { startH: 9, startM: 0, endH: 11, endM: 30 },
+                { startH: 14, startM: 0, endH: 16, endM: 0 }
+            ];
+            ranges.forEach(r => {
+                let h = r.startH, m = r.startM;
+                while (h < r.endH || (h === r.endH && m <= r.endM)) {
+                    slots.push(formatTime12h(h, m));
+                    m += 30;
+                    if (m >= 60) { m -= 60; h += 1; }
+                }
+            });
+            return slots;
+        }
+
+        async function conReintento(fn) {
+            let ultimo;
+            for (let i = 0; i < 3; i++) {
+                try {
+                    const res = await Promise.race([
+                        fn(),
+                        new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000))
+                    ]);
+                    if (res && res.error) throw res.error;
+                    return res;
+                } catch (e) {
+                    ultimo = e;
+                    await new Promise(r => setTimeout(r, 800));
+                }
+            }
+            throw ultimo;
+        }
+
+        // ===== LOGIN / NAVEGACIÓN =====
+        function validarLogin() {
+            const ok = nameInput.value.trim().length >= 2 && /^[0-9]{8}$/.test(phoneInput.value.trim());
+            btnStart.disabled = !ok;
+            nameInput.classList.toggle('filled', nameInput.value.trim().length > 0);
+            phoneInput.classList.toggle('filled', phoneInput.value.trim().length > 0);
+        }
+        nameInput.addEventListener('input', validarLogin);
+        phoneInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 8);
+            validarLogin();
+        });
+
+        btnStart.addEventListener('click', function() {
+            if (btnStart.disabled) return;
+            clientChip.textContent = nameInput.value.trim().split(' ')[0] + ' · ' + phoneInput.value;
+            homeScreen.classList.remove('active');
+            bookingScreen.classList.add('active');
+            window.scrollTo(0, 0);
+            updateSummary();
+            updateTimeSlots();
+        });
+
+        btnBack.addEventListener('click', function() {
+            bookingScreen.classList.remove('active');
+            homeScreen.classList.add('active');
+            window.scrollTo(0, 0);
+        });
+
+        // ===== SERVICIOS =====
+        function toggleService(label, group) {
+            const cb = label.querySelector('input[type="checkbox"]');
+            if (group === 'main-cut') {
+                if (cb.checked) {
+                    cb.checked = false;
+                    label.classList.remove('selected');
+                } else {
+                    document.querySelectorAll('input[data-group="main-cut"]').forEach(inp => {
+                        inp.checked = false;
+                        inp.closest('.service-item').classList.remove('selected');
+                    });
+                    cb.checked = true;
+                    label.classList.add('selected');
+                }
+            } else {
+                cb.checked = !cb.checked;
+                label.classList.toggle('selected', cb.checked);
+            }
+            updateSummary();
+        }
+        function toggleExtra(label, id) {
+            const cb = document.getElementById(id);
+            cb.checked = !cb.checked;
+            label.classList.toggle('selected', cb.checked);
+            updateSummary();
+        }
+
+        function updateSummary() {
+            let total = 0, selectedCount = 0, isDegradado = false, addonsCount = 0;
+            document.querySelectorAll('input[name="service"]').forEach(cb => {
+                if (cb.checked) {
+                    selectedCount++;
+                    total += parseInt(cb.getAttribute('data-price'));
+                    if (cb.value === 'Degradado') isDegradado = true;
+                    if (cb.getAttribute('data-group') === 'addon') addonsCount++;
+                }
+            });
+            ['cafeCheck', 'ponqueCheck'].forEach(id => {
+                const cb = document.getElementById(id);
+                if (cb && cb.checked) total += parseInt(cb.getAttribute('data-price'));
+            });
+
+            let durationText = '--';
+            if (selectedCount === 1) durationText = '30 minutos';
+            else if (isDegradado && addonsCount === 3) durationText = '1 hora y 30 min';
+            else if (selectedCount > 1) durationText = '1 hora aprox.';
+
+            liveTotal.textContent = '$' + total;
+            liveDuration.textContent = durationText;
+            validateSubmit();
+        }
+
+        // ===== HORARIOS =====
+        async function updateTimeSlots() {
+            if (!dateInput.value) {
+                timeSelect.innerHTML = '<option value="">Selecciona fecha primero...</option>';
+                timeSelect.disabled = true;
+                validateSubmit();
+                return;
+            }
+            const p = dateInput.value.split('-');
+            const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
+
+            if (dateInput.value < getTodayStr()) {
+                timeSelect.innerHTML = '<option value="">No puedes elegir fechas pasadas</option>';
+                timeSelect.disabled = true;
+                validateSubmit();
+                return;
+            }
+            if (d.getDay() === 0) {
+                timeSelect.innerHTML = '<option value="">Cerrado los domingos</option>';
+                timeSelect.disabled = true;
+                validateSubmit();
+                return;
+            }
+
+            timeSelect.innerHTML = '<option value="">Cargando turnos...</option>';
+            timeSelect.disabled = true;
+
+            const allSlots = buildAllSlots();
+            let occupiedSlots = [];
+
+            let waited = 0;
+            while (!window.firebaseReady && waited < 5000) {
+                await new Promise(r => setTimeout(r, 200));
+                waited += 200;
+            }
+
+            try {
+                const { data } = await conReintento(() =>
+                    window.supabaseClient
+                        .from('citas')
+                        .select('horario')
+                        .eq('fecha', dateInput.value)
+                );
+                if (data) occupiedSlots = data.map(r => r.horario);
+            } catch (e) {
+                // si falla la red, mostramos todos los turnos
+            }
+
+            const isToday = dateInput.value === getTodayStr();
+            const disponibles = allSlots.filter(s => {
+                if (occupiedSlots.includes(s)) return false;
+                if (isToday && slotYaPaso(s)) return false;
+                return true;
+            });
+
+            if (disponibles.length === 0) {
+                timeSelect.innerHTML = '<option value="">No hay turnos disponibles</option>';
+                timeSelect.disabled = true;
+            } else {
+                timeSelect.innerHTML = '<option value="">Elige horario...</option>' +
+                    disponibles.map(s => `<option value="${s}">${s}</option>`).join('');
+                timeSelect.disabled = false;
+            }
+            validateSubmit();
+        }
+
+        dateInput.addEventListener('change', updateTimeSlots);
+        timeSelect.addEventListener('change', validateSubmit);
+        acceptTerms.addEventListener('change', validateSubmit);
+
+        function validateSubmit() {
+            const hasService = document.querySelectorAll('input[name="service"]:checked').length > 0;
+            const ok = hasService && dateInput.value && timeSelect.value && acceptTerms.checked;
+            submitBtn.disabled = !ok;
+        }
+
+        // ===== TOOLTIP =====
+        let tooltipVisible = false;
+        document.querySelectorAll('.info-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const info = this.getAttribute('data-info');
+                if (tooltipVisible && tooltip.textContent === info) {
+                    tooltip.classList.remove('visible');
+                    tooltipVisible = false;
+                    return;
+                }
+                tooltip.textContent = info;
+                const rect = this.getBoundingClientRect();
+                let left = rect.left - 270;
+                if (left < 10) left = rect.right + 10;
+                let top = rect.top - 10;
+                if (top + 120 > window.innerHeight) top = window.innerHeight - 130;
+                tooltip.style.left = left + 'px';
+                tooltip.style.top = top + 'px';
+                tooltip.classList.add('visible');
+                tooltipVisible = true;
+            });
+        });
+        document.addEventListener('click', function() {
+            tooltip.classList.remove('visible');
+            tooltipVisible = false;
+        });
+
+        // ===== PRECIOS DESDE SUPABASE =====
+        function normKey(s) {
+            return String(s || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+        async function cargarPrecios() {
+            try {
+                const { data, error } = await window.supabaseClient.from('precios').select('servicio,precio');
+                if (error || !data || !data.length) return;
+                const mapa = {};
+                data.forEach(r => { mapa[normKey(r.servicio)] = parseInt(r.precio); });
+                document.querySelectorAll('input[data-price]').forEach(inp => {
+                    const nombre = inp.getAttribute('data-name') || inp.value;
+                    const precio = mapa[normKey(nombre)];
+                    if (!Number.isFinite(precio)) return;
+                    inp.setAttribute('data-price', precio);
+                    const etiqueta = inp.closest('.service-item').querySelector(':scope > span:last-child');
+                    if (etiqueta) etiqueta.textContent = (inp.id ? '+$' : '$') + precio;
+                });
+                updateSummary();
+            } catch (e) { /* se queda con los precios del HTML */ }
+        }
+        cargarPrecios();
+
+        // ===== ENVÍO =====
+        bookingForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (submitBtn.disabled) return;
+
+            const nombre = nameInput.value.trim();
+            const telefono = phoneInput.value.trim();
+            const fecha = dateInput.value;
+            const time = timeSelect.value;
+            const duration = liveDuration.textContent;
+
+            let selected = [];
+            let total = 0;
+            document.querySelectorAll('input[name="service"]:checked').forEach(cb => {
+                selected.push(cb.value);
+                total += parseInt(cb.getAttribute('data-price'));
+            });
+            ['cafeCheck', 'ponqueCheck'].forEach(id => {
+                const cb = document.getElementById(id);
+                if (cb && cb.checked) {
+                    selected.push(cb.getAttribute('data-name'));
+                    total += parseInt(cb.getAttribute('data-price'));
+                }
+            });
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Guardando...';
+
+            try {
+                await conReintento(() =>
+                    window.supabaseClient.from('citas').insert({
+                        id: nuevoUUID(),
+                        nombre: nombre,
+                        telefono: telefono,
+                        fecha: fecha,
+                        horario: time,
+                        servicios: selected.join(', '),
+                        total: total,
+                        duracion: duration,
+                        creado: new Date().toISOString()
+                    })
+                );
+
+                // Preparar WhatsApp
+                const p = fecha.split('-');
+                const dateObj = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
+                const dayName = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(dateObj);
+                const formattedDate = `${dayName} ${p[2]}-${p[1]}-${p[0]}`;
+
+                const texto =
+`¡Hola Felix!
+Quiero pedir una cita en
+*Mono's Barberia Holguin*
+
+👤Nombre: ${nombre}
+📱Telefono: ${telefono}
+📍Direccion: Maceo 254 e/ Cables y Angel Guerra
+📆Fecha: ${formattedDate}
+🕙Horario: ${time}
+☕️Servicio: ${selected.join(', ')}
+⌛️Duracion aprox: ${duration}
+💰Total a pagar: $${total}`;
+
+                const msg = encodeURIComponent(texto);
+                const enlace = `whatsapp://send?phone=${WHATSAPP_NUMBER}&text=${msg}`;
+                document.getElementById('waApp').href = enlace;
+                document.getElementById('waApp2').href = enlace;
+
+                document.getElementById('confirmMain').classList.remove('hidden');
+                document.getElementById('confirmAsk').classList.add('hidden');
+                document.getElementById('confirmBox').classList.add('open');
+
+            } catch (err) {
+                alert('No se pudo guardar la cita. Revisa tu conexión e inténtalo de nuevo.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Solicitar cita';
+                return;
+            }
+
+            submitBtn.textContent = 'Solicitar cita';
+            validateSubmit();
+        });
+
+        // ===== CONFIRMACIÓN =====
+        function pedirCierre() {
+            document.getElementById('confirmMain').classList.add('hidden');
+            document.getElementById('confirmAsk').classList.remove('hidden');
+        }
+        function volverConfirmacion() {
+            document.getElementById('confirmAsk').classList.add('hidden');
+            document.getElementById('confirmMain').classList.remove('hidden');
+        }
+        function cerrarConfirmacion() {
+            document.getElementById('confirmBox').classList.remove('open');
+            // limpia servicios y fecha, conserva nombre/teléfono
+            document.querySelectorAll('.service-item.selected').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('input[name="service"], #cafeCheck, #ponqueCheck').forEach(cb => { cb.checked = false; });
+            dateInput.value = '';
+            acceptTerms.checked = false;
+            updateSummary();
+            updateTimeSlots();
+            // vuelve al inicio
+            bookingScreen.classList.remove('active');
+            homeScreen.classList.add('active');
+            window.scrollTo(0, 0);
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('confirmBox').classList.contains('open')) {
+                pedirCierre();
+            }
+        });
+
+        // Arrancar siempre arriba
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        window.scrollTo(0, 0);
+    </script>
+</body>
+</html>
