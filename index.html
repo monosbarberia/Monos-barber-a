@@ -518,28 +518,29 @@
         .reveal { opacity: 0; transition: opacity 0.5s ease; }
         .reveal.visible { opacity: 1; }
 
-        /* Capitoné detrás del logo: estático, un solo fondo (sin máscaras ni filtros).
-           Lleva la misma textura de grano que el resto de la web y se funde con ella abajo. */
+        /* Inicio limpio: mismo grano que toda la web + una luz suave detrás del logo.
+           Todo estático (sin máscaras ni filtros), así que es muy ligero. */
         #inicio {
-            --boton: #2e5738 0, #173323 1.5px, #0d1b12 3.2px, rgba(0, 0, 0, 0.6) 5px, transparent 7px;
-            --luz: rgba(255, 255, 255, 0.07) 0, rgba(255, 255, 255, 0) 42px;
             background-color: #1c3823;
             background-image:
                 var(--grano),
-                linear-gradient(to bottom, #1c3823 0%, rgba(28, 56, 35, 0) 10%, rgba(28, 56, 35, 0) 58%, #1c3823 100%),
-                radial-gradient(ellipse 110% 42% at 50% 45%, #1c3823 24%, rgba(28, 56, 35, 0) 64%),
-                radial-gradient(circle at 50% 50%, var(--boton)),
-                radial-gradient(circle at 0 0, var(--boton)),
-                radial-gradient(circle at 100% 0, var(--boton)),
-                radial-gradient(circle at 0 100%, var(--boton)),
-                radial-gradient(circle at 100% 100%, var(--boton)),
-                radial-gradient(circle at 50% 0, var(--luz)),
-                radial-gradient(circle at 50% 100%, var(--luz)),
-                radial-gradient(circle at 0 50%, var(--luz)),
-                radial-gradient(circle at 100% 50%, var(--luz)),
-                linear-gradient(45deg, transparent 47.8%, rgba(0, 0, 0, 0.3) 48.8%, rgba(0, 0, 0, 0.55) 49.6%, rgba(243, 234, 210, 0.16) 50.4%, transparent 51.6%),
-                linear-gradient(135deg, transparent 47.8%, rgba(0, 0, 0, 0.3) 48.8%, rgba(0, 0, 0, 0.55) 49.6%, rgba(243, 234, 210, 0.16) 50.4%, transparent 51.6%);
-            background-size: 128px 128px, 100% 100%, 100% 100%, 100px 100px, 100px 100px, 100px 100px, 100px 100px, 100px 100px, 100px 100px, 100px 100px, 100px 100px, 100px 100px, 100px 100px, 100px 100px;
+                radial-gradient(ellipse 85% 34% at 50% 40%, rgba(96, 150, 104, 0.3) 0%, rgba(96, 150, 104, 0.12) 45%, rgba(96, 150, 104, 0) 100%);
+            background-size: 128px 128px, 100% 100%;
+            background-repeat: repeat, no-repeat;
+        }
+        /* Costura dorada con relieve que separa el inicio de "Bienvenido" */
+        #inicio::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: 70%;
+            max-width: 320px;
+            height: 1px;
+            transform: translateX(-50%);
+            border-top: 1.5px dashed rgba(214, 190, 112, 0.75);
+            border-bottom: 1.5px dashed rgba(0, 0, 0, 0.5);
+            pointer-events: none;
         }
 
         /* ---- Pantalla de confirmación (reserva guardada) ---- */
