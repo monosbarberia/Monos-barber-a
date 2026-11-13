@@ -87,8 +87,9 @@
         .bienvenida { margin: 0 auto 18px; max-width: 320px; font-size: 0.88rem; line-height: 1.5; color: var(--suave); }
         .lab { display: block; margin-bottom: 6px; text-align: left; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--suave); }
         .field-wrap { margin-bottom: 14px; border: 1px solid rgba(243,234,210,0.28); border-radius: 10px; background: rgba(0,0,0,0.25); transition: border-color 0.2s; }
-        .field-wrap:focus-within, .field-wrap.filled { border-color: var(--oro); }
-        .field-wrap input { display: block; width: 100%; height: 50px; padding: 0 14px; background: transparent; border: none; outline: none; color: var(--crema); font: 1rem var(--sans); }
+        .field-wrap:focus-within { border-color: var(--oro); }
+        .field-wrap input { display: block; width: 100%; height: 50px; padding: 0 14px; background: transparent; border: none; outline: none; color: var(--oro); caret-color: var(--oro); font: 1rem var(--sans); }
+        .field-wrap input:-webkit-autofill { -webkit-text-fill-color: var(--oro); box-shadow: 0 0 0 1000px #1b3522 inset; caret-color: var(--oro); }
         .field-wrap input::placeholder { color: rgba(243,234,210,0.45); }
         .home-bottom .btn-link { display: block; margin: 0 auto 6px; }
         .quick { display: flex; margin: 0 -4px; }
@@ -97,7 +98,7 @@
         /* ---------- Pantallas 2 y 3 ---------- */
         .top { display: flex; align-items: center; justify-content: space-between; }
         .back { min-height: 44px; padding: 0 12px 0 0; background: none; border: none; color: var(--crema); font: 600 1rem var(--sans); cursor: pointer; }
-        .hello { max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.88rem; color: var(--suave); }
+        .hello { max-width: 62%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 700 1.15rem var(--sans); color: var(--crema); }
         .titulo { display: flex; align-items: baseline; justify-content: space-between; margin: 4px 0 10px; }
         .titulo h2 { margin: 0; font: 700 2rem/1.1 var(--serif); }
         .titulo span { font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--oro); font-weight: 700; }
@@ -116,16 +117,20 @@
         .info-btn { flex-shrink: 0; width: 40px; height: 40px; margin-left: 8px; border-radius: 50%; border: 1px solid rgba(243,234,210,0.3); background: transparent; color: var(--suave); font: italic 700 1.1rem var(--serif); cursor: pointer; padding: 0; }
 
         /* ---------- Barra inferior ---------- */
-        .bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: #162b1b; border-top: 1px solid var(--linea); padding: 10px 20px 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+        .bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background-color: #162b1b; background-image: var(--grano); background-size: 128px 128px; border-top: 1px solid var(--linea); padding: 10px 20px 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
         .bar .col { display: flex; align-items: center; justify-content: space-between; }
         .bar small { display: block; font-size: 0.72rem; color: var(--suave); }
         .bar .total { font: 700 1.8rem/1.1 var(--serif); color: var(--oro); }
+        .cuando span { display: block; font: 700 1.05rem/1.25 var(--sans); color: var(--oro); }
         .bar .btn { width: auto; min-width: 150px; margin-left: 14px; }
 
         /* ---------- Fecha y hora ---------- */
         .campo { margin-bottom: 16px; }
         input[type="date"], select { display: block; width: 100%; height: 52px; padding: 0 14px; background-color: rgba(0,0,0,0.25); color: var(--crema); border: 1px solid rgba(243,234,210,0.28); border-radius: 10px; font: 1rem var(--sans); outline: none; -webkit-appearance: none; appearance: none; }
         input[type="date"]:focus, select:focus { border-color: var(--oro); }
+        input[type="date"] { text-align: left; line-height: normal; }
+        input[type="date"]::-webkit-date-and-time-value { text-align: left; margin: 0; min-height: 1.4em; }
+        input[type="date"]::-webkit-datetime-edit { padding: 0; }
         select:disabled { opacity: 0.55; }
         select option { background-color: #1c3823; color: var(--crema); }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(80%) sepia(30%) saturate(300%) hue-rotate(5deg); }
@@ -140,13 +145,13 @@
         .check { display: flex; align-items: flex-start; margin-top: 12px; font: 700 0.92rem var(--sans); color: var(--crema); cursor: pointer; }
         .check input { flex-shrink: 0; width: 22px; height: 22px; margin: 0 12px 0 0; accent-color: var(--oro); }
 
-        .info-tooltip { display: none; position: fixed; z-index: 300; max-width: 260px; padding: 12px 14px; background: #162b1b; border: 1px solid rgba(243,234,210,0.3); border-radius: 10px; font-size: 0.88rem; line-height: 1.45; color: var(--crema); box-shadow: 0 8px 28px rgba(0,0,0,0.5); pointer-events: none; }
+        .info-tooltip { display: none; position: fixed; z-index: 300; max-width: 260px; padding: 12px 14px; background-color: #162b1b; background-image: var(--grano); background-size: 128px 128px; border: 1px solid rgba(243,234,210,0.3); border-radius: 10px; font-size: 0.88rem; line-height: 1.45; color: var(--crema); box-shadow: 0 8px 28px rgba(0,0,0,0.5); pointer-events: none; }
         .info-tooltip.visible { display: block; }
 
         /* ---------- Ventanas ---------- */
-        .overlay { display: none; position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 500; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; background: rgba(8,18,11,0.92); }
+        .overlay { display: none; position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 500; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; background-color: rgba(10,22,14,0.9); background-image: var(--grano); background-size: 128px 128px; }
         .overlay.open { display: flex; }
-        .modal { width: 100%; max-width: 380px; margin: auto; padding: 28px 22px 22px; background-color: var(--verde-2); border: 1px solid var(--linea); border-radius: 14px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; }
+        .modal { width: 100%; max-width: 380px; margin: auto; padding: 28px 22px 22px; background-color: var(--verde-2); background-image: var(--grano); background-size: 128px 128px; border: 1px solid var(--linea); border-radius: 14px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; }
         .modal h3 { margin: 0 0 8px; font: 700 1.6rem/1.15 var(--serif); }
         .modal p { margin: 0 0 18px; font-size: 0.95rem; line-height: 1.5; color: var(--suave); }
         .modal .btn { margin-top: 10px; position: relative; z-index: 2; }
@@ -186,7 +191,7 @@
                 <button type="button" class="btn-link" id="btnHow">¿Cómo reservar?</button>
                 <div class="quick">
                     <a href="https://www.google.com/maps/search/?api=1&query=Monos+Barberia+Holguin" target="_blank" rel="noopener" class="btn btn-line">Ubicación</a>
-                    <a href="https://www.instagram.com/monos_barberia_holguin" target="_blank" rel="noopener" class="btn btn-line">Instagram</a>
+                    <a href="https://www.instagram.com/monos_barberia_holguin/" target="_blank" rel="noopener" class="btn btn-line">Instagram</a>
                     <a href="https://www.facebook.com/profile.php?id=61550881144010" target="_blank" rel="noopener" class="btn btn-line">Facebook</a>
                 </div>
             </div>
@@ -287,7 +292,7 @@
         </div>
         <div class="bar">
             <div class="col">
-                <div><small class="js-dur">Elige un servicio</small><span class="total js-total">$0</span></div>
+                <div class="cuando"><small>Tu cita</small><span class="js-cuando">Elige día y hora</span></div>
                 <button type="submit" form="bookingForm" class="btn btn-oro" id="submitBtn" disabled>Confirmar</button>
             </div>
         </div>
@@ -633,7 +638,18 @@
         dateInput.addEventListener('change', updateTimeSlots);
         timeSelect.addEventListener('change', validateSubmit);
         acceptTerms.addEventListener('change', validateSubmit);
+        function actualizarCuando() {
+            let t = 'Elige día y hora';
+            if (dateInput.value) {
+                const p = dateInput.value.split('-');
+                const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
+                const dia = new Intl.DateTimeFormat('es-ES', { weekday: 'short' }).format(d).replace('.', '');
+                t = dia.charAt(0).toUpperCase() + dia.slice(1) + ' ' + p[2] + '/' + p[1] + (timeSelect.value ? ' · ' + timeSelect.value : ' · elige hora');
+            }
+            document.querySelectorAll('.js-cuando').forEach(e => { e.textContent = t; });
+        }
         function validateSubmit() {
+            actualizarCuando();
             const hasService = document.querySelectorAll('input[name="service"]:checked').length > 0;
             submitBtn.disabled = !(hasService && dateInput.value && timeSelect.value && acceptTerms.checked);
         }
