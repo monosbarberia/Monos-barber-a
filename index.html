@@ -10,7 +10,8 @@
     <meta property="og:image" content="https://monosbarberia.github.io/Monos-barber-a/logo.jpg">
     <meta property="og:url" content="https://monosbarberia.github.io/Monos-barber-a/">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#1c3823">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -18,916 +19,361 @@
     <link rel="apple-touch-icon" sizes="520x520" href="favicon.jpg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,700;1,600&display=swap" rel="stylesheet">
 
     <style>
+        /* Colores 60 / 30 / 10
+           60% verde bosque: fondos y paneles
+           30% crema: textos, líneas y botones secundarios
+           10% dorado: lo que llama la atención (botón principal, seleccionado, precios, marca) */
         :root {
-            --dark-forest-green: #1c3823;
-            --elegant-gold: #cbb26a;
-            --elegant-gold-hover: #e0cca0;
-            --soft-gold-bg: rgba(203, 178, 106, 0.05);
+            --verde: #1c3823;
+            --verde-2: #234530;
+            --crema: #f3ead2;
+            --oro: #cbb26a;
+            --oro-grad: linear-gradient(135deg, #f1e1a6 0%, #cbb26a 45%, #a98b40 100%);
+            --linea: rgba(243, 234, 210, 0.2);
+            --suave: rgba(243, 234, 210, 0.72);
+            --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --serif: 'Cormorant Garamond', Georgia, serif;
         }
-
-        html { scroll-behavior: smooth; }
-
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; padding: 0; }
         body {
-            background-color: var(--dark-forest-green);
-            color: var(--elegant-gold);
-            font-family: 'Cormorant Garamond', serif;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-
-        .top-nav {
-            position: fixed;
-            top: 15px;
-            right: 20px;
-            z-index: 200;
-        }
-        .nav-toggle {
-            background: rgba(203, 178, 106, 0.12);
-            border: 1px solid rgba(203, 178, 106, 0.5);
-            color: var(--elegant-gold);
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1em;
-            letter-spacing: 1px;
-            padding: 10px 18px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .nav-toggle:hover { background: rgba(203, 178, 106, 0.22); }
-        .nav-dropdown {
-            display: none;
-            position: absolute;
-            top: calc(100% + 8px);
-            right: 0;
-            background: rgba(28, 56, 35, 0.97);
-            border: 1px solid rgba(203, 178, 106, 0.3);
-            border-radius: 6px;
-            overflow: hidden;
-            min-width: 180px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-        }
-        .nav-dropdown.open { display: block; }
-        .nav-dropdown a {
-            display: block;
-            padding: 14px 20px;
-            color: var(--elegant-gold);
-            text-decoration: none;
-            font-size: 1.05em;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            transition: background 0.2s;
-            border-bottom: 1px solid rgba(203, 178, 106, 0.1);
-        }
-        .nav-dropdown a:last-child { border-bottom: none; }
-        .nav-dropdown a:hover { background: rgba(203, 178, 106, 0.15); }
-
-        .page-section {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 60px 20px 80px;
-            box-sizing: border-box;
-            position: relative;
-        }
-        .section-arrow {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            opacity: 0.6;
-            animation: bounce 2s infinite;
-            font-size: 1em;
-            letter-spacing: 1px;
-            text-align: center;
-            pointer-events: none;
-            user-select: none;
-        }
-        .section-arrow .arrow { font-size: 1.6em; margin-top: 4px; display: block; }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
-            40% { transform: translateX(-50%) translateY(-8px); }
-            60% { transform: translateX(-50%) translateY(-4px); }
-        }
-
-        .hero-logo-container { text-align: center; margin-bottom: 16px; }
-        .hero-logo-img {
-            max-width: 300px;
-            width: 100%;
-            height: auto;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
-        }
-        .hero-title {
-            font-size: 2.6em;
-            font-weight: 700;
-            letter-spacing: 4px;
-            margin: 0 0 10px;
-            text-transform: uppercase;
-            line-height: 1.1;
-            text-align: center;
-            white-space: nowrap;
-        }
-        .hero-subtitle {
-            font-size: 1.2em;
-            font-style: italic;
-            margin: 0;
-            opacity: 0.75;
-            text-align: center;
-        }
-
-        .about-section { max-width: 550px; width: 100%; text-align: center; }
-        .about-title {
-            font-size: 2.2em;
-            font-weight: 700;
-            letter-spacing: 3px;
-            text-align: center;
-            margin-top: 0;
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(203, 178, 106, 0.3);
-            padding-bottom: 15px;
-            text-transform: uppercase;
-        }
-        .about-text {
-            font-size: 1.2em;
-            line-height: 1.6;
-            text-align: justify;
-            margin-bottom: 30px;
-        }
-        .slogan { font-style: italic; font-size: 1.3em; text-align: center; margin-bottom: 25px; }
-        .address {
-            text-align: center;
-            font-size: 1.1em;
-            margin: 0 0 10px;
-            letter-spacing: 1px;
-            line-height: 1.6;
-        }
-        .address strong {
-            display: block;
-            margin-bottom: 4px;
-            font-size: 0.9em;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            opacity: 0.7;
-        }
-        .siguenos {
-            font-size: 0.85em;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            opacity: 0.6;
-            margin: 18px 0 12px;
-        }
-        .action-links { display: flex; justify-content: center; gap: 15px; width: 100%; }
-        .action-btn {
-            flex: 1;
-            text-decoration: none;
-            color: var(--elegant-gold);
-            border: 1px solid var(--elegant-gold);
-            padding: 12px 5px;
-            border-radius: 4px;
-            font-size: 0.9em;
-            font-weight: bold;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-align: center;
-        }
-        .action-btn:hover { background-color: var(--elegant-gold); color: var(--dark-forest-green); }
-
-        .content-box {
-            max-width: 550px;
-            width: 100%;
-            background-color: var(--soft-gold-bg);
-            border: 1px solid rgba(203, 178, 106, 0.2);
-            padding: 40px;
-            border-radius: 8px;
-            box-sizing: border-box;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-        }
-        .section-title {
-            font-size: 1.5em;
-            margin-top: 0;
-            border-bottom: 1px solid rgba(203, 178, 106, 0.2);
-            padding-bottom: 10px;
-            margin-bottom: 25px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-align: center;
-        }
-        .service-list { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; }
-
-        .service-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .service-item {
-            flex: 1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.25em;
-            padding: 18px 20px;
-            background-color: rgba(0,0,0,0.15);
-            border: 1px solid rgba(203, 178, 106, 0.3);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-            position: relative;
-            user-select: none;
-        }
-        .service-item input[type="checkbox"] {
-            position: absolute;
-            opacity: 0;
-            width: 0;
-            height: 0;
-            pointer-events: none;
-        }
-        .service-item.selected {
-            background-color: var(--elegant-gold);
-            color: var(--dark-forest-green);
-            font-weight: bold;
-            border-color: var(--elegant-gold);
-        }
-
-        .info-btn {
-            flex-shrink: 0;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: 1px solid rgba(203, 178, 106, 0.6);
-            background: transparent;
-            color: var(--elegant-gold);
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1em;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            line-height: 1;
-            padding: 0;
-        }
-        .info-btn:hover {
-            background: rgba(203, 178, 106, 0.2);
-            border-color: var(--elegant-gold);
-        }
-
-        .info-tooltip {
-            display: none;
-            position: fixed;
-            z-index: 300;
-            background: rgba(20, 45, 25, 0.98);
-            border: 1px solid rgba(203, 178, 106, 0.5);
-            border-radius: 8px;
-            padding: 16px 20px;
-            font-size: 1.05em;
+            background-color: var(--verde);
+            color: var(--crema);
+            font-family: var(--sans);
+            font-size: 16px;
             line-height: 1.5;
-            color: var(--elegant-gold);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-            max-width: 260px;
-            pointer-events: none;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
+        .hidden { display: none !important; }
+        .col { width: 100%; max-width: 440px; margin: 0 auto; }
+
+        .screen { display: none; min-height: 100vh; min-height: 100dvh; flex-direction: column; padding: 16px 20px 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); }
+        .screen.active { display: flex; }
+        .screen.con-barra { padding-bottom: 110px; }
+
+        /* ---------- Botones ---------- */
+        .btn { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 52px; padding: 0 18px; border-radius: 12px; font: 700 0.95rem var(--sans); letter-spacing: 0.8px; text-transform: uppercase; text-decoration: none; text-align: center; cursor: pointer; border: 1px solid transparent; }
+        .btn-oro { position: relative; overflow: hidden; background-color: var(--oro); background-image: var(--oro-grad); color: var(--verde); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .btn-oro:active { filter: brightness(0.95); }
+        .btn-oro:disabled { background-image: none; background-color: rgba(243,234,210,0.1); color: rgba(243,234,210,0.4); box-shadow: none; cursor: not-allowed; }
+        .btn-oro:not(:disabled)::after { content: ''; position: absolute; top: 0; left: 0; width: 40%; height: 100%; background: linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent); transform: translateX(-150%) skewX(-20deg); animation: sheen 3s ease-in-out infinite; will-change: transform; pointer-events: none; }
+        @keyframes sheen { 0% { transform: translateX(-150%) skewX(-20deg); } 40% { transform: translateX(350%) skewX(-20deg); } 100% { transform: translateX(350%) skewX(-20deg); } }
+        .btn-line { min-height: 46px; background: transparent; color: var(--crema); border-color: rgba(243,234,210,0.3); font-size: 0.78rem; }
+        .btn-line:active { background: rgba(243,234,210,0.08); }
+        .btn-link { background: none; border: none; color: var(--suave); font: 600 0.9rem var(--sans); text-decoration: underline; min-height: 44px; cursor: pointer; }
+
+        /* ---------- Costura ---------- */
+        .stitch { position: relative; }
+        .stitch::before, .stitch::after { content: ''; position: absolute; border-radius: 8px; pointer-events: none; }
+        .stitch::before { top: 10.5px; right: 7.5px; bottom: 7.5px; left: 10.5px; border: 1.5px dashed rgba(0,0,0,0.45); }
+        .stitch::after { top: 9px; right: 9px; bottom: 9px; left: 9px; border: 1.5px dashed rgba(243,234,210,0.38); }
+        .card { background: rgba(255,255,255,0.04); border: 1px solid var(--linea); border-radius: 14px; padding: 22px 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+
+        /* ---------- Inicio ---------- */
+        #home { background-image: radial-gradient(ellipse 85% 34% at 50% 26%, rgba(96,150,104,0.28), rgba(96,150,104,0)); background-size: 100% 100%; background-repeat: no-repeat; }
+        #home .col { flex: 1; display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
+        .home-top { padding-top: 8px; }
+        .logo { display: block; width: 62%; max-width: 230px; height: auto; margin: 0 auto 8px; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.45)); }
+        .marca { margin: 0; font: 700 0.95rem var(--serif); letter-spacing: 5px; text-transform: uppercase; color: var(--oro); }
+        .home-mid { padding: 14px 0; }
+        .slogan { margin: 0 0 6px; font: italic 600 1.4rem/1.2 var(--serif); }
+        .bienvenida { margin: 0 auto 18px; max-width: 320px; font-size: 0.88rem; line-height: 1.5; color: var(--suave); }
+        .lab { display: block; margin-bottom: 6px; text-align: left; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--suave); }
+        .field-wrap { margin-bottom: 14px; border: 1px solid rgba(243,234,210,0.28); border-radius: 10px; background: rgba(0,0,0,0.25); transition: border-color 0.2s; }
+        .field-wrap:focus-within { border-color: var(--oro); }
+        .field-wrap input { display: block; width: 100%; height: 50px; padding: 0 14px; background: transparent; border: none; outline: none; color: var(--oro); caret-color: var(--oro); font: 1rem var(--sans); }
+        .field-wrap input:-webkit-autofill { -webkit-text-fill-color: var(--oro); box-shadow: 0 0 0 1000px #1b3522 inset; caret-color: var(--oro); }
+        .field-wrap input::placeholder { color: rgba(243,234,210,0.45); }
+        .home-bottom .btn-link { display: block; margin: 0 auto 6px; }
+        .quick { display: flex; margin: 0 -4px; }
+        .quick .btn-line { flex: 1; margin: 0 4px; padding: 0 4px; }
+
+        /* ---------- Pantallas 2 y 3 ---------- */
+        .top { display: flex; align-items: center; justify-content: space-between; }
+        .back { min-height: 44px; padding: 0 12px 0 0; background: none; border: none; color: var(--crema); font: 600 1rem var(--sans); cursor: pointer; }
+        .hello { max-width: 62%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 700 1.15rem var(--sans); color: var(--crema); }
+        .titulo { display: flex; align-items: baseline; justify-content: space-between; margin: 4px 0 10px; }
+        .titulo h2 { margin: 0; font: 700 2rem/1.1 var(--serif); }
+        .titulo span { font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--oro); font-weight: 700; }
+        .prog { height: 3px; margin-bottom: 8px; background: rgba(243,234,210,0.15); border-radius: 2px; }
+        .prog i { display: block; height: 100%; background: var(--oro-grad); border-radius: 2px; }
+        .grp { margin: 18px 0 8px; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: var(--suave); }
+
+        .service-row { display: flex; align-items: center; margin-bottom: 10px; }
+        .service-item { flex: 1; display: flex; justify-content: space-between; align-items: center; min-height: 56px; margin-bottom: 0; padding: 0 16px; background: rgba(0,0,0,0.18); border: 1px solid var(--linea); border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; -webkit-user-select: none; user-select: none; transition: background-color 0.2s, border-color 0.2s; }
+        .service-item input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+        .service-item span:last-child { font: 700 1.4rem var(--serif); color: var(--oro); white-space: nowrap; padding-left: 10px; }
+        .service-item.selected { background-color: var(--oro); background-image: var(--oro-grad); border-color: var(--oro); color: var(--verde); }
+        .service-item.selected span:last-child { color: var(--verde); }
+        .service-row + .service-row, .extras .service-item { margin-top: 0; }
+        .extras .service-item { margin-bottom: 10px; }
+        .info-btn { flex-shrink: 0; width: 40px; height: 40px; margin-left: 8px; border-radius: 50%; border: 1px solid rgba(243,234,210,0.3); background: transparent; color: var(--suave); font: italic 700 1.1rem var(--serif); cursor: pointer; padding: 0; }
+
+        /* ---------- Barra inferior ---------- */
+        .bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background-color: #162b1b; border-top: 1px solid var(--linea); padding: 10px 20px 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+        .bar .col { display: flex; align-items: center; justify-content: space-between; }
+        .bar small { display: block; font-size: 0.72rem; color: var(--suave); }
+        .bar .total { font: 700 1.8rem/1.1 var(--serif); color: var(--oro); }
+        .cuando span { display: block; font: 700 1.05rem/1.25 var(--sans); color: var(--oro); }
+        .bar .btn { width: auto; min-width: 150px; margin-left: 14px; }
+
+        /* ---------- Fecha y hora ---------- */
+        .campo { margin-bottom: 16px; }
+        input[type="date"], select { display: block; width: 100%; height: 52px; padding: 0 14px; background-color: rgba(0,0,0,0.25); color: var(--crema); border: 1px solid rgba(243,234,210,0.28); border-radius: 10px; font: 1rem var(--sans); outline: none; -webkit-appearance: none; appearance: none; }
+        input[type="date"]:focus, select:focus { border-color: var(--oro); }
+        input[type="date"], select { text-align: center; text-align-last: center; }
+        input[type="date"] { display: flex; align-items: center; justify-content: center; line-height: normal; }
+        input[type="date"]::-webkit-date-and-time-value { text-align: center; margin: 0; min-height: 1.4em; }
+        input[type="date"]::-webkit-datetime-edit { padding: 0; }
+        select:disabled { opacity: 0.55; }
+        select option { background-color: #1c3823; color: var(--crema); }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(80%) sepia(30%) saturate(300%) hue-rotate(5deg); }
+        .pista { margin: 6px 0 0; font-size: 0.82rem; color: var(--suave); }
+        .resumen { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; margin-bottom: 14px; }
+        .resumen small { display: block; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--suave); }
+        .resumen b { font: 700 1.5rem var(--serif); color: var(--crema); }
+        .resumen .t { text-align: right; }
+        .resumen .t b { color: var(--oro); font-size: 1.9rem; }
+        .terms { margin-top: 6px; padding: 20px; }
+        .terms-t { margin: 0 0 10px; font: 700 1.35rem var(--serif); letter-spacing: 1px; text-transform: uppercase; color: var(--oro); }
+        .terms-l { margin: 0 0 14px; padding-left: 20px; font-size: 0.95rem; line-height: 1.5; color: var(--crema); }
+        .terms-l li { margin-bottom: 6px; }
+        .terms-l li::marker { color: var(--oro); }
+        .check { display: flex; align-items: center; padding: 12px 14px; background: rgba(0,0,0,0.22); border: 1px solid rgba(203,178,106,0.55); border-radius: 10px; font: 700 0.98rem var(--sans); color: var(--crema); cursor: pointer; }
+        .check input { flex-shrink: 0; width: 24px; height: 24px; margin: 0 12px 0 0; accent-color: var(--oro); }
+
+        .info-tooltip { display: none; position: fixed; z-index: 300; max-width: 260px; padding: 12px 14px; background-color: #162b1b; border: 1px solid rgba(243,234,210,0.3); border-radius: 10px; font-size: 0.88rem; line-height: 1.45; color: var(--crema); box-shadow: 0 8px 28px rgba(0,0,0,0.5); pointer-events: none; }
         .info-tooltip.visible { display: block; }
 
-        .form-group { margin: 25px 0; display: flex; flex-direction: column; gap: 10px; }
-        input[type="date"], input[type="text"], input[type="tel"], select {
-            background-color: rgba(0,0,0,0.25);
-            color: var(--elegant-gold);
-            border: 1px solid rgba(203, 178, 106, 0.5);
-            padding: 18px;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.2em;
-            border-radius: 6px;
-            outline: none;
-            cursor: pointer;
-            transition: border-color 0.3s;
-            width: 100%;
-            box-sizing: border-box;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        input[type="text"], input[type="tel"] { cursor: text; }
-        input[type="date"]:focus, input[type="text"]:focus, input[type="tel"]:focus, select:focus { border-color: var(--elegant-gold); }
-        input[type="text"]::placeholder, input[type="tel"]::placeholder { color: rgba(203, 178, 106, 0.45); }
-        select option { background-color: #1c3823; color: var(--elegant-gold); }
-        input[type="date"]::-webkit-datetime-edit-text,
-        input[type="date"]::-webkit-datetime-edit-month-field,
-        input[type="date"]::-webkit-datetime-edit-day-field,
-        input[type="date"]::-webkit-datetime-edit-year-field { color: var(--elegant-gold); }
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(75%) sepia(40%) saturate(400%) hue-rotate(5deg);
-            cursor: pointer;
-        }
-        select:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .field-hint {
-            font-size: 0.8em;
-            opacity: 0.55;
-            margin-top: -4px;
-            padding-left: 4px;
-        }
-        .live-summary {
-            background-color: rgba(0,0,0,0.3);
-            padding: 20px;
-            border-radius: 6px;
-            margin-top: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 4px solid var(--elegant-gold);
-        }
-        .terms-box {
-            background-color: rgba(0,0,0,0.2);
-            border: 1px solid rgba(203, 178, 106, 0.2);
-            padding: 20px;
-            border-radius: 6px;
-            margin-top: 30px;
-            font-size: 1.05em;
-            line-height: 1.5;
-        }
-        .checkbox-container {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            margin-top: 15px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .checkbox-container input {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: var(--elegant-gold);
-            margin-top: 2px;
-            flex-shrink: 0;
-        }
-        .btn-submit {
-            background-color: var(--elegant-gold);
-            color: var(--dark-forest-green);
-            border: none;
-            padding: 20px;
-            width: 100%;
-            font-size: 1.4em;
-            font-weight: bold;
-            font-family: 'Cormorant Garamond', serif;
-            cursor: pointer;
-            border-radius: 6px;
-            margin-top: 35px;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        .btn-submit:hover:not(:disabled) { background-color: var(--elegant-gold-hover); }
-        .btn-submit:disabled {
-            background-color: rgba(203, 178, 106, 0.15);
-            color: rgba(203, 178, 106, 0.4);
-            cursor: not-allowed;
-            box-shadow: none;
-        }
+        /* ---------- Ventanas ---------- */
+        .overlay { display: none; position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 500; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; background-color: rgba(10,22,14,0.9); }
+        .overlay.open { display: flex; }
+        .modal { width: 100%; max-width: 380px; margin: auto; padding: 28px 22px 22px; background-color: var(--verde-2); border: 1px solid var(--linea); border-radius: 14px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; }
+        .modal h3 { margin: 0 0 8px; font: 700 1.6rem/1.15 var(--serif); }
+        .modal p { margin: 0 0 18px; font-size: 0.95rem; line-height: 1.5; color: var(--suave); }
+        .modal .btn { margin-top: 10px; position: relative; z-index: 2; }
+        .pasos { text-align: left; margin-bottom: 14px; }
+        .paso { display: flex; align-items: flex-start; margin-bottom: 12px; font-size: 0.93rem; line-height: 1.4; }
+        .paso b { color: #fff; }
+        .num { flex-shrink: 0; width: 26px; height: 26px; margin-right: 12px; border-radius: 50%; background: var(--oro-grad); color: var(--verde); font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+        .aviso { padding: 12px 14px; margin-bottom: 6px; background: rgba(0,0,0,0.25); border-left: 3px solid var(--oro); border-radius: 8px; text-align: left; font-size: 0.88rem; line-height: 1.45; }
 
-        /* ================= ESTILO (versión ligera) ================= */
-        :root {
-            --grano: url("data:image/png;base64,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");
-            --cream: #f3ead2;
-            --gold-grad: linear-gradient(135deg, #f1e1a6 0%, #cbb26a 40%, #b79c52 70%, #8f7430 100%);
-            --gold-text-grad: linear-gradient(180deg, #f1e0a3 0%, #cbb26a 50%, #a98b40 100%);
-        }
-
-        /* Fondo: verde con grano de cuero (una sola imagen pequeña de 6 KB que se repite) */
-        body {
-            background-color: var(--dark-forest-green);
-            background-image: var(--grano);
-            background-size: 128px 128px;
-        }
-
-        /* Títulos dorados */
-        .hero-title, .about-title, .section-title {
-            background: var(--gold-text-grad);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            -webkit-text-fill-color: transparent;
-        }
-        .hero-logo-img { filter: drop-shadow(0 6px 8px rgba(0,0,0,0.45)); }
-
-        /* Textos pequeños legibles */
-        .hero-subtitle { opacity: 1; color: var(--cream); }
-        .about-text, .terms-box, .checkbox-container { color: var(--cream); }
-        .siguenos { opacity: 1; color: rgba(243, 234, 210, 0.85); font-size: 0.95em; }
-        .address strong { opacity: 1; }
-        .field-hint { opacity: 1; color: rgba(243, 234, 210, 0.8); font-size: 0.95em; }
-        .section-arrow { opacity: 0.85; }
-        .info-tooltip { color: var(--cream); }
-        input[type="date"], input[type="text"], input[type="tel"], select { color: var(--cream); }
-        input[type="text"]::placeholder, input[type="tel"]::placeholder { color: rgba(243, 234, 210, 0.6); }
-        select option { color: var(--cream); }
-        input[type="date"]::-webkit-datetime-edit-text,
-        input[type="date"]::-webkit-datetime-edit-month-field,
-        input[type="date"]::-webkit-datetime-edit-day-field,
-        input[type="date"]::-webkit-datetime-edit-year-field { color: var(--cream); }
-        input[type="date"]:focus, input[type="text"]:focus, input[type="tel"]:focus, select:focus {
-            box-shadow: 0 0 0 3px rgba(203, 178, 106, 0.25);
-        }
-
-        /* Tarjetas con costura dorada */
-        .content-box {
-            position: relative;
-            background-color: rgba(203, 178, 106, 0.06);
-            border-color: rgba(203, 178, 106, 0.3);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.35);
-        }
-        .content-box::before, .content-box::after {
-            content: '';
-            position: absolute;
-            border-radius: 5px;
-            pointer-events: none;
-        }
-        /* sombra del hilo (abajo a la derecha: la luz viene de arriba a la izquierda) */
-        .content-box::before {
-            top: 10.5px; right: 7.5px; bottom: 7.5px; left: 10.5px;
-            border: 1.5px dashed rgba(0, 0, 0, 0.5);
-        }
-        /* hilo dorado */
-        .content-box::after {
-            top: 9px; right: 9px; bottom: 9px; left: 9px;
-            border: 1.5px dashed rgba(214, 190, 112, 0.75);
-        }
-        .service-item:hover { border-color: var(--elegant-gold); background-color: rgba(0,0,0,0.25); }
-
-        /* Dorado metálico estático (la luz siempre viene de arriba a la izquierda) */
-        .service-item.selected, .field-wrap.filled, .btn-submit:not(:disabled), .confirm-btn.primary, .nav-toggle.open, .how-go {
-            background-color: #cbb26a;
-            background-image: var(--gold-grad);
-            border-color: var(--elegant-gold);
-            color: var(--dark-forest-green);
-        }
-        .nav-toggle.open, .how-go { font-weight: 700; }
-        .btn-submit:not(:disabled) { box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .btn-submit:disabled { color: rgba(243, 234, 210, 0.55); }
-
-        /* Destello: solo en los 3 botones principales. Solo usa transform (lo más barato para el teléfono) */
-        .btn-submit:not(:disabled), .confirm-btn.primary, .how-go { position: relative; overflow: hidden; }
-        .btn-submit:not(:disabled)::after, .confirm-btn.primary::after, .how-go::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 40%;
-            height: 100%;
-            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.5), transparent);
-            transform: translateX(-150%) skewX(-20deg);
-            animation: sheen 3s ease-in-out infinite;
-            will-change: transform;
-            pointer-events: none;
-        }
-        @keyframes sheen {
-            0% { transform: translateX(-150%) skewX(-20deg); }
-            40% { transform: translateX(350%) skewX(-20deg); }
-            100% { transform: translateX(350%) skewX(-20deg); }
-        }
-
-        /* Campos nombre y teléfono: el recuadro es el que se pone dorado */
-        .field-wrap {
-            border: 1px solid rgba(203, 178, 106, 0.5);
-            border-radius: 6px;
-            background-color: rgba(0, 0, 0, 0.25);
-        }
-        .field-wrap input[type="text"], .field-wrap input[type="tel"],
-        .field-wrap input[type="text"]:focus, .field-wrap input[type="tel"]:focus {
-            background: transparent;
-            border: none;
-            box-shadow: none;
-        }
-        .field-wrap:focus-within { border-color: var(--elegant-gold); }
-        .field-wrap.filled input { color: var(--dark-forest-green); font-weight: 700; caret-color: var(--dark-forest-green); }
-
-        /* Aparición suave (solo opacidad) */
-        .reveal { opacity: 0; transition: opacity 0.5s ease; }
-        .reveal.visible { opacity: 1; }
-
-        /* Inicio limpio: mismo grano que toda la web + una luz suave detrás del logo.
-           Todo estático (sin máscaras ni filtros), así que es muy ligero. */
-        #inicio {
-            background-color: #1c3823;
-            background-image:
-                var(--grano),
-                radial-gradient(ellipse 85% 34% at 50% 40%, rgba(96, 150, 104, 0.3) 0%, rgba(96, 150, 104, 0.12) 45%, rgba(96, 150, 104, 0) 100%);
-            background-size: 128px 128px, 100% 100%;
-            background-repeat: repeat, no-repeat;
-        }
-        /* Costura dorada con relieve que separa el inicio de "Bienvenido" */
-        #inicio::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            bottom: 0;
-            width: 70%;
-            max-width: 320px;
-            height: 1px;
-            transform: translateX(-50%);
-            border-top: 1.5px dashed rgba(214, 190, 112, 0.75);
-            border-bottom: 1.5px dashed rgba(0, 0, 0, 0.5);
-            pointer-events: none;
-        }
-
-        /* ---- Pantalla de confirmación (reserva guardada) ---- */
-        .confirm-overlay {
-            display: none;
-            position: fixed;
-            top: 0; right: 0; bottom: 0; left: 0;
-            z-index: 500;
-            background: rgba(8, 18, 11, 0.92);
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-        }
-        .confirm-overlay.open { display: flex; }
-        .confirm-box {
-            background: #1f3f28;
-            border-color: rgba(203, 178, 106, 0.5);
-            text-align: center;
-            margin: auto;
-        }
-        .confirm-close {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            border: 1px solid rgba(203, 178, 106, 0.6);
-            background: transparent;
-            color: var(--elegant-gold);
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.6em;
-            line-height: 1;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-        }
-        .confirm-box .section-title { margin-top: 8px; }
-        .confirm-steps { display: flex; flex-direction: column; gap: 16px; margin: 0 0 26px; text-align: left; }
-        .confirm-step { display: flex; align-items: flex-start; gap: 14px; font-size: 1.15em; line-height: 1.4; color: var(--cream); }
-        .confirm-step strong { color: #fff; }
-        .step-num {
-            flex-shrink: 0;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: var(--gold-grad);
-            color: var(--dark-forest-green);
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 1px;
-        }
-        .confirm-ask-text { font-size: 1.2em; line-height: 1.5; color: var(--cream); margin: 0 0 24px; }
-        .confirm-note { font-size: 1em; line-height: 1.4; color: rgba(243, 234, 210, 0.8); margin: 16px 0 0; }
-        .confirm-btn {
-            display: block;
-            box-sizing: border-box;
-            width: 100%;
-            padding: 16px 10px;
-            margin-bottom: 12px;
-            font-size: 1.15em;
-            font-family: 'Cormorant Garamond', serif;
-            cursor: pointer;
-            background: transparent;
-        }
-        .confirm-link {
-            background: none;
-            border: none;
-            color: var(--cream);
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.05em;
-            text-decoration: underline;
-            cursor: pointer;
-            padding: 8px;
-            margin-top: 4px;
-        }
-
-        /* ---- Cómo reservar (desplegable) ---- */
-        #como-reservar { min-height: 0; padding: 70px 20px 90px; }
-        .how-summary { display: block; list-style: none; cursor: pointer; text-align: center; padding: 6px 0; -webkit-tap-highlight-color: transparent; }
-        .how-summary::-webkit-details-marker { display: none; }
-        .how-title {
-            display: block;
-            font-size: 1.5em;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            background: var(--gold-text-grad);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            -webkit-text-fill-color: transparent;
-        }
-        .how-hint { display: block; margin-top: 8px; font-size: 1.05em; color: var(--cream); }
-        .how-hint .t-open { display: none; }
-        .how-details[open] .how-hint .t-open { display: inline; }
-        .how-details[open] .how-hint .t-closed { display: none; }
-        .how-chevron { display: inline-block; }
-        .how-details[open] .how-chevron { transform: rotate(180deg); }
-        .how-details[open] .how-summary { border-bottom: 1px solid rgba(203, 178, 106, 0.25); padding-bottom: 16px; margin-bottom: 22px; }
-        .how-intro { font-size: 1.2em; line-height: 1.5; color: var(--cream); text-align: center; margin: 0 0 24px; }
-        .how-warning {
-            border-left: 4px solid var(--elegant-gold);
-            background: rgba(0, 0, 0, 0.25);
-            padding: 14px 16px;
-            border-radius: 6px;
-            font-size: 1.1em;
-            line-height: 1.5;
-            color: var(--cream);
-            text-align: left;
-            margin-bottom: 22px;
-        }
-        .how-warning strong { color: #fff; }
-        .how-go { display: block; padding: 14px 10px; }
-
-        @media (prefers-reduced-motion: reduce) {
-            .reveal { opacity: 1; transition: none; }
-            .btn-submit::after, .confirm-btn.primary::after, .how-go::after, .section-arrow { animation: none; }
-        }
-
-        @media (max-width: 600px) {
-            .hero-title { font-size: 1.8em; letter-spacing: 2px; }
-            .content-box { padding: 30px 20px; }
-            .action-links { flex-direction: column; }
-            .nav-toggle { font-size: 0.9em; padding: 9px 14px; }
-        }
+        @media (max-height: 640px) { .logo { width: 48%; } .bienvenida { margin-bottom: 12px; } }
+        @media (max-width: 340px) { .quick .btn-line { font-size: 0.7rem; letter-spacing: 0.3px; } .titulo h2 { font-size: 1.7rem; } }
+        @media (prefers-reduced-motion: reduce) { .btn-oro::after { animation: none; } }
     </style>
 </head>
 <body>
-
     <div class="info-tooltip" id="globalTooltip"></div>
 
-    <nav class="top-nav">
-        <button class="nav-toggle" onclick="toggleNav()">Menu</button>
-        <div class="nav-dropdown" id="navDropdown">
-            <a href="#historia" onclick="closeNav()">Bienvenido</a>
-            <a href="#como-reservar" onclick="closeNav()">Cómo reservar</a>
-            <a href="#servicios" onclick="closeNav()">Servicios</a>
-        </div>
-    </nav>
-
-    <section class="page-section" id="inicio">
-        <div class="hero-logo-container">
-            <img src="logo.png" alt="Logo Mono's" class="hero-logo-img" decoding="async">
-        </div>
-        <h1 class="hero-title">Barbería Holguín</h1>
-        <p class="hero-subtitle">+300 clientes satisfechos</p>
-        <div class="section-arrow">
-            <span>Desliza para continuar</span>
-            <span class="arrow">&#8595;</span>
-        </div>
-    </section>
-
-    <section class="page-section" id="historia">
-        <div class="about-section">
-            <h2 class="about-title">Bienvenido</h2>
-            <p class="about-text">
-                Estás en el lugar ideal para asegurar tu espacio y vivir una experiencia de primer nivel. En Mono's Barbería Holguín, dirigida y atendida por Félix y Paola, combinamos la elegancia del caballero clásico con el estilo más moderno. Nuestra historia se forja en la atención al detalle y la pasión por nuestro oficio. Selecciona tus servicios a continuación y permítenos cuidar de tu imagen.
-            </p>
-            <div class="slogan">Para que luzcas limpio, fino, mono...</div>
-            <div class="address">
+    <!-- INICIO -->
+    <div id="home" class="screen active">
+        <div class="col">
+            <div class="home-top">
+                <img src="logo.png" alt="Mono's Barbería" class="logo" decoding="async">
+                <p class="marca">Barbería Holguín</p>
             </div>
-            <div class="siguenos">Síguenos en nuestras redes sociales</div>
-            <div class="action-links">
-                <a href="https://www.google.com/maps/search/?api=1&query=Monos+Barberia+Holguin" target="_blank" class="action-btn">Mapa</a>
-                <a href="https://www.facebook.com/profile.php?id=61550881144010" class="action-btn" target="_blank">Facebook</a>
-                <a href="https://www.instagram.com/monos_barberia_holguin" class="action-btn" target="_blank">Instagram</a>
-            </div>
-        </div>
-        <div class="section-arrow">
-            <span>Cómo reservar</span>
-            <span class="arrow">&#8595;</span>
-        </div>
-    </section>
-
-    <section class="page-section" id="como-reservar">
-        <div class="content-box">
-            <details class="how-details">
-                <summary class="how-summary">
-                    <span class="how-title">Cómo reservar tu cita</span>
-                    <span class="how-hint"><span class="t-closed">Toca aquí para ver los pasos</span><span class="t-open">Toca aquí para cerrar</span> <span class="how-chevron">&#9662;</span></span>
-                </summary>
-                <p class="how-intro">Es muy fácil. Sigue estos pasos uno por uno y tu cita queda lista.</p>
-                <div class="confirm-steps">
-                    <div class="confirm-step"><span class="step-num">1</span><span><strong>Elige tus servicios.</strong> Toca lo que quieres hacerte (corte, barba, peinado...). Cuando lo tocas se pone dorado: eso quiere decir que está elegido. El botón <strong>!</strong> te explica en qué consiste cada servicio.</span></div>
-                    <div class="confirm-step"><span class="step-num">2</span><span><strong>Escribe tu nombre y tu teléfono</strong> (8 números). Solo lo usamos para confirmar tu cita.</span></div>
-                    <div class="confirm-step"><span class="step-num">3</span><span><strong>Elige el día y la hora.</strong> Solo te salen los horarios que están libres. Los domingos estamos cerrados.</span></div>
-                    <div class="confirm-step"><span class="step-num">4</span><span><strong>Marca que aceptas las condiciones</strong> y toca el botón dorado <strong>«Solicitar Cita»</strong>.</span></div>
-                    <div class="confirm-step"><span class="step-num">5</span><span><strong>Toca «Abrir WhatsApp» y envía el mensaje.</strong> Se abre WhatsApp con el mensaje ya escrito. Tú solo tienes que presionar enviar.</span></div>
-                    <div class="confirm-step"><span class="step-num">6</span><span><strong>¡Listo!</strong> Te llegará un mensaje de agradecimiento confirmando tu cita.</span></div>
-                </div>
-                <div class="how-warning"><strong>Importante:</strong> cuando aparece «Tu cita está agendada», tu turno ya está guardado. <strong>No reserves otra vez.</strong> Solo falta enviar el mensaje por WhatsApp. Si no puedes venir, avísanos con tiempo.</div>
-                <a href="#servicios" class="action-btn how-go">Empezar a reservar</a>
-            </details>
-        </div>
-    </section>
-
-    <form id="bookingForm">
-
-        <section class="page-section" id="servicios">
-            <div class="content-box">
-                <h3 class="section-title">Elige tus servicios</h3>
-                <div class="service-list">
-
-                    <div class="service-row">
-                        <label class="service-item" onclick="toggleService(this, 'main-cut')">
-                            <span><input type="checkbox" name="service" value="Corte sencillo" data-price="400" data-group="main-cut"> Corte sencillo</span>
-                            <span>$400</span>
-                        </label>
-                        <button type="button" class="info-btn" data-info="Corte con tijera o con maquina sencillo. Tambien puede ser un afeitado completo de cabeza.">!</button>
-                    </div>
-
-                    <div class="service-row">
-                        <label class="service-item" onclick="toggleService(this, 'main-cut')">
-                            <span><input type="checkbox" name="service" value="Degradado" data-price="650" data-group="main-cut"> Degradado</span>
-                            <span>$650</span>
-                        </label>
-                        <button type="button" class="info-btn" data-info="Corte degradado desde el cero o desde el afeitado, hasta el numero que desee, segun el tipo de corte y estilo que se vaya a realizar.">!</button>
-                    </div>
-
-                    <div class="service-row">
-                        <label class="service-item" onclick="toggleService(this, 'addon')">
-                            <span><input type="checkbox" name="service" value="Barba" data-price="150" data-group="addon"> Barba</span>
-                            <span>$150</span>
-                        </label>
-                        <button type="button" class="info-btn" data-info="Perfilado de barba o afeitado completo, segun la preferencia del cliente.">!</button>
-                    </div>
-
-                    <div class="service-row">
-                        <label class="service-item" onclick="toggleService(this, 'addon')">
-                            <span><input type="checkbox" name="service" value="Diseño Personalizado" data-price="100" data-group="addon"> Diseño Personalizado</span>
-                            <span>$100</span>
-                        </label>
-                        <button type="button" class="info-btn" data-info="Diseno personalizado que puede incluir dibujos o figuras a eleccion del cliente.">!</button>
-                    </div>
-
-                    <div class="service-row">
-                        <label class="service-item" onclick="toggleService(this, 'addon')">
-                            <span><input type="checkbox" name="service" value="Peinado" data-price="200" data-group="addon"> Peinado</span>
-                            <span>$200</span>
-                        </label>
-                        <button type="button" class="info-btn" data-info="Peinado y estilizado con los productos disponibles en el momento.">!</button>
-                    </div>
-
-                </div>
-
-                <h3 class="section-title">Opciones adicionales</h3>
-                <div class="service-list" style="margin-bottom: 0;">
-                    <label class="service-item" style="border-color: rgba(203, 178, 106, 0.8);" onclick="toggleExtra(this, 'cafeCheck')">
-                        <span><input type="checkbox" id="cafeCheck" data-price="40" data-name="Café expresso"> Cafe expresso</span>
-                        <span>+$40</span>
-                    </label>
-                    <label class="service-item" style="border-color: rgba(203, 178, 106, 0.8);" onclick="toggleExtra(this, 'ponqueCheck')">
-                        <span><input type="checkbox" id="ponqueCheck" data-price="100" data-name="Ponquecito casero"> Ponquecito casero</span>
-                        <span>+$100</span>
-                    </label>
+            <div class="home-mid">
+                <p class="slogan">Para que luzcas limpio, fino, mono...</p>
+                <p class="bienvenida">Dirigida por Félix y Paola. Elegancia clásica con estilo moderno y atención al detalle.</p>
+                <div class="card stitch">
+                    <label class="lab" for="clientName">Nombre</label>
+                    <div class="field-wrap" id="wrapName"><input type="text" id="clientName" placeholder="Tu nombre" maxlength="60" autocomplete="name" required></div>
+                    <label class="lab" for="clientPhone">Teléfono</label>
+                    <div class="field-wrap" id="wrapPhone"><input type="tel" id="clientPhone" placeholder="8 dígitos" pattern="[0-9]{8}" maxlength="8" inputmode="numeric" autocomplete="tel" required></div>
+                    <button type="button" class="btn btn-oro" id="btnStart" disabled>Reservar</button>
                 </div>
             </div>
-            <div class="section-arrow">
-                <span>Fecha y horario</span>
-                <span class="arrow">&#8595;</span>
-            </div>
-        </section>
-
-        <section class="page-section" id="reserva">
-            <div class="content-box">
-                <h3 class="section-title">Tus Datos</h3>
-                <div class="form-group">
-                    <div class="field-wrap"><input type="text" id="clientName" placeholder="Nombre" required maxlength="60" autocomplete="name"></div>
+            <div class="home-bottom">
+                <button type="button" class="btn-link" id="btnHow">¿Cómo reservar?</button>
+                <div class="quick">
+                    <a href="https://www.google.com/maps/search/?api=1&query=Monos+Barberia+Holguin" target="_blank" rel="noopener" class="btn btn-line">Ubicación</a>
+                    <a href="https://www.instagram.com/monosbarberiaholguin/" target="_blank" rel="noopener" class="btn btn-line">Instagram</a>
+                    <a href="https://www.facebook.com/profile.php?id=61550881144010" target="_blank" rel="noopener" class="btn btn-line">Facebook</a>
                 </div>
-                <div class="form-group">
-                    <div class="field-wrap"><input type="tel" id="clientPhone" placeholder="Teléfono (8 dígitos)" required pattern="[0-9]{8}" maxlength="8" inputmode="numeric" autocomplete="tel"></div>
-                    <span class="field-hint">Su número solo se usará para confirmar su cita y evitar reservas duplicadas</span>
-                </div>
-
-                <h3 class="section-title">Fecha y Horario</h3>
-                <div class="form-group">
-                    <input type="date" id="date" required>
-                </div>
-                <div class="form-group">
-                    <select id="time" required disabled>
-                        <option value="">Selecciona fecha primero...</option>
-                    </select>
-                </div>
-                <div class="live-summary">
-                    <div>
-                        <div style="font-style: italic; opacity: 0.8; font-size: 0.95em;">Tiempo estimado</div>
-                        <div id="live-duration" style="font-size: 1.1em; margin-top: 5px;">--</div>
-                    </div>
-                    <div style="text-align: right;">
-                        <div style="font-style: italic; opacity: 0.8; font-size: 0.95em;">Total</div>
-                        <div style="font-weight: bold; font-size: 1.5em; color: #fff;" id="live-total">$0</div>
-                    </div>
-                </div>
-                <div class="terms-box">
-                    <strong style="display: block; margin-bottom: 8px; color: #fff;">Términos de reserva:</strong>
-                    Para respetar el tiempo de todos, agradecemos que llegue puntual. Si no puede asistir, infórmanos con antelación para ceder el turno; de no hacerlo se le cobrará en la próxima cita como si se le hubiera realizado el servicio.
-                    <label class="checkbox-container">
-                        <input type="checkbox" id="acceptTerms">
-                        <span>He leído y acepto las condiciones</span>
-                    </label>
-                </div>
-                <button type="button" class="btn-submit" id="submitBtn" onclick="crearReserva()" disabled>Solicitar Cita</button>
-            </div>
-        </section>
-
-    </form>
-
-    <!-- ============================================= -->
-    <!-- PANTALLA DE CONFIRMACIÓN: reserva guardada + botones de WhatsApp -->
-    <!-- ============================================= -->
-    <div class="confirm-overlay" id="confirmBox" onclick="if (event.target === this) pedirCierre()">
-        <div class="content-box confirm-box">
-            <button type="button" class="confirm-close" onclick="pedirCierre()" aria-label="Cerrar">&times;</button>
-
-            <div id="confirmMain">
-                <h3 class="section-title">¡Tu cita está agendada!</h3>
-                <div class="confirm-steps">
-                    <div class="confirm-step"><span class="step-num">&#10003;</span><span>Tu turno ya quedó reservado. No necesitas reservar otra vez.</span></div>
-                    <div class="confirm-step"><span class="step-num">2</span><span>Falta un paso: toca el botón de abajo y <strong>envíanos el mensaje por WhatsApp</strong>. Ya viene escrito, solo presiona enviar.</span></div>
-                    <div class="confirm-step"><span class="step-num">3</span><span>Cuando lo recibamos, te llegará un mensaje de agradecimiento por tu cita.</span></div>
-                </div>
-                <a id="waApp" class="action-btn confirm-btn primary" href="#">Abrir WhatsApp</a>
-                <p class="confirm-note">Si tienes mala señal, vuelve a tocar el botón cuando mejore.</p>
-            </div>
-
-            <div id="confirmAsk" hidden>
-                <h3 class="section-title">Antes de cerrar</h3>
-                <p class="confirm-ask-text">¿Ya nos avisaste por WhatsApp de tu reserva?<br>Si no lo has hecho, toca el botón y envía el mensaje.</p>
-                <a id="waApp2" class="action-btn confirm-btn primary" href="#">Abrir WhatsApp</a>
-                <button type="button" class="action-btn confirm-btn" onclick="cerrarConfirmacion()">Sí, ya lo envié</button>
-                <button type="button" class="confirm-link" onclick="volverConfirmacion()">Volver</button>
             </div>
         </div>
     </div>
 
+    <!-- SERVICIOS -->
+    <div id="services" class="screen con-barra">
+        <div class="col">
+            <div class="top"><button type="button" class="back" id="btnBackHome">&#8249; Atrás</button><span class="hello" id="helloChip"></span></div>
+            <div class="titulo"><h2>Servicios</h2><span>Paso 1 de 2</span></div>
+            <div class="prog"><i style="width:50%"></i></div>
+
+            <div class="grp">Corte y arreglo</div>
+                <div class="service-row">
+                    <label class="service-item" onclick="toggleService(this, 'main-cut')">
+                        <span><input type="checkbox" name="service" value="Corte sencillo" data-price="400" data-group="main-cut" data-name="Corte sencillo"> Corte sencillo</span>
+                        <span>$400</span>
+                    </label>
+                    <button type="button" class="info-btn" data-info="Corte con tijera o con máquina sencillo. También puede ser un afeitado completo de cabeza." aria-label="Más información">i</button>
+                </div>
+                <div class="service-row">
+                    <label class="service-item" onclick="toggleService(this, 'main-cut')">
+                        <span><input type="checkbox" name="service" value="Degradado" data-price="650" data-group="main-cut" data-name="Degradado"> Degradado</span>
+                        <span>$650</span>
+                    </label>
+                    <button type="button" class="info-btn" data-info="Corte degradado desde el cero o desde el afeitado, hasta el número que desee, según el tipo de corte y estilo que se vaya a realizar." aria-label="Más información">i</button>
+                </div>
+                <div class="service-row">
+                    <label class="service-item" onclick="toggleService(this, 'addon')">
+                        <span><input type="checkbox" name="service" value="Barba" data-price="150" data-group="addon" data-name="Barba"> Barba</span>
+                        <span>$150</span>
+                    </label>
+                    <button type="button" class="info-btn" data-info="Perfilado de barba o afeitado completo, según la preferencia del cliente." aria-label="Más información">i</button>
+                </div>
+                <div class="service-row">
+                    <label class="service-item" onclick="toggleService(this, 'addon')">
+                        <span><input type="checkbox" name="service" value="Diseño Personalizado" data-price="100" data-group="addon" data-name="Diseño Personalizado"> Diseño Personalizado</span>
+                        <span>$100</span>
+                    </label>
+                    <button type="button" class="info-btn" data-info="Diseño personalizado que puede incluir dibujos o figuras a elección del cliente." aria-label="Más información">i</button>
+                </div>
+                <div class="service-row">
+                    <label class="service-item" onclick="toggleService(this, 'addon')">
+                        <span><input type="checkbox" name="service" value="Peinado" data-price="200" data-group="addon" data-name="Peinado"> Peinado</span>
+                        <span>$200</span>
+                    </label>
+                    <button type="button" class="info-btn" data-info="Peinado y estilizado con los productos disponibles en el momento." aria-label="Más información">i</button>
+                </div>
+
+            <div class="grp">Para acompañar</div>
+            <div class="extras">
+                <label class="service-item" onclick="toggleExtra(this, 'cafeCheck')">
+                    <span><input type="checkbox" id="cafeCheck" data-price="40" data-name="Café expresso"> Café expresso</span>
+                    <span>+$40</span>
+                </label>
+                <label class="service-item" onclick="toggleExtra(this, 'ponqueCheck')">
+                    <span><input type="checkbox" id="ponqueCheck" data-price="100" data-name="Ponquecito casero"> Ponquecito casero</span>
+                    <span>+$100</span>
+                </label>
+
+            </div>
+        </div>
+        <div class="bar">
+            <div class="col">
+                <div><small class="js-dur">Elige un servicio</small><span class="total js-total">$0</span></div>
+                <button type="button" class="btn btn-oro" id="btnToDate" disabled>Siguiente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FECHA Y HORA -->
+    <div id="datetime" class="screen con-barra">
+        <div class="col">
+            <div class="top"><button type="button" class="back" id="btnBackServices">&#8249; Atrás</button><span class="hello" id="helloChip2"></span></div>
+            <div class="titulo"><h2>Fecha y hora</h2><span>Paso 2 de 2</span></div>
+            <div class="prog"><i style="width:100%"></i></div>
+
+            <form id="bookingForm">
+                <div class="campo">
+                    <label class="lab" for="date">Día</label>
+                    <input type="date" id="date" required>
+                    <p class="pista">Cerrado los domingos.</p>
+                </div>
+                <div class="campo">
+                    <label class="lab" for="time">Hora</label>
+                    <select id="time" required disabled><option value="">Selecciona fecha primero...</option></select>
+                </div>
+                <div class="card stitch resumen">
+                    <div><small>Duración</small><b id="live-duration">--</b></div>
+                    <div class="t"><small>Total</small><b id="live-total">$0</b></div>
+                </div>
+                <div class="card stitch terms">
+                    <p class="terms-t">Términos de reserva</p>
+                    <ul class="terms-l">
+                        <li>Llega puntual.</li>
+                        <li>Si no puedes venir, avísanos con tiempo para ceder tu turno.</li>
+                        <li>Si no avisas, se cobrará en tu próxima cita como si se hubiera realizado el servicio.</li>
+                    </ul>
+                    <label class="check"><input type="checkbox" id="acceptTerms"><span>He leído y acepto las condiciones</span></label>
+                </div>
+            </form>
+        </div>
+        <div class="bar">
+            <div class="col">
+                <div class="cuando"><small>Tu cita</small><span class="js-cuando">Elige día y hora</span></div>
+                <button type="submit" form="bookingForm" class="btn btn-oro" id="submitBtn" disabled>Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CÓMO RESERVAR -->
+    <div class="overlay" id="howBox">
+        <div class="modal stitch">
+            <h3>Cómo reservar</h3>
+            <p>Solo 3 pasos y tu turno queda listo.</p>
+            <div class="pasos">
+                <div class="paso"><span class="num">1</span><span><b>Nombre y teléfono</b>, y toca <b>«Reservar»</b>.</span></div>
+                <div class="paso"><span class="num">2</span><span><b>Elige tus servicios</b> y toca <b>«Siguiente»</b>.</span></div>
+                <div class="paso"><span class="num">3</span><span><b>Elige día y hora</b>, acepta las condiciones y toca <b>«Confirmar»</b>.</span></div>
+                <div class="paso"><span class="num">4</span><span><b>Envía el mensaje por WhatsApp.</b> Ya viene escrito, solo envíalo.</span></div>
+            </div>
+            <div class="aviso"><b>Importante:</b> cuando sale «Tu cita está agendada», tu turno ya está guardado. <b>No reserves otra vez.</b></div>
+            <button type="button" class="btn btn-oro" id="howClose">Entendido</button>
+        </div>
+    </div>
+
+    <!-- CITA AGENDADA -->
+    <div class="overlay" id="confirmBox">
+        <div class="modal stitch">
+            <div id="confirmMain">
+                <h3>Tu cita está agendada</h3>
+                <p>Tu turno ya quedó guardado. Falta enviarnos el mensaje por WhatsApp para confirmar.</p>
+                <a id="waApp" class="btn btn-oro" href="#">Abrir WhatsApp</a>
+                <button type="button" class="btn btn-line" onclick="pedirCierre()">Cerrar</button>
+            </div>
+            <div id="confirmAsk" class="hidden">
+                <h3>¿Ya lo enviaste?</h3>
+                <p>Si aún no, toca el botón y envía el mensaje. Así confirmamos tu cita.</p>
+                <a id="waApp2" class="btn btn-oro" href="#">Abrir WhatsApp</a>
+                <button type="button" class="btn btn-line" onclick="cerrarConfirmacion()">Ya lo envié</button>
+                <button type="button" class="btn-link" onclick="volverConfirmacion()">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase: carga sin bloquear la página y con una dirección de respaldo si la primera falla -->
     <script>
-        // Aparición suave de las secciones: se repite al bajar, al subir y al volver a bajar
-        (function() {
-            const els = document.querySelectorAll('.hero-logo-container, .hero-title, .hero-subtitle, .about-section, #como-reservar > .content-box, #servicios > .content-box, #reserva > .content-box');
-            if (!('IntersectionObserver' in window)) return;
-            const io = new IntersectionObserver(function(entries) {
-                entries.forEach(function(en) {
-                    en.target.classList.toggle('visible', en.intersectionRatio >= 0.15);
-                });
-            }, { threshold: 0.15 });
-            els.forEach(function(el) { el.classList.add('reveal'); io.observe(el); });
-        })();
+        var SUPABASE_URL = "https://ldxxflhwpyzldisydhmd.supabase.co";
+        var SUPABASE_KEY = "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
+        function iniciarSB() {
+            if (window.supabaseClient || !window.supabase) return;
+            window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            window.firebaseReady = true;
+            if (typeof cargarPrecios === 'function') cargarPrecios();
+        }
+        function cargarSB(i) {
+            var urls = ['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js', 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js'];
+            if (i >= urls.length) return;
+            var s = document.createElement('script');
+            s.src = urls[i];
+            s.async = true;
+            s.onload = iniciarSB;
+            s.onerror = function() { cargarSB(i + 1); };
+            document.head.appendChild(s);
+        }
+        cargarSB(0);
     </script>
 
-    <!-- ============================================= -->
-    <!-- SUPABASE: inicialización y conexión a la base de datos -->
-    <!-- ============================================= -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
     <script>
-        const SUPABASE_URL = "https://ldxxflhwpyzldisydhmd.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
-
-        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        window.firebaseReady = true;
-        document.dispatchEvent(new Event('firebase-ready'));
-    </script>
-
-    <script>
-        // Al refrescar (o volver a la página) siempre empieza arriba, en el logo
-        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-        if (location.hash) history.replaceState(null, '', location.pathname + location.search);
-        window.scrollTo(0, 0);
-        window.addEventListener('pageshow', function() { window.scrollTo(0, 0); });
-
         const WHATSAPP_NUMBER = '5358592776';
 
-        // randomUUID no existe en teléfonos viejos; este respaldo funciona en todos
-        function nuevoUUID() {
-            if (window.crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                const r = (window.crypto && crypto.getRandomValues) ? (crypto.getRandomValues(new Uint8Array(1))[0] & 15) : Math.floor(Math.random() * 16);
-                return (c === 'x' ? r : ((r & 3) | 8)).toString(16);
-            });
-        }
-
+        const homeScreen = document.getElementById('home');
+        const servicesScreen = document.getElementById('services');
+        const datetimeScreen = document.getElementById('datetime');
+        const nameInput = document.getElementById('clientName');
+        const phoneInput = document.getElementById('clientPhone');
+        const wrapName = document.getElementById('wrapName');
+        const wrapPhone = document.getElementById('wrapPhone');
+        const btnStart = document.getElementById('btnStart');
+        const btnToDate = document.getElementById('btnToDate');
         const dateInput = document.getElementById('date');
         const timeSelect = document.getElementById('time');
         const acceptTerms = document.getElementById('acceptTerms');
@@ -935,16 +381,22 @@
         const liveTotal = document.getElementById('live-total');
         const liveDuration = document.getElementById('live-duration');
         const tooltip = document.getElementById('globalTooltip');
-        const nameInput = document.getElementById('clientName');
-        const phoneInput = document.getElementById('clientPhone');
+        const bookingForm = document.getElementById('bookingForm');
+        const howBox = document.getElementById('howBox');
 
+        function nuevoUUID() {
+            if (window.crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = (window.crypto && crypto.getRandomValues) ? (crypto.getRandomValues(new Uint8Array(1))[0] & 15) : Math.floor(Math.random() * 16);
+                return (c === 'x' ? r : ((r & 3) | 8)).toString(16);
+            });
+        }
         function getTodayStr() {
             const n = new Date();
             return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
         }
         dateInput.setAttribute('min', getTodayStr());
 
-        // Convierte "9:30 AM" / "2:00 PM" a minutos desde medianoche
         function slotToMinutes(slot) {
             const m = slot.match(/^(\d{1,2}):(\d{2}) (AM|PM)$/);
             if (!m) return 0;
@@ -956,120 +408,15 @@
             const n = new Date();
             return slotToMinutes(slot) <= n.getHours() * 60 + n.getMinutes();
         }
-
-        function toggleNav() {
-            const abierto = document.getElementById('navDropdown').classList.toggle('open');
-            document.querySelector('.nav-toggle').classList.toggle('open', abierto);
+        function formatTime12h(h, m) {
+            const period = h >= 12 ? 'PM' : 'AM';
+            let h12 = h % 12;
+            if (h12 === 0) h12 = 12;
+            return `${h12}:${String(m).padStart(2, '0')} ${period}`;
         }
-        function closeNav() {
-            document.getElementById('navDropdown').classList.remove('open');
-            document.querySelector('.nav-toggle').classList.remove('open');
-        }
-        document.addEventListener('click', function(e) {
-            const nav = document.querySelector('.top-nav');
-            if (!nav.contains(e.target)) closeNav();
-        });
-
-        let tooltipVisible = false;
-        document.querySelectorAll('.info-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const info = this.getAttribute('data-info');
-                if (tooltipVisible && tooltip.textContent === info) {
-                    tooltip.classList.remove('visible');
-                    tooltipVisible = false;
-                    return;
-                }
-                tooltip.textContent = info;
-                const rect = this.getBoundingClientRect();
-                let left = rect.left - 270;
-                if (left < 10) left = rect.right + 10;
-                let top = rect.top - 10;
-                if (top + 120 > window.innerHeight) top = window.innerHeight - 130;
-                tooltip.style.left = left + 'px';
-                tooltip.style.top = top + 'px';
-                tooltip.classList.add('visible');
-                tooltipVisible = true;
-            });
-        });
-        document.addEventListener('click', function() {
-            tooltip.classList.remove('visible');
-            tooltipVisible = false;
-        });
-
-        function toggleService(label, group) {
-            const cb = label.querySelector('input[type="checkbox"]');
-            if (group === 'main-cut') {
-                if (cb.checked) {
-                    cb.checked = false;
-                    label.classList.remove('selected');
-                } else {
-                    document.querySelectorAll('input[data-group="main-cut"]').forEach(other => {
-                        other.checked = false;
-                        other.closest('.service-item').classList.remove('selected');
-                    });
-                    cb.checked = true;
-                    label.classList.add('selected');
-                }
-            } else {
-                cb.checked = !cb.checked;
-                label.classList.toggle('selected', cb.checked);
-            }
-            updateSummary();
-            if (dateInput.value) updateTimeSlots();
-        }
-
-        function toggleExtra(label, id) {
-            const cb = document.getElementById(id);
-            cb.checked = !cb.checked;
-            label.classList.toggle('selected', cb.checked);
-            updateSummary();
-        }
-
-        function getSelectedBlocksCount() {
-            const selectedCount = document.querySelectorAll('input[name="service"]:checked').length;
-            if (selectedCount <= 1) return 1;
-            return 2;
-        }
-
-        function updateSummary() {
-            let total = 0;
-            let selectedCount = 0;
-            let isDegradado = false;
-            let addonsCount = 0;
-
-            document.querySelectorAll('input[name="service"]').forEach(cb => {
-                if (cb.checked) {
-                    selectedCount++;
-                    total += parseInt(cb.getAttribute('data-price'));
-                    if (cb.value === 'Degradado') isDegradado = true;
-                    if (cb.getAttribute('data-group') === 'addon') addonsCount++;
-                }
-            });
-
-            ['cafeCheck', 'ponqueCheck'].forEach(id => {
-                const cb = document.getElementById(id);
-                if (cb && cb.checked) total += parseInt(cb.getAttribute('data-price'));
-            });
-
-            let durationText = '--';
-            if (selectedCount === 1) durationText = '30 minutos';
-            else if (isDegradado && addonsCount === 3) durationText = '1 hora y 30 min';
-            else if (selectedCount > 1) durationText = '1 hora aprox.';
-
-            liveTotal.textContent = `$${total}`;
-            liveDuration.textContent = durationText;
-            validateSubmit();
-        }
-
-        // Genera la lista de horarios: 9:00 a 11:30 y 2:00 a 4:00 PM, cada 30 min
         function buildAllSlots() {
             const slots = [];
-            const ranges = [
-                { startH: 9, startM: 0, endH: 11, endM: 30 },
-                { startH: 14, startM: 0, endH: 16, endM: 0 }
-            ];
-            ranges.forEach(r => {
+            [{ startH: 9, startM: 0, endH: 11, endM: 30 }, { startH: 14, startM: 0, endH: 16, endM: 0 }].forEach(r => {
                 let h = r.startH, m = r.startM;
                 while (h < r.endH || (h === r.endH && m <= r.endM)) {
                     slots.push(formatTime12h(h, m));
@@ -1080,31 +427,129 @@
             return slots;
         }
 
-        function formatTime12h(h, m) {
-            const period = h >= 12 ? 'PM' : 'AM';
-            let h12 = h % 12;
-            if (h12 === 0) h12 = 12;
-            const mm = String(m).padStart(2, '0');
-            return `${h12}:${mm} ${period}`;
-        }
-
         // Con mala señal: hasta 3 intentos, cada uno con límite de 10 segundos
         async function conReintento(fn) {
             let ultimo;
             for (let i = 0; i < 3; i++) {
                 try {
-                    const res = await Promise.race([
-                        fn(),
-                        new Promise(function(_, rej) { setTimeout(function() { rej(new Error('timeout')); }, 10000); })
-                    ]);
+                    const res = await Promise.race([fn(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000))]);
                     if (res && res.error) throw res.error;
                     return res;
                 } catch (e) {
                     ultimo = e;
-                    await new Promise(function(r) { setTimeout(r, 800); });
+                    await new Promise(r => setTimeout(r, 800));
                 }
             }
             throw ultimo;
+        }
+
+        function showScreen(name) {
+            homeScreen.classList.toggle('active', name === 'home');
+            servicesScreen.classList.toggle('active', name === 'services');
+            datetimeScreen.classList.toggle('active', name === 'datetime');
+            window.scrollTo(0, 0);
+        }
+
+        // Recordar nombre y teléfono en este teléfono
+        function guardarDatos(n, t) { try { localStorage.setItem('mono_nombre', n); localStorage.setItem('mono_tel', t); } catch (e) {} }
+        function cargarDatos() {
+            try {
+                const n = localStorage.getItem('mono_nombre'), t = localStorage.getItem('mono_tel');
+                if (n) nameInput.value = n;
+                if (t) phoneInput.value = t;
+            } catch (e) {}
+        }
+
+        function validarLogin() {
+            const nameOk = nameInput.value.trim().length >= 2;
+            const phoneOk = /^[0-9]{8}$/.test(phoneInput.value.trim());
+            btnStart.disabled = !(nameOk && phoneOk);
+            wrapName.classList.toggle('filled', nameInput.value.trim().length > 0);
+            wrapPhone.classList.toggle('filled', phoneInput.value.trim().length > 0);
+        }
+        nameInput.addEventListener('input', validarLogin);
+        phoneInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 8);
+            validarLogin();
+        });
+
+        btnStart.addEventListener('click', function() {
+            if (btnStart.disabled) return;
+            const hola = 'Hola, ' + nameInput.value.trim().split(' ')[0];
+            document.getElementById('helloChip').textContent = hola;
+            document.getElementById('helloChip2').textContent = hola;
+            showScreen('services');
+            updateSummary();
+        });
+        document.getElementById('btnBackHome').addEventListener('click', function() { showScreen('home'); });
+        document.getElementById('btnBackServices').addEventListener('click', function() { showScreen('services'); });
+        btnToDate.addEventListener('click', function() {
+            if (btnToDate.disabled) return;
+            showScreen('datetime');
+            updateSummary();
+            updateTimeSlots();
+        });
+
+        document.getElementById('btnHow').addEventListener('click', function() { howBox.classList.add('open'); });
+        document.getElementById('howClose').addEventListener('click', function() { howBox.classList.remove('open'); });
+        howBox.addEventListener('click', function(e) { if (e.target === howBox) howBox.classList.remove('open'); });
+
+        function toggleService(label, group) {
+            const cb = label.querySelector('input[type="checkbox"]');
+            if (group === 'main-cut') {
+                if (cb.checked) {
+                    cb.checked = false;
+                    label.classList.remove('selected');
+                } else {
+                    document.querySelectorAll('input[data-group="main-cut"]').forEach(inp => {
+                        inp.checked = false;
+                        inp.closest('.service-item').classList.remove('selected');
+                    });
+                    cb.checked = true;
+                    label.classList.add('selected');
+                }
+            } else {
+                cb.checked = !cb.checked;
+                label.classList.toggle('selected', cb.checked);
+            }
+            updateSummary();
+        }
+        function toggleExtra(label, id) {
+            const cb = document.getElementById(id);
+            cb.checked = !cb.checked;
+            label.classList.toggle('selected', cb.checked);
+            updateSummary();
+        }
+        function getSelectedBlocksCount() {
+            return document.querySelectorAll('input[name="service"]:checked').length <= 1 ? 1 : 2;
+        }
+
+        function updateSummary() {
+            let total = 0, selectedCount = 0, isDegradado = false, addonsCount = 0;
+            document.querySelectorAll('input[name="service"]').forEach(cb => {
+                if (cb.checked) {
+                    selectedCount++;
+                    total += parseInt(cb.getAttribute('data-price'));
+                    if (cb.value === 'Degradado') isDegradado = true;
+                    if (cb.getAttribute('data-group') === 'addon') addonsCount++;
+                }
+            });
+            ['cafeCheck', 'ponqueCheck'].forEach(id => {
+                const cb = document.getElementById(id);
+                if (cb && cb.checked) total += parseInt(cb.getAttribute('data-price'));
+            });
+            let durationText = '--';
+            if (selectedCount === 1) durationText = '30 minutos';
+            else if (isDegradado && addonsCount === 3) durationText = '1 hora y 30 min';
+            else if (selectedCount > 1) durationText = '1 hora aprox.';
+
+            liveTotal.textContent = '$' + total;
+            liveDuration.textContent = durationText;
+            document.querySelectorAll('.js-total').forEach(e => { e.textContent = '$' + total; });
+            document.querySelectorAll('.js-dur').forEach(e => { e.textContent = durationText === '--' ? 'Elige un servicio' : durationText; });
+            btnToDate.disabled = selectedCount === 0;
+            validateSubmit();
+            if (dateInput.value && datetimeScreen.classList.contains('active')) updateTimeSlots();
         }
 
         async function updateTimeSlots() {
@@ -1114,17 +559,14 @@
                 validateSubmit();
                 return;
             }
-
             const p = dateInput.value.split('-');
             const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
-
             if (dateInput.value < getTodayStr()) {
                 timeSelect.innerHTML = '<option value="">No puedes elegir fechas pasadas</option>';
                 timeSelect.disabled = true;
                 validateSubmit();
                 return;
             }
-
             if (d.getDay() === 0) {
                 timeSelect.innerHTML = '<option value="">Cerrado los domingos</option>';
                 timeSelect.disabled = true;
@@ -1138,17 +580,16 @@
             const allSlots = buildAllSlots();
             const morningSlots = allSlots.filter(s => s.includes('AM'));
             const afternoonSlots = allSlots.filter(s => s.includes('PM'));
-            let occupiedSlots = [];
+            const occupiedSlots = [];
 
+            // Espera hasta 15 s a que cargue la conexión (mala señal)
             let waited = 0;
-            while (!window.firebaseReady && waited < 5000) {
-                await new Promise(r => setTimeout(r, 200));
-                waited += 200;
+            while (!window.firebaseReady && waited < 15000) {
+                await new Promise(r => setTimeout(r, 250));
+                waited += 250;
             }
-
             if (!window.firebaseReady) {
-                timeSelect.innerHTML = '<option value="">Error: no se pudo conectar. Revisa tu conexion e intenta de nuevo.</option>';
-                timeSelect.disabled = true;
+                timeSelect.innerHTML = '<option value="">Sin conexión. Cambia de fecha para reintentar</option>';
                 validateSubmit();
                 return;
             }
@@ -1157,103 +598,129 @@
                 const { data } = await conReintento(function() {
                     return window.supabaseClient.from('turnos_ocupados').select('turno').eq('fecha', dateInput.value);
                 });
-
-                data.forEach(row => {
-                    occupiedSlots.push(row.turno);
-                });
+                if (data) data.forEach(row => { occupiedSlots.push(row.turno); });
             } catch (err) {
-                timeSelect.innerHTML = '<option value="">Mala señal. Cambia de fecha y vuelve a elegirla para reintentar</option>';
-                timeSelect.disabled = true;
+                timeSelect.innerHTML = '<option value="">Mala señal. Cambia de fecha para reintentar</option>';
                 validateSubmit();
                 return;
             }
 
             const blocksNeeded = getSelectedBlocksCount();
             const esHoy = dateInput.value === getTodayStr();
-            const freeSlots = allSlots.filter(slot =>
-                !occupiedSlots.includes(slot) && !(esHoy && slotYaPaso(slot))
-            );
+            const freeSlots = allSlots.filter(slot => !occupiedSlots.includes(slot) && !(esHoy && slotYaPaso(slot)));
             let availableSlots = freeSlots;
-
             if (blocksNeeded === 2) {
                 availableSlots = freeSlots.filter(slot => {
                     const sameGroup = morningSlots.includes(slot) ? morningSlots : afternoonSlots;
-                    const idx = sameGroup.indexOf(slot);
-                    const nextSlot = sameGroup[idx + 1];
-                    if (!nextSlot) return false;
-                    return freeSlots.includes(nextSlot);
+                    const nextSlot = sameGroup[sameGroup.indexOf(slot) + 1];
+                    return nextSlot ? freeSlots.includes(nextSlot) : false;
                 });
             }
-
             if (availableSlots.length === 0) {
-                timeSelect.innerHTML = '<option value="">No hay turnos disponibles este dia</option>';
+                timeSelect.innerHTML = '<option value="">No hay turnos disponibles este día</option>';
                 timeSelect.disabled = true;
                 validateSubmit();
                 return;
             }
-
             timeSelect.innerHTML = '<option value="">Elegir horario...</option>';
             timeSelect.disabled = false;
-
             availableSlots.forEach(slot => {
                 const opt = document.createElement('option');
                 opt.value = slot;
                 opt.textContent = slot;
                 timeSelect.appendChild(opt);
             });
-
             validateSubmit();
         }
 
-        // Dado el turno elegido, devuelve el/los turnos que hay que marcar como ocupados
-        // (1 si el servicio dura 30 min, 2 si necesita el bloque siguiente)
         function getSlotsForBooking(selectedTurno) {
-            const blocksNeeded = getSelectedBlocksCount();
-            if (blocksNeeded === 1) return [selectedTurno];
-
+            if (getSelectedBlocksCount() === 1) return [selectedTurno];
             const allSlots = buildAllSlots();
-            const sameGroup = selectedTurno.includes('AM')
-                ? allSlots.filter(s => s.includes('AM'))
-                : allSlots.filter(s => s.includes('PM'));
-            const idx = sameGroup.indexOf(selectedTurno);
-            const nextSlot = sameGroup[idx + 1];
+            const sameGroup = allSlots.filter(s => selectedTurno.includes('AM') ? s.includes('AM') : s.includes('PM'));
+            const nextSlot = sameGroup[sameGroup.indexOf(selectedTurno) + 1];
             return nextSlot ? [selectedTurno, nextSlot] : [selectedTurno];
-        }
-
-        function validateSubmit() {
-            const anyService = document.querySelectorAll('input[name="service"]:checked').length > 0;
-            const nameOk = nameInput.value.trim().length > 0;
-            const phoneOk = /^[0-9]{8}$/.test(phoneInput.value.trim());
-            submitBtn.disabled = !(anyService && dateInput.value && timeSelect.value && acceptTerms.checked && nameOk && phoneOk);
-            syncFilled();
         }
 
         dateInput.addEventListener('change', updateTimeSlots);
         timeSelect.addEventListener('change', validateSubmit);
         acceptTerms.addEventListener('change', validateSubmit);
-        nameInput.addEventListener('input', validateSubmit);
-        phoneInput.addEventListener('input', validateSubmit);
+        function actualizarCuando() {
+            let t = 'Elige día y hora';
+            if (dateInput.value) {
+                const p = dateInput.value.split('-');
+                const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
+                const dia = new Intl.DateTimeFormat('es-ES', { weekday: 'short' }).format(d).replace('.', '');
+                t = dia.charAt(0).toUpperCase() + dia.slice(1) + ' ' + p[2] + '/' + p[1] + (timeSelect.value ? ' · ' + timeSelect.value : ' · elige hora');
+            }
+            document.querySelectorAll('.js-cuando').forEach(e => { e.textContent = t; });
+        }
+        function validateSubmit() {
+            actualizarCuando();
+            const hasService = document.querySelectorAll('input[name="service"]:checked').length > 0;
+            submitBtn.disabled = !(hasService && dateInput.value && timeSelect.value && acceptTerms.checked);
+        }
 
-        // Ocupa el/los turnos en Supabase. Si Supabase lo rechaza (limite semanal
-        // superado o el turno se acaba de ocupar), avisa al cliente y no muestra WhatsApp.
-        async function crearReserva() {
+        let tooltipVisible = false;
+        document.querySelectorAll('.info-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const info = this.getAttribute('data-info');
+                if (tooltipVisible && tooltip.textContent === info) {
+                    tooltip.classList.remove('visible');
+                    tooltipVisible = false;
+                    return;
+                }
+                tooltip.textContent = info;
+                const rect = this.getBoundingClientRect();
+                let left = rect.right - 260;
+                if (left < 10) left = 10;
+                let top = rect.bottom + 8;
+                if (top + 130 > window.innerHeight) top = rect.top - 130;
+                tooltip.style.left = left + 'px';
+                tooltip.style.top = top + 'px';
+                tooltip.classList.add('visible');
+                tooltipVisible = true;
+            });
+        });
+        document.addEventListener('click', function() {
+            tooltip.classList.remove('visible');
+            tooltipVisible = false;
+        });
+
+        // Precios desde Supabase (si falla, se quedan los que ya están escritos)
+        function normKey(s) { return String(s || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+        async function cargarPrecios() {
+            try {
+                const { data, error } = await window.supabaseClient.from('precios').select('servicio,precio');
+                if (error || !data || !data.length) return;
+                const mapa = {};
+                data.forEach(r => { mapa[normKey(r.servicio)] = parseInt(r.precio); });
+                document.querySelectorAll('input[data-price]').forEach(inp => {
+                    const precio = mapa[normKey(inp.getAttribute('data-name') || inp.value)];
+                    if (!Number.isFinite(precio)) return;
+                    inp.setAttribute('data-price', precio);
+                    const etiqueta = inp.closest('.service-item').querySelector(':scope > span:last-child');
+                    if (etiqueta) etiqueta.textContent = (inp.id ? '+$' : '$') + precio;
+                });
+                updateSummary();
+            } catch (e) {}
+        }
+        if (window.supabaseClient) cargarPrecios();
+
+        bookingForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (submitBtn.disabled) return;
             const nombre = nameInput.value.trim();
             const telefono = phoneInput.value.trim();
             const turnoSeleccionado = timeSelect.value;
             const fecha = dateInput.value;
-
-            if (!nombre || !telefono || !fecha || !turnoSeleccionado) {
-                validateSubmit();
-                return;
-            }
-
+            if (!nombre || !telefono || !fecha || !turnoSeleccionado) { validateSubmit(); return; }
             if (fecha < getTodayStr() || (fecha === getTodayStr() && slotYaPaso(turnoSeleccionado))) {
                 alert('Ese horario ya pasó. Elige otro turno disponible.');
                 updateTimeSlots();
                 return;
             }
 
-            // Servicios elegidos y total (incluye extras), para guardarlos con la reserva
             const serviciosElegidos = [];
             let totalReserva = 0;
             document.querySelectorAll('input[name="service"]:checked').forEach(cb => {
@@ -1269,12 +736,8 @@
             });
 
             const reservaId = nuevoUUID();
-            const turnosAOcupar = getSlotsForBooking(turnoSeleccionado);
-            const filas = turnosAOcupar.map(turno => ({
-                fecha,
-                turno,
-                nombre,
-                telefono,
+            const filas = getSlotsForBooking(turnoSeleccionado).map(turno => ({
+                fecha, turno, nombre, telefono,
                 reserva_id: reservaId,
                 notificado: false,
                 estado: 'ocupado',
@@ -1284,21 +747,19 @@
 
             const textoOriginal = submitBtn.textContent;
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Guardando reserva...';
+            submitBtn.textContent = 'Guardando...';
 
             let error = null;
             try {
                 const res = await window.supabaseClient.from('turnos').insert(filas);
                 error = res.error;
-            } catch (e) {
-                // Sin conexión: el fetch falla y lanza excepción
+            } catch (err) {
                 error = { message: 'network', code: 'NETWORK' };
             }
 
             if (error) {
                 submitBtn.textContent = textoOriginal;
                 validateSubmit();
-
                 if (error.message && error.message.includes('LIMITE_SEMANAL')) {
                     alert('Este numero de telefono ya tiene 3 citas reservadas esta semana. Si necesitas otro turno, escribenos directo por WhatsApp.');
                 } else if (error.code === '23505') {
@@ -1312,34 +773,24 @@
                 return;
             }
 
-            // Reserva guardada: el botón queda bloqueado para evitar reservas duplicadas
             submitBtn.textContent = 'Reserva guardada';
+            guardarDatos(nombre, telefono);
             sendToWhatsApp(nombre, telefono);
-        }
+        });
 
-        // Prepara los enlaces de WhatsApp y muestra la pantalla de confirmación.
-        // El cliente puede tocar el botón las veces que haga falta si falla la señal.
         function sendToWhatsApp(nombre, telefono) {
-            const rawDate = dateInput.value;
-            const time = timeSelect.value;
-            const duration = liveDuration.textContent;
-            const p = rawDate.split('-');
+            const p = dateInput.value.split('-');
             const dateObj = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
             const dayName = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(dateObj);
             const formattedDate = `${dayName} ${p[2]}-${p[1]}-${p[0]}`;
 
-            let selected = [];
+            const selected = [];
             let total = 0;
             document.querySelectorAll('input[name="service"]:checked').forEach(cb => {
                 selected.push(cb.value);
                 total += parseInt(cb.getAttribute('data-price'));
             });
-
-            const extras = [
-                { id: 'cafeCheck', label: 'Cafe expresso' },
-                { id: 'ponqueCheck', label: 'Ponquecito casero' }
-            ];
-            extras.forEach(ex => {
+            [{ id: 'cafeCheck', label: 'Cafe expresso' }, { id: 'ponqueCheck', label: 'Ponquecito casero' }].forEach(ex => {
                 const cb = document.getElementById(ex.id);
                 if (cb && cb.checked) {
                     selected.push(ex.label);
@@ -1347,7 +798,6 @@
                 }
             });
 
-            // Mensaje en texto normal; se codifica completo una sola vez
             const texto =
 `¡Hola Felix!
 Quiero pedir una cita en
@@ -1357,85 +807,46 @@ Quiero pedir una cita en
 📱Telefono: ${telefono}
 📍Direccion: Maceo 254 e/ Cables y Angel Guerra
 📆Fecha: ${formattedDate}
-🕙Horario: ${time}
+🕙Horario: ${timeSelect.value}
 ☕️Servicio: ${selected.join(', ')}
-⌛️Duracion aprox: ${duration}
+⌛️Duracion aprox: ${liveDuration.textContent}
 💰Total a pagar: $${total}`;
 
-            const msg = encodeURIComponent(texto);
-
-            // whatsapp:// abre la app directamente, sin cargar ninguna pagina web
-            const enlace = `whatsapp://send?phone=${WHATSAPP_NUMBER}&text=${msg}`;
+            const enlace = `whatsapp://send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(texto)}`;
             document.getElementById('waApp').href = enlace;
             document.getElementById('waApp2').href = enlace;
-
             volverConfirmacion();
             document.getElementById('confirmBox').classList.add('open');
         }
 
-        // Nombre y teléfono se ponen dorados cuando tienen contenido
-        function syncFilled() {
-            [nameInput, phoneInput].forEach(function(inp) {
-                const w = inp.closest('.field-wrap');
-                if (w) w.classList.toggle('filled', inp.value.trim().length > 0);
-            });
-        }
-
-        window.addEventListener('load', syncFilled);
-
-        // Al intentar cerrar (X, tocar afuera o Escape) primero se pregunta si ya envió el mensaje
         function pedirCierre() {
-            document.getElementById('confirmMain').hidden = true;
-            document.getElementById('confirmAsk').hidden = false;
+            document.getElementById('confirmMain').classList.add('hidden');
+            document.getElementById('confirmAsk').classList.remove('hidden');
         }
         function volverConfirmacion() {
-            document.getElementById('confirmAsk').hidden = true;
-            document.getElementById('confirmMain').hidden = false;
+            document.getElementById('confirmAsk').classList.add('hidden');
+            document.getElementById('confirmMain').classList.remove('hidden');
         }
         function cerrarConfirmacion() {
             document.getElementById('confirmBox').classList.remove('open');
-
-            // Limpia servicios, extras, fecha, horario y términos (se conservan nombre y teléfono)
             document.querySelectorAll('.service-item.selected').forEach(el => el.classList.remove('selected'));
             document.querySelectorAll('input[name="service"], #cafeCheck, #ponqueCheck').forEach(cb => { cb.checked = false; });
             dateInput.value = '';
             acceptTerms.checked = false;
-            submitBtn.textContent = 'Solicitar Cita';
-
+            submitBtn.textContent = 'Confirmar';
             updateSummary();
             updateTimeSlots();
-            document.getElementById('servicios').scrollIntoView({ behavior: 'smooth' });
+            showScreen('home');
         }
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && document.getElementById('confirmBox').classList.contains('open')) {
-                pedirCierre();
-            }
+            if (e.key === 'Escape' && document.getElementById('confirmBox').classList.contains('open')) pedirCierre();
         });
 
-        // ---- Lista única de precios ----
-        // Los precios se leen de la tabla "precios" de Supabase. Si algo falla,
-        // la página se queda con los precios que ya tiene escritos arriba.
-        function normKey(s) {
-            return String(s || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        }
-        async function cargarPrecios() {
-            try {
-                const { data, error } = await window.supabaseClient.from('precios').select('servicio,precio');
-                if (error || !data || !data.length) return;
-                const mapa = {};
-                data.forEach(r => { mapa[normKey(r.servicio)] = parseInt(r.precio); });
-                document.querySelectorAll('input[data-price]').forEach(inp => {
-                    const nombre = inp.getAttribute('data-name') || inp.value;
-                    const precio = mapa[normKey(nombre)];
-                    if (!Number.isFinite(precio)) return;
-                    inp.setAttribute('data-price', precio);
-                    const etiqueta = inp.closest('.service-item').querySelector(':scope > span:last-child');
-                    if (etiqueta) etiqueta.textContent = (inp.id ? '+$' : '$') + precio;
-                });
-                updateSummary();
-            } catch (e) { /* se queda con los precios actuales */ }
-        }
-        cargarPrecios();
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        cargarDatos();
+        validarLogin();
+        updateSummary();
+        window.scrollTo(0, 0);
     </script>
 </body>
 </html>
