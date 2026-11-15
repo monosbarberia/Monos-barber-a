@@ -1,0 +1,125 @@
+-- =====================================================================
+--  PANEL DE MONO'S BARBERÍA - instalación (se corre UNA sola vez)
+--  Supabase > SQL Editor > New query > pegar todo > Run
+--  Solo AGREGA cosas nuevas. No borra ni cambia tus reservas actuales.
+-- =====================================================================
+
+-- 0) TU CORREO: solo este correo podrá entrar al panel. CÁMBIALO AQUÍ.
+create table if not exists admin_emails (email text primary key);
+alter table admin_emails enable row level security;
+insert into admin_emails (email) values ('TU_CORREO@ejemplo.com') on conflict do nothing;
+
+create or replace function es_admin() returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from admin_emails
+                 where lower(email) = lower(coalesce(auth.jwt() ->> 'email', '')));
+$$;
+
+create or replace function soy_admin() returns boolean
+language sql stable security definer set search_path = public as $$ select es_admin(); $$;
+
+-- 1) BLOQUEOS (días u horas que no quieres atender)
+create table if not exists bloqueos (
+  id uuid primary key default gen_random_uuid(),
+  fecha date not null,
+  turno text,            -- null = todo el día
+  motivo text,
+  creado timestamptz default now()
+);
+alter table bloqueos enable row level security;
+drop policy if exists bloqueos_publico on bloqueos;
+create policy bloqueos_publico on bloqueos for select to anon, authenticated using (true);
+drop policy if exists bloqueos_admin on bloqueos;
+create policy bloqueos_admin on bloqueos for all to authenticated using (es_admin()) with check (es_admin());
+
+-- La reserva se rechaza si el horario está bloqueado (aunque alguien lo intente saltar)
+create or replace function bloquear_turnos() returns trigger language plpgsql as $$
+begin
+  if exists (select 1 from bloqueos b where b.fecha = new.fecha::date and (b.turno is null or b.turno = new.turno)) then
+    raise exception 'BLOQUEADO';
+  end if;
+  return new;
+end $$;
+drop trigger if exists trg_bloqueos on turnos;
+create trigger trg_bloqueos before insert on turnos for each row execute function bloquear_turnos();
+
+-- 2) CITAS CANCELADAS (historial) y NO-SHOW (deudas)
+create table if not exists turnos_cancelados as select * from turnos where false;
+alter table turnos_cancelados add column if not exists cancelado_en timestamptz default now();
+alter table turnos_cancelados add column if not exists motivo text;
+alter table turnos_cancelados enable row level security;
+drop policy if exists canc_admin on turnos_cancelados;
+create policy canc_admin on turnos_cancelados for select to authenticated using (es_admin());
+
+create table if not exists no_shows (
+  id uuid primary key default gen_random_uuid(),
+  reserva_id text unique,
+  telefono text not null,
+  nombre text,
+  fecha date,
+  turno text,
+  monto numeric default 0,
+  estado text default 'pendiente',   -- pendiente | pagado | perdonado
+  creado timestamptz default now(),
+  resuelto_en timestamptz
+);
+alter table no_shows enable row level security;
+drop policy if exists ns_admin on no_shows;
+create policy ns_admin on no_shows for select to authenticated using (es_admin());
+
+-- 3) PERMISOS DEL PANEL sobre tus tablas actuales (se suman a los que ya tienes)
+drop policy if exists turnos_admin_leer on turnos;
+create policy turnos_admin_leer on turnos for select to authenticated using (es_admin());
+drop policy if exists turnos_admin_crear on turnos;
+create policy turnos_admin_crear on turnos for insert to authenticated with check (es_admin());
+drop policy if exists precios_admin on precios;
+create policy precios_admin on precios for all to authenticated using (es_admin()) with check (es_admin());
+
+-- 4) ACCIONES DEL PANEL
+create or replace function marcar_estado(p_reserva text, p_estado text) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not es_admin() then raise exception 'NO_AUTORIZADO'; end if;
+  if p_estado = 'cancelado' then
+    insert into turnos_cancelados select t.*, now(), null from turnos t where t.reserva_id::text = p_reserva;
+    delete from turnos where reserva_id::text = p_reserva;
+    delete from no_shows where reserva_id = p_reserva and estado = 'pendiente';
+  elsif p_estado in ('ocupado', 'completado', 'no_show') then
+    update turnos set estado = p_estado where reserva_id::text = p_reserva;
+    if p_estado = 'no_show' then
+      insert into no_shows (reserva_id, telefono, nombre, fecha, turno, monto)
+        select p_reserva, t.telefono, t.nombre, t.fecha::date, t.turno, coalesce(t.total, 0)::numeric
+        from turnos t where t.reserva_id::text = p_reserva limit 1
+        on conflict (reserva_id) do nothing;
+    else
+      delete from no_shows where reserva_id = p_reserva and estado = 'pendiente';
+    end if;
+  end if;
+end $$;
+
+create or replace function resolver_no_show(p_id uuid, p_accion text) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not es_admin() then raise exception 'NO_AUTORIZADO'; end if;
+  update no_shows
+     set estado = case p_accion when 'pagado' then 'pagado' when 'perdonado' then 'perdonado' else 'pendiente' end,
+         resuelto_en = case when p_accion in ('pagado', 'perdonado') then now() else null end
+   where id = p_id;
+end $$;
+
+-- Clientes con deuda que YA tienen una cita nueva (es el aviso del panel)
+create or replace function alertas_deuda() returns jsonb
+language sql stable security definer set search_path = public as $$
+  select coalesce(jsonb_agg(x), '[]'::jsonb) from (
+    select t.reserva_id::text as reserva_id, max(t.nombre) as nombre, t.telefono,
+           t.fecha::date as fecha, min(t.turno) as turno, d.deuda
+    from turnos t
+    join (select telefono, sum(monto) as deuda from no_shows where estado = 'pendiente' group by telefono) d
+      on d.telefono = t.telefono
+    where es_admin() and t.estado = 'ocupado' and t.fecha::date >= current_date
+    group by t.reserva_id, t.telefono, t.fecha, d.deuda
+  ) x;
+$$;
+
+revoke all on function marcar_estado(text, text), resolver_no_show(uuid, text), alertas_deuda(), soy_admin() from public, anon;
+grant execute on function marcar_estado(text, text), resolver_no_show(uuid, text), alertas_deuda(), soy_admin() to authenticated;
