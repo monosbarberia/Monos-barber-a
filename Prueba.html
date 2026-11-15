@@ -1,852 +1,496 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>Mono's Barbería | Cortes Clásicos y Reserva Online</title>
-    <meta name="description" content="Bienvenido a Mono's Barbería. Especialistas en cortes de caballero, barbas y estilo vintage. Reserva tu cita fácilmente desde nuestra web.">
-    <meta name="keywords" content="barbería, corte de cabello, Mono's Barbería, barbero, reserva de citas, barber shop">
-    <meta name="author" content="Félix">
-    <meta property="og:title" content="Mono's Barbería">
-    <meta property="og:description" content="Agenda tu cita para un corte de nivel profesional.">
-    <meta property="og:image" content="https://monosbarberia.github.io/Monos-barber-a/logo.jpg">
-    <meta property="og:url" content="https://monosbarberia.github.io/Monos-barber-a/">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#1c3823">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <link rel="icon" type="image/png" sizes="520x520" href="favicon.jpg">
-    <link rel="apple-touch-icon" sizes="520x520" href="favicon.jpg">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,700;1,600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1c3823">
+<title>Panel | Mono's Barbería</title>
+<style>
+:root{--verde:#1c3823;--verde2:#234530;--crema:#f3ead2;--oro:#cbb26a;--oro-grad:linear-gradient(135deg,#f1e1a6 0%,#cbb26a 45%,#a98b40 100%);--linea:rgba(243,234,210,.2);--suave:rgba(243,234,210,.72);--ok:#8fcb98;--mal:#e5897c;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--serif:Georgia,'Times New Roman',serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--verde);color:var(--crema);font:16px/1.45 var(--sans)}
+[hidden]{display:none!important}
+button{font-family:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid rgba(243,234,210,.3);background:transparent;color:var(--crema);font:700 .85rem var(--sans);cursor:pointer;text-decoration:none}
+.btn.oro{background:var(--oro-grad);color:var(--verde);border-color:var(--oro)}
+.btn.mal{color:var(--mal);border-color:rgba(229,137,124,.5)}
+.btn.ok{color:var(--ok);border-color:rgba(143,203,152,.5)}
+.btn.sm{min-height:36px;padding:0 12px;font-size:.78rem}
+.btn:disabled{opacity:.5}
+input,select{width:100%;height:48px;padding:0 12px;background:rgba(0,0,0,.25);color:var(--crema);border:1px solid rgba(243,234,210,.28);border-radius:10px;font:1rem var(--sans);outline:none}
+input:focus,select:focus{border-color:var(--oro)}
+select option{background:#1c3823}
+label.l{display:block;margin:12px 0 5px;font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--suave)}
+.card{background:rgba(255,255,255,.04);border:1px solid var(--linea);border-radius:12px;padding:14px;margin-bottom:10px}
 
-    <style>
-        /* Colores 60 / 30 / 10
-           60% verde bosque: fondos y paneles
-           30% crema: textos, líneas y botones secundarios
-           10% dorado: lo que llama la atención (botón principal, seleccionado, precios, marca) */
-        :root {
-            --verde: #1c3823;
-            --verde-2: #234530;
-            --crema: #f3ead2;
-            --oro: #cbb26a;
-            --oro-grad: linear-gradient(135deg, #f1e1a6 0%, #cbb26a 45%, #a98b40 100%);
-            --linea: rgba(243, 234, 210, 0.2);
-            --suave: rgba(243, 234, 210, 0.72);
-            --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            --serif: 'Cormorant Garamond', Georgia, serif;
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { margin: 0; padding: 0; }
-        body {
-            background-color: var(--verde);
-            color: var(--crema);
-            font-family: var(--sans);
-            font-size: 16px;
-            line-height: 1.5;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-        .hidden { display: none !important; }
-        .col { width: 100%; max-width: 440px; margin: 0 auto; }
+/* Entrada */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+#login .card{width:100%;max-width:360px;padding:24px 20px}
+#login h1{margin:0 0 4px;font:700 1.7rem var(--serif);color:var(--oro)}
+.err{color:var(--mal);font-size:.88rem;margin:10px 0 0}
 
-        .screen { display: none; min-height: 100vh; min-height: 100dvh; flex-direction: column; padding: 16px 20px 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); }
-        .screen.active { display: flex; }
-        .screen.con-barra { padding-bottom: 110px; }
+/* Estructura */
+#app{display:flex;flex-direction:column;min-height:100vh}
+header.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#162b1b;border-bottom:1px solid var(--linea)}
+header.top b{font:700 1.2rem var(--serif);color:var(--oro)}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;background:#162b1b;border-top:1px solid var(--linea);padding-bottom:env(safe-area-inset-bottom,0)}
+nav button{flex:1;position:relative;padding:8px 2px 7px;background:none;border:none;color:var(--suave);font-size:.68rem;cursor:pointer}
+nav button span{display:block;font-size:1.25rem;line-height:1.2}
+nav button.on{color:var(--oro)}
+nav i{position:absolute;top:4px;left:55%;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--mal);color:#fff;font:700 .68rem/17px var(--sans);text-align:center;font-style:normal}
+main{flex:1;width:100%;max-width:860px;margin:0 auto;padding:14px 16px 96px}
+@media(min-width:860px){
+ #app{flex-direction:row;flex-wrap:wrap}
+ header.top{width:100%;position:static}
+ nav{position:sticky;top:0;align-self:flex-start;flex-direction:column;width:200px;height:calc(100vh - 62px);border-top:none;border-right:1px solid var(--linea);padding:10px}
+ nav button{flex:none;display:flex;align-items:center;text-align:left;padding:12px;font-size:.95rem;border-radius:10px}
+ nav button span{display:inline;margin-right:10px}
+ nav button.on{background:rgba(203,178,106,.12)}
+ nav i{position:static;margin-left:auto}
+ main{flex:1;width:auto;padding-bottom:30px}
+}
+h2.t{margin:4px 0 12px;font:700 1.7rem var(--serif)}
 
-        /* ---------- Botones ---------- */
-        .btn { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 52px; padding: 0 18px; border-radius: 12px; font: 700 0.95rem var(--sans); letter-spacing: 0.8px; text-transform: uppercase; text-decoration: none; text-align: center; cursor: pointer; border: 1px solid transparent; }
-        .btn-oro { position: relative; overflow: hidden; background-color: var(--oro); background-image: var(--oro-grad); color: var(--verde); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .btn-oro:active { filter: brightness(0.95); }
-        .btn-oro:disabled { background-image: none; background-color: rgba(243,234,210,0.1); color: rgba(243,234,210,0.4); box-shadow: none; cursor: not-allowed; }
-        .btn-oro:not(:disabled)::after { content: ''; position: absolute; top: 0; left: 0; width: 40%; height: 100%; background: linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent); transform: translateX(-150%) skewX(-20deg); animation: sheen 3s ease-in-out infinite; will-change: transform; pointer-events: none; }
-        @keyframes sheen { 0% { transform: translateX(-150%) skewX(-20deg); } 40% { transform: translateX(350%) skewX(-20deg); } 100% { transform: translateX(350%) skewX(-20deg); } }
-        .btn-line { min-height: 46px; background: transparent; color: var(--crema); border-color: rgba(243,234,210,0.3); font-size: 0.78rem; }
-        .btn-line:active { background: rgba(243,234,210,0.08); }
-        .btn-link { background: none; border: none; color: var(--suave); font: 600 0.9rem var(--sans); text-decoration: underline; min-height: 44px; cursor: pointer; }
+/* Alerta de deuda */
+.alerta{border:1px solid rgba(229,137,124,.6);background:rgba(229,137,124,.1);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+.alerta b{color:var(--mal)}
+.alerta .fila{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid rgba(229,137,124,.25)}
+.alerta .fila:first-of-type{border-top:none}
 
-        /* ---------- Costura ---------- */
-        .stitch { position: relative; }
-        .stitch::before, .stitch::after { content: ''; position: absolute; border-radius: 8px; pointer-events: none; }
-        .stitch::before { top: 10.5px; right: 7.5px; bottom: 7.5px; left: 10.5px; border: 1.5px dashed rgba(0,0,0,0.45); }
-        .stitch::after { top: 9px; right: 9px; bottom: 9px; left: 9px; border: 1.5px dashed rgba(243,234,210,0.38); }
-        .card { background: rgba(255,255,255,0.04); border: 1px solid var(--linea); border-radius: 14px; padding: 22px 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+/* Calendario */
+.tira{display:flex;margin-bottom:12px}
+.tira button{flex:1;margin:0 2px;padding:7px 0;border-radius:10px;border:1px solid var(--linea);background:transparent;color:var(--crema);cursor:pointer}
+.tira button.fl{flex:0 0 32px;font-size:1.3rem;border:none;color:var(--oro)}
+.tira small{display:block;font-size:.66rem;letter-spacing:1px;text-transform:uppercase;color:var(--suave)}
+.tira b{display:block;font:700 1.15rem var(--serif)}
+.tira i{display:block;height:14px;font:700 .68rem/14px var(--sans);color:var(--oro);font-style:normal}
+.tira button.on{background:var(--oro-grad);color:var(--verde);border-color:var(--oro)}
+.tira button.on small,.tira button.on i{color:var(--verde)}
+.tira button.hoy:not(.on){border-color:var(--oro)}
+.slot{display:flex;align-items:stretch;margin-bottom:8px}
+.slot .h{flex:0 0 66px;padding-top:12px;font-size:.8rem;color:var(--suave)}
+.slot .c{flex:1;min-width:0;border-radius:10px;padding:10px 12px;border:1px dashed rgba(243,234,210,.2)}
+.slot .c.cita{border:1px solid var(--oro);background:rgba(203,178,106,.1);cursor:pointer}
+.slot .c.cita.ns{border-color:rgba(229,137,124,.6);background:rgba(229,137,124,.1)}
+.slot .c.cita.cp{border-color:rgba(143,203,152,.5);background:rgba(143,203,152,.08)}
+.slot .c.cont{border:1px solid rgba(203,178,106,.35);background:rgba(203,178,106,.05);color:var(--suave);font-size:.82rem;padding:6px 12px}
+.slot .c.blq{border:1px solid rgba(243,234,210,.25);background:repeating-linear-gradient(45deg,rgba(0,0,0,.18),rgba(0,0,0,.18) 6px,transparent 6px,transparent 12px);display:flex;justify-content:space-between;align-items:center;color:var(--suave)}
+.slot .c.libre{display:flex;justify-content:space-between;align-items:center;color:var(--suave)}
+.nom{font:700 1.02rem var(--sans)}
+.sub{font-size:.84rem;color:var(--suave);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{display:inline-block;padding:2px 9px;border-radius:20px;font:700 .68rem var(--sans);letter-spacing:.6px;text-transform:uppercase;border:1px solid}
+.p-ocupado{color:var(--oro);border-color:var(--oro)}
+.p-completado{color:var(--ok);border-color:var(--ok)}
+.p-no_show{color:var(--mal);border-color:var(--mal)}
+.p-cancelado{color:var(--suave);border-color:var(--suave)}
+.debe{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:6px;background:var(--mal);color:#2a0f0b;font:700 .72rem var(--sans)}
+.fila2{display:flex;align-items:center;justify-content:space-between}
 
-        /* ---------- Inicio ---------- */
-        #home { background-image: radial-gradient(ellipse 85% 34% at 50% 26%, rgba(96,150,104,0.28), rgba(96,150,104,0)); background-size: 100% 100%; background-repeat: no-repeat; }
-        #home .col { flex: 1; display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
-        .home-top { padding-top: 8px; }
-        .logo { display: block; width: 62%; max-width: 230px; height: auto; margin: 0 auto 8px; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.45)); }
-        .marca { margin: 0; font: 700 0.95rem var(--serif); letter-spacing: 5px; text-transform: uppercase; color: var(--oro); }
-        .home-mid { padding: 14px 0; }
-        .slogan { margin: 0 0 6px; font: italic 600 1.4rem/1.2 var(--serif); }
-        .bienvenida { margin: 0 auto 18px; max-width: 320px; font-size: 0.88rem; line-height: 1.5; color: var(--suave); }
-        .lab { display: block; margin-bottom: 6px; text-align: left; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--suave); }
-        .field-wrap { margin-bottom: 14px; border: 1px solid rgba(243,234,210,0.28); border-radius: 10px; background: rgba(0,0,0,0.25); transition: border-color 0.2s; }
-        .field-wrap:focus-within { border-color: var(--oro); }
-        .field-wrap input { display: block; width: 100%; height: 50px; padding: 0 14px; background: transparent; border: none; outline: none; color: var(--oro); caret-color: var(--oro); font: 1rem var(--sans); }
-        .field-wrap input:-webkit-autofill { -webkit-text-fill-color: var(--oro); box-shadow: 0 0 0 1000px #1b3522 inset; caret-color: var(--oro); }
-        .field-wrap input::placeholder { color: rgba(243,234,210,0.45); }
-        .home-bottom .btn-link { display: block; margin: 0 auto 6px; }
-        .quick { display: flex; margin: 0 -4px; }
-        .quick .btn-line { flex: 1; margin: 0 4px; padding: 0 4px; }
+/* Estadísticas y listas */
+.stats{display:flex;overflow-x:auto;margin:0 -16px 12px;padding:0 12px}
+.stat{flex:0 0 118px;margin:0 4px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--linea)}
+.stat small{display:block;font-size:.66rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--suave)}
+.stat b{font:700 1.5rem var(--serif)}
+.stat span{display:block;font-size:.78rem;color:var(--oro)}
+.chips{display:flex;overflow-x:auto;margin:0 -16px 10px;padding:0 12px}
+.chip{flex:0 0 auto;margin:0 4px;padding:8px 14px;border-radius:20px;border:1px solid var(--linea);background:transparent;color:var(--crema);font-size:.85rem;cursor:pointer}
+.chip.on{background:var(--oro);color:var(--verde);border-color:var(--oro);font-weight:700}
+.item{cursor:pointer}
+.vacio{padding:30px 10px;text-align:center;color:var(--suave)}
 
-        /* ---------- Pantallas 2 y 3 ---------- */
-        .top { display: flex; align-items: center; justify-content: space-between; }
-        .back { min-height: 44px; padding: 0 12px 0 0; background: none; border: none; color: var(--crema); font: 600 1rem var(--sans); cursor: pointer; }
-        .hello { max-width: 62%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 700 1.15rem var(--sans); color: var(--crema); }
-        .titulo { display: flex; align-items: baseline; justify-content: space-between; margin: 4px 0 10px; }
-        .titulo h2 { margin: 0; font: 700 2rem/1.1 var(--serif); }
-        .titulo span { font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--oro); font-weight: 700; }
-        .prog { height: 3px; margin-bottom: 8px; background: rgba(243,234,210,0.15); border-radius: 2px; }
-        .prog i { display: block; height: 100%; background: var(--oro-grad); border-radius: 2px; }
-        .grp { margin: 18px 0 8px; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: var(--suave); }
-
-        .service-row { display: flex; align-items: center; margin-bottom: 10px; }
-        .service-item { flex: 1; display: flex; justify-content: space-between; align-items: center; min-height: 56px; margin-bottom: 0; padding: 0 16px; background: rgba(0,0,0,0.18); border: 1px solid var(--linea); border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; -webkit-user-select: none; user-select: none; transition: background-color 0.2s, border-color 0.2s; }
-        .service-item input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
-        .service-item span:last-child { font: 700 1.4rem var(--serif); color: var(--oro); white-space: nowrap; padding-left: 10px; }
-        .service-item.selected { background-color: var(--oro); background-image: var(--oro-grad); border-color: var(--oro); color: var(--verde); }
-        .service-item.selected span:last-child { color: var(--verde); }
-        .service-row + .service-row, .extras .service-item { margin-top: 0; }
-        .extras .service-item { margin-bottom: 10px; }
-        .info-btn { flex-shrink: 0; width: 40px; height: 40px; margin-left: 8px; border-radius: 50%; border: 1px solid rgba(243,234,210,0.3); background: transparent; color: var(--suave); font: italic 700 1.1rem var(--serif); cursor: pointer; padding: 0; }
-
-        /* ---------- Barra inferior ---------- */
-        .bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background-color: #162b1b; border-top: 1px solid var(--linea); padding: 10px 20px 12px; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
-        .bar .col { display: flex; align-items: center; justify-content: space-between; }
-        .bar small { display: block; font-size: 0.72rem; color: var(--suave); }
-        .bar .total { font: 700 1.8rem/1.1 var(--serif); color: var(--oro); }
-        .cuando span { display: block; font: 700 1.05rem/1.25 var(--sans); color: var(--oro); }
-        .bar .btn { width: auto; min-width: 150px; margin-left: 14px; }
-
-        /* ---------- Fecha y hora ---------- */
-        .campo { margin-bottom: 16px; }
-        input[type="date"], select { display: block; width: 100%; height: 52px; padding: 0 14px; background-color: rgba(0,0,0,0.25); color: var(--crema); border: 1px solid rgba(243,234,210,0.28); border-radius: 10px; font: 1rem var(--sans); outline: none; -webkit-appearance: none; appearance: none; }
-        input[type="date"]:focus, select:focus { border-color: var(--oro); }
-        input[type="date"], select { text-align: center; text-align-last: center; }
-        input[type="date"] { display: flex; align-items: center; justify-content: center; line-height: normal; }
-        input[type="date"]::-webkit-date-and-time-value { text-align: center; margin: 0; min-height: 1.4em; }
-        input[type="date"]::-webkit-datetime-edit { padding: 0; }
-        select:disabled { opacity: 0.55; }
-        select option { background-color: #1c3823; color: var(--crema); }
-        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(80%) sepia(30%) saturate(300%) hue-rotate(5deg); }
-        .pista { margin: 6px 0 0; font-size: 0.82rem; color: var(--suave); }
-        .resumen { display: flex; justify-content: space-between; align-items: center; padding: 18px 20px; margin-bottom: 14px; }
-        .resumen small { display: block; font-size: 0.72rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--suave); }
-        .resumen b { font: 700 1.5rem var(--serif); color: var(--crema); }
-        .resumen .t { text-align: right; }
-        .resumen .t b { color: var(--oro); font-size: 1.9rem; }
-        .terms { margin-top: 6px; padding: 20px; }
-        .terms-t { margin: 0 0 10px; font: 700 1.35rem var(--serif); letter-spacing: 1px; text-transform: uppercase; color: var(--oro); }
-        .terms-l { margin: 0 0 14px; padding-left: 20px; font-size: 0.95rem; line-height: 1.5; color: var(--crema); }
-        .terms-l li { margin-bottom: 6px; }
-        .terms-l li::marker { color: var(--oro); }
-        .check { display: flex; align-items: center; padding: 12px 14px; background: rgba(0,0,0,0.22); border: 1px solid rgba(203,178,106,0.55); border-radius: 10px; font: 700 0.98rem var(--sans); color: var(--crema); cursor: pointer; }
-        .check input { flex-shrink: 0; width: 24px; height: 24px; margin: 0 12px 0 0; accent-color: var(--oro); }
-
-        .info-tooltip { display: none; position: fixed; z-index: 300; max-width: 260px; padding: 12px 14px; background-color: #162b1b; border: 1px solid rgba(243,234,210,0.3); border-radius: 10px; font-size: 0.88rem; line-height: 1.45; color: var(--crema); box-shadow: 0 8px 28px rgba(0,0,0,0.5); pointer-events: none; }
-        .info-tooltip.visible { display: block; }
-
-        /* ---------- Ventanas ---------- */
-        .overlay { display: none; position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 500; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; background-color: rgba(10,22,14,0.9); }
-        .overlay.open { display: flex; }
-        .modal { width: 100%; max-width: 380px; margin: auto; padding: 28px 22px 22px; background-color: var(--verde-2); border: 1px solid var(--linea); border-radius: 14px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; }
-        .modal h3 { margin: 0 0 8px; font: 700 1.6rem/1.15 var(--serif); }
-        .modal p { margin: 0 0 18px; font-size: 0.95rem; line-height: 1.5; color: var(--suave); }
-        .modal .btn { margin-top: 10px; position: relative; z-index: 2; }
-        .pasos { text-align: left; margin-bottom: 14px; }
-        .paso { display: flex; align-items: flex-start; margin-bottom: 12px; font-size: 0.93rem; line-height: 1.4; }
-        .paso b { color: #fff; }
-        .num { flex-shrink: 0; width: 26px; height: 26px; margin-right: 12px; border-radius: 50%; background: var(--oro-grad); color: var(--verde); font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
-        .aviso { padding: 12px 14px; margin-bottom: 6px; background: rgba(0,0,0,0.25); border-left: 3px solid var(--oro); border-radius: 8px; text-align: left; font-size: 0.88rem; line-height: 1.45; }
-
-        @media (max-height: 640px) { .logo { width: 48%; } .bienvenida { margin-bottom: 12px; } }
-        @media (max-width: 340px) { .quick .btn-line { font-size: 0.7rem; letter-spacing: 0.3px; } .titulo h2 { font-size: 1.7rem; } }
-        @media (prefers-reduced-motion: reduce) { .btn-oro::after { animation: none; } }
-    </style>
+/* Ventana */
+.overlay{display:none;position:fixed;top:0;right:0;bottom:0;left:0;z-index:100;background:rgba(8,18,11,.9);align-items:flex-end;justify-content:center;overflow-y:auto}
+.overlay.open{display:flex}
+.hoja{width:100%;max-width:520px;max-height:92vh;overflow-y:auto;background:var(--verde2);border:1px solid var(--linea);border-radius:18px 18px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom,0))}
+@media(min-width:600px){.overlay{align-items:center}.hoja{border-radius:18px}}
+.hoja h3{margin:0 0 4px;font:700 1.5rem var(--serif)}
+.cierra{float:right;width:40px;height:40px;margin:-6px -6px 0 0;border-radius:50%;border:1px solid var(--linea);background:none;color:var(--crema);font-size:1.4rem;cursor:pointer}
+.acc{display:flex;flex-wrap:wrap;margin:12px -4px 0}
+.acc .btn{flex:1 1 40%;margin:4px}
+.svc{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;margin-bottom:6px;border:1px solid var(--linea);border-radius:10px;cursor:pointer}
+.svc input{width:22px;height:22px;accent-color:#cbb26a;margin:0 10px 0 0}
+.svc span:first-child{display:flex;align-items:center}
+.pr{display:flex;align-items:center;margin-bottom:8px}
+.pr span{flex:1}.pr input{width:110px;text-align:right}
+</style>
 </head>
 <body>
-    <div class="info-tooltip" id="globalTooltip"></div>
 
-    <!-- INICIO -->
-    <div id="home" class="screen active">
-        <div class="col">
-            <div class="home-top">
-                <img src="logo.png" alt="Mono's Barbería" class="logo" decoding="async">
-                <p class="marca">Barbería Holguín</p>
-            </div>
-            <div class="home-mid">
-                <p class="slogan">Para que luzcas limpio, fino, mono...</p>
-                <p class="bienvenida">Dirigida por Félix y Paola. Elegancia clásica con estilo moderno y atención al detalle.</p>
-                <div class="card stitch">
-                    <label class="lab" for="clientName">Nombre</label>
-                    <div class="field-wrap" id="wrapName"><input type="text" id="clientName" placeholder="Tu nombre" maxlength="60" autocomplete="name" required></div>
-                    <label class="lab" for="clientPhone">Teléfono</label>
-                    <div class="field-wrap" id="wrapPhone"><input type="tel" id="clientPhone" placeholder="8 dígitos" pattern="[0-9]{8}" maxlength="8" inputmode="numeric" autocomplete="tel" required></div>
-                    <button type="button" class="btn btn-oro" id="btnStart" disabled>Reservar</button>
-                </div>
-            </div>
-            <div class="home-bottom">
-                <button type="button" class="btn-link" id="btnHow">¿Cómo reservar?</button>
-                <div class="quick">
-                    <a href="https://www.google.com/maps/search/?api=1&query=Monos+Barberia+Holguin" target="_blank" rel="noopener" class="btn btn-line">Ubicación</a>
-                    <a href="https://www.instagram.com/monosbarberiaholguin/" target="_blank" rel="noopener" class="btn btn-line">Instagram</a>
-                    <a href="https://www.facebook.com/profile.php?id=61550881144010" target="_blank" rel="noopener" class="btn btn-line">Facebook</a>
-                </div>
-            </div>
-        </div>
-    </div>
+<div id="login" hidden>
+  <div class="card">
+    <h1>Mono's Barbería</h1>
+    <p style="margin:0 0 6px;color:var(--suave)">Panel de administración</p>
+    <label class="l" for="em">Correo</label>
+    <input id="em" type="email" autocomplete="username" inputmode="email">
+    <label class="l" for="pw">Contraseña</label>
+    <input id="pw" type="password" autocomplete="current-password">
+    <p class="err" id="lerr" hidden></p>
+    <button class="btn oro" style="width:100%;margin-top:16px" id="bEntrar">Entrar</button>
+  </div>
+</div>
 
-    <!-- SERVICIOS -->
-    <div id="services" class="screen con-barra">
-        <div class="col">
-            <div class="top"><button type="button" class="back" id="btnBackHome">&#8249; Atrás</button><span class="hello" id="helloChip"></span></div>
-            <div class="titulo"><h2>Servicios</h2><span>Paso 1 de 2</span></div>
-            <div class="prog"><i style="width:50%"></i></div>
+<div id="cargando" style="padding:40px;text-align:center;color:var(--suave)">Cargando…</div>
 
-            <div class="grp">Corte y arreglo</div>
-                <div class="service-row">
-                    <label class="service-item" onclick="toggleService(this, 'main-cut')">
-                        <span><input type="checkbox" name="service" value="Corte sencillo" data-price="400" data-group="main-cut" data-name="Corte sencillo"> Corte sencillo</span>
-                        <span>$400</span>
-                    </label>
-                    <button type="button" class="info-btn" data-info="Corte con tijera o con máquina sencillo. También puede ser un afeitado completo de cabeza." aria-label="Más información">i</button>
-                </div>
-                <div class="service-row">
-                    <label class="service-item" onclick="toggleService(this, 'main-cut')">
-                        <span><input type="checkbox" name="service" value="Degradado" data-price="650" data-group="main-cut" data-name="Degradado"> Degradado</span>
-                        <span>$650</span>
-                    </label>
-                    <button type="button" class="info-btn" data-info="Corte degradado desde el cero o desde el afeitado, hasta el número que desee, según el tipo de corte y estilo que se vaya a realizar." aria-label="Más información">i</button>
-                </div>
-                <div class="service-row">
-                    <label class="service-item" onclick="toggleService(this, 'addon')">
-                        <span><input type="checkbox" name="service" value="Barba" data-price="150" data-group="addon" data-name="Barba"> Barba</span>
-                        <span>$150</span>
-                    </label>
-                    <button type="button" class="info-btn" data-info="Perfilado de barba o afeitado completo, según la preferencia del cliente." aria-label="Más información">i</button>
-                </div>
-                <div class="service-row">
-                    <label class="service-item" onclick="toggleService(this, 'addon')">
-                        <span><input type="checkbox" name="service" value="Diseño Personalizado" data-price="100" data-group="addon" data-name="Diseño Personalizado"> Diseño Personalizado</span>
-                        <span>$100</span>
-                    </label>
-                    <button type="button" class="info-btn" data-info="Diseño personalizado que puede incluir dibujos o figuras a elección del cliente." aria-label="Más información">i</button>
-                </div>
-                <div class="service-row">
-                    <label class="service-item" onclick="toggleService(this, 'addon')">
-                        <span><input type="checkbox" name="service" value="Peinado" data-price="200" data-group="addon" data-name="Peinado"> Peinado</span>
-                        <span>$200</span>
-                    </label>
-                    <button type="button" class="info-btn" data-info="Peinado y estilizado con los productos disponibles en el momento." aria-label="Más información">i</button>
-                </div>
+<div id="app" hidden>
+  <header class="top"><b>Mono's · Panel</b><button class="btn sm" id="bRef">Actualizar</button></header>
+  <nav id="nav">
+    <button data-t="cal" class="on"><span>📅</span>Calendario</button>
+    <button data-t="citas"><span>📋</span>Citas</button>
+    <button data-t="cli"><span>👥</span>Clientes</button>
+    <button data-t="blq"><span>⛔</span>Bloqueos</button>
+    <button data-t="aju"><span>⚙️</span>Ajustes</button>
+  </nav>
+  <main id="main"></main>
+</div>
 
-            <div class="grp">Para acompañar</div>
-            <div class="extras">
-                <label class="service-item" onclick="toggleExtra(this, 'cafeCheck')">
-                    <span><input type="checkbox" id="cafeCheck" data-price="40" data-name="Café expresso"> Café expresso</span>
-                    <span>+$40</span>
-                </label>
-                <label class="service-item" onclick="toggleExtra(this, 'ponqueCheck')">
-                    <span><input type="checkbox" id="ponqueCheck" data-price="100" data-name="Ponquecito casero"> Ponquecito casero</span>
-                    <span>+$100</span>
-                </label>
+<div class="overlay" id="ov"><div class="hoja" id="hoja"></div></div>
 
-            </div>
-        </div>
-        <div class="bar">
-            <div class="col">
-                <div><small class="js-dur">Elige un servicio</small><span class="total js-total">$0</span></div>
-                <button type="button" class="btn btn-oro" id="btnToDate" disabled>Siguiente</button>
-            </div>
-        </div>
-    </div>
+<script>
+var SUPABASE_URL = "https://ldxxflhwpyzldisydhmd.supabase.co";
+var SUPABASE_KEY = "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
+function cargarSB(i) {
+  var urls = ['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js', 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js'];
+  if (i >= urls.length) { document.getElementById('cargando').textContent = 'Sin conexión. Recarga la página.'; return; }
+  var s = document.createElement('script');
+  s.src = urls[i]; s.onload = arrancar; s.onerror = function() { cargarSB(i + 1); };
+  document.head.appendChild(s);
+}
+cargarSB(0);
+</script>
+<script>
+var sb, S = { tab: 'cal', fecha: '', turnos: [], canc: [], bloqueos: [], ns: [], deudas: [], precios: [], map: {}, rango: 'mes', est: 'todas', q: '', cq: '', cf: 'todos' };
+var $ = function(s) { return document.querySelector(s); };
+var esc = function(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+var DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'], MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+var DEF = [['Corte sencillo', 400], ['Degradado', 650], ['Barba', 150], ['Diseño Personalizado', 100], ['Peinado', 200], ['Café expresso', 40], ['Ponquecito casero', 100]];
+var ESTADO = { ocupado: 'Pendiente', completado: 'Completado', no_show: 'No-show', cancelado: 'Cancelado' };
 
-    <!-- FECHA Y HORA -->
-    <div id="datetime" class="screen con-barra">
-        <div class="col">
-            <div class="top"><button type="button" class="back" id="btnBackServices">&#8249; Atrás</button><span class="hello" id="helloChip2"></span></div>
-            <div class="titulo"><h2>Fecha y hora</h2><span>Paso 2 de 2</span></div>
-            <div class="prog"><i style="width:100%"></i></div>
+function pd(i) { var p = i.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+function iso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function addD(i, n) { var d = pd(i); d.setDate(d.getDate() + n); return iso(d); }
+function lunes(i) { var d = pd(i); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return iso(d); }
+function fmt(i) { var d = pd(i); return DIAS[d.getDay()] + ' ' + d.getDate() + ' ' + MESES[d.getMonth()]; }
+function hoy() { return iso(new Date()); }
+function mins(s) { var m = s.match(/^(\d{1,2}):(\d{2}) (AM|PM)$/); if (!m) return 0; var h = +m[1] % 12; if (m[3] === 'PM') h += 12; return h * 60 + +m[2]; }
+function t12(m) { var h = Math.floor(m / 60), mm = m % 60, p = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return h + ':' + String(mm).padStart(2, '0') + ' ' + p; }
+function allSlots() {
+  var out = [];
+  [[540, 690], [840, 960]].forEach(function(r) { for (var m = r[0]; m <= r[1]; m += 30) out.push(t12(m)); });
+  return out;
+}
+function money(n) { return '$' + (Math.round(n * 100) / 100); }
+function norm(s) { return String(s || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
 
-            <form id="bookingForm">
-                <div class="campo">
-                    <label class="lab" for="date">Día</label>
-                    <input type="date" id="date" required>
-                    <p class="pista">Cerrado los domingos.</p>
-                </div>
-                <div class="campo">
-                    <label class="lab" for="time">Hora</label>
-                    <select id="time" required disabled><option value="">Selecciona fecha primero...</option></select>
-                </div>
-                <div class="card stitch resumen">
-                    <div><small>Duración</small><b id="live-duration">--</b></div>
-                    <div class="t"><small>Total</small><b id="live-total">$0</b></div>
-                </div>
-                <div class="card stitch terms">
-                    <p class="terms-t">Términos de reserva</p>
-                    <ul class="terms-l">
-                        <li>Llega puntual.</li>
-                        <li>Si no puedes venir, avísanos con tiempo para ceder tu turno.</li>
-                        <li>Si no avisas, se cobrará en tu próxima cita como si se hubiera realizado el servicio.</li>
-                    </ul>
-                    <label class="check"><input type="checkbox" id="acceptTerms"><span>He leído y acepto las condiciones</span></label>
-                </div>
-            </form>
-        </div>
-        <div class="bar">
-            <div class="col">
-                <div class="cuando"><small>Tu cita</small><span class="js-cuando">Elige día y hora</span></div>
-                <button type="submit" form="bookingForm" class="btn btn-oro" id="submitBtn" disabled>Confirmar</button>
-            </div>
-        </div>
-    </div>
+/* ---------- Arranque y sesión ---------- */
+async function arrancar() {
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  S.fecha = hoy();
+  var r = await sb.auth.getSession();
+  if (r.data && r.data.session) entrar(); else mostrarLogin();
+  sb.auth.onAuthStateChange(function(ev) { if (ev === 'SIGNED_OUT') mostrarLogin(); });
+}
+function mostrarLogin() { $('#cargando').hidden = true; $('#app').hidden = true; $('#login').hidden = false; }
+$('#bEntrar').onclick = async function() {
+  var e = $('#lerr'); e.hidden = true; this.disabled = true;
+  var r = await sb.auth.signInWithPassword({ email: $('#em').value.trim(), password: $('#pw').value });
+  this.disabled = false;
+  if (r.error) { e.textContent = 'Correo o contraseña incorrectos.'; e.hidden = false; return; }
+  entrar();
+};
+async function entrar() {
+  var r = await sb.rpc('soy_admin');
+  if (r.error || r.data !== true) {
+    await sb.auth.signOut();
+    mostrarLogin();
+    var e = $('#lerr'); e.textContent = 'Este correo no tiene permiso para el panel.'; e.hidden = false;
+    return;
+  }
+  $('#cargando').hidden = true; $('#login').hidden = true; $('#app').hidden = false;
+  await recargar();
+  setInterval(function() { if (document.visibilityState === 'visible' && !$('#ov').classList.contains('open')) recargar(true); }, 60000);
+}
 
-    <!-- CÓMO RESERVAR -->
-    <div class="overlay" id="howBox">
-        <div class="modal stitch">
-            <h3>Cómo reservar</h3>
-            <p>Solo 3 pasos y tu turno queda listo.</p>
-            <div class="pasos">
-                <div class="paso"><span class="num">1</span><span><b>Nombre y teléfono</b>, y toca <b>«Reservar»</b>.</span></div>
-                <div class="paso"><span class="num">2</span><span><b>Elige tus servicios</b> y toca <b>«Siguiente»</b>.</span></div>
-                <div class="paso"><span class="num">3</span><span><b>Elige día y hora</b>, acepta las condiciones y toca <b>«Confirmar»</b>.</span></div>
-                <div class="paso"><span class="num">4</span><span><b>Envía el mensaje por WhatsApp.</b> Ya viene escrito, solo envíalo.</span></div>
-            </div>
-            <div class="aviso"><b>Importante:</b> cuando sale «Tu cita está agendada», tu turno ya está guardado. <b>No reserves otra vez.</b></div>
-            <button type="button" class="btn btn-oro" id="howClose">Entendido</button>
-        </div>
-    </div>
+/* ---------- Datos ---------- */
+async function recargar(silencio) {
+  var desde = addD(hoy(), -180);
+  var q = await Promise.all([
+    sb.from('turnos').select('*').gte('fecha', desde).order('fecha'),
+    sb.from('turnos_cancelados').select('*').gte('fecha', desde),
+    sb.from('bloqueos').select('*').gte('fecha', desde),
+    sb.from('no_shows').select('*'),
+    sb.rpc('alertas_deuda'),
+    sb.from('precios').select('servicio,precio')
+  ]);
+  if (q[0].error) { if (!silencio) alert('No se pudieron cargar las citas. Revisa tu conexión.'); return; }
+  S.turnos = q[0].data || []; S.canc = q[1].data || []; S.bloqueos = q[2].data || [];
+  S.ns = q[3].data || []; S.deudas = q[4].data || []; S.precios = q[5].data || [];
+  pintar();
+}
+function agrupar(rows, estadoFijo) {
+  var m = {};
+  rows.forEach(function(r) {
+    var f = String(r.fecha).slice(0, 10), k = (estadoFijo ? 'c|' : '') + (r.reserva_id || (f + '|' + r.nombre + '|' + r.telefono));
+    var o = m[k] || (m[k] = { k: k, id: r.reserva_id ? String(r.reserva_id) : null, fecha: f, nombre: r.nombre, telefono: r.telefono, servicios: r.servicios, total: Number(r.total) || 0, estado: estadoFijo || r.estado || 'ocupado', turnos: [] });
+    o.turnos.push(r.turno);
+  });
+  return Object.keys(m).map(function(k) { var o = m[k]; o.turnos.sort(function(a, b) { return mins(a) - mins(b); }); S.map[k] = o; return o; });
+}
+function reservas() { S.map = {}; return agrupar(S.turnos).concat(agrupar(S.canc, 'cancelado')); }
+function deudaDe(tel) { return S.ns.filter(function(n) { return n.telefono === tel && n.estado === 'pendiente'; }).reduce(function(a, n) { return a + Number(n.monto || 0); }, 0); }
+function hora(r) { var a = r.turnos[0], z = r.turnos[r.turnos.length - 1]; return a + (r.turnos.length > 1 ? ' – ' + t12(mins(z) + 30) : ''); }
+function wa(tel, msg) { window.open('https://wa.me/53' + String(tel).replace(/\D/g, '').replace(/^53/, '') + '?text=' + encodeURIComponent(msg), '_blank'); }
 
-    <!-- CITA AGENDADA -->
-    <div class="overlay" id="confirmBox">
-        <div class="modal stitch">
-            <div id="confirmMain">
-                <h3>Tu cita está agendada</h3>
-                <p>Tu turno ya quedó guardado. Falta enviarnos el mensaje por WhatsApp para confirmar.</p>
-                <a id="waApp" class="btn btn-oro" href="#">Abrir WhatsApp</a>
-                <button type="button" class="btn btn-line" onclick="pedirCierre()">Cerrar</button>
-            </div>
-            <div id="confirmAsk" class="hidden">
-                <h3>¿Ya lo enviaste?</h3>
-                <p>Si aún no, toca el botón y envía el mensaje. Así confirmamos tu cita.</p>
-                <a id="waApp2" class="btn btn-oro" href="#">Abrir WhatsApp</a>
-                <button type="button" class="btn btn-line" onclick="cerrarConfirmacion()">Ya lo envié</button>
-                <button type="button" class="btn-link" onclick="volverConfirmacion()">Volver</button>
-            </div>
-        </div>
-    </div>
+/* ---------- Navegación ---------- */
+$('#nav').onclick = function(e) { var b = e.target.closest('button'); if (!b) return; S.tab = b.dataset.t; pintar(); window.scrollTo(0, 0); };
+$('#bRef').onclick = function() { recargar(); };
+function pintar() {
+  document.querySelectorAll('#nav button').forEach(function(b) {
+    b.classList.toggle('on', b.dataset.t === S.tab);
+    var i = b.querySelector('i'); if (i) i.remove();
+    if (b.dataset.t === 'cli' && S.deudas.length) b.insertAdjacentHTML('beforeend', '<i>' + S.deudas.length + '</i>');
+  });
+  var v = { cal: vCal, citas: vCitas, cli: vCli, blq: vBlq, aju: vAju }[S.tab];
+  $('#main').innerHTML = banner() + v();
+}
+function banner() {
+  if (!S.deudas.length) return '';
+  var h = '<div class="alerta"><b>⚠ Cliente con deuda tiene cita nueva</b>';
+  S.deudas.forEach(function(d, i) {
+    h += '<div class="fila"><div><div class="nom">' + esc(d.nombre) + '</div><div class="sub">' + fmt(String(d.fecha).slice(0, 10)) + ' · ' + esc(d.turno) + ' · debe ' + money(d.deuda) + '</div></div><div><button class="btn sm" onclick="verDia(\'' + String(d.fecha).slice(0, 10) + '\')">Ver</button> <button class="btn sm oro" onclick="avisarDeuda(' + i + ')">Avisar</button></div></div>';
+  });
+  return h + '</div>';
+}
+function verDia(f) { S.tab = 'cal'; S.fecha = f; pintar(); }
+function avisarDeuda(i) {
+  var d = S.deudas[i], n = S.ns.filter(function(x) { return x.telefono === d.telefono && x.estado === 'pendiente'; })[0];
+  wa(d.telefono, 'Hola ' + d.nombre + ', te recordamos que tienes pendiente ' + money(d.deuda) + ' por el turno' + (n ? ' del ' + fmt(String(n.fecha).slice(0, 10)) : '') + ' al que no asististe en Mono\'s Barbería. Se abona junto con tu próxima cita. Gracias por tu comprensión.');
+}
 
-    <!-- Supabase: carga sin bloquear la página y con una dirección de respaldo si la primera falla -->
-    <script>
-        var SUPABASE_URL = "https://ldxxflhwpyzldisydhmd.supabase.co";
-        var SUPABASE_KEY = "sb_publishable_zYVUWmP8r6s21WegS23RxQ_G-MOf1TH";
-        function iniciarSB() {
-            if (window.supabaseClient || !window.supabase) return;
-            window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            window.firebaseReady = true;
-            if (typeof cargarPrecios === 'function') cargarPrecios();
-        }
-        function cargarSB(i) {
-            var urls = ['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js', 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js'];
-            if (i >= urls.length) return;
-            var s = document.createElement('script');
-            s.src = urls[i];
-            s.async = true;
-            s.onload = iniciarSB;
-            s.onerror = function() { cargarSB(i + 1); };
-            document.head.appendChild(s);
-        }
-        cargarSB(0);
-    </script>
+/* ---------- Calendario ---------- */
+function vCal() {
+  var f = S.fecha, rs = reservas(), cuenta = function(d) { return rs.filter(function(r) { return r.fecha === d && r.estado !== 'cancelado'; }).length; };
+  var h = '<h2 class="t">Calendario</h2><div class="tira"><button class="fl" onclick="sem(-7)">‹</button>';
+  for (var i = 0; i < 6; i++) {
+    var d = addD(lunes(f), i), n = cuenta(d);
+    h += '<button class="' + (d === f ? 'on ' : '') + (d === hoy() ? 'hoy' : '') + '" onclick="irDia(\'' + d + '\')"><small>' + DIAS[pd(d).getDay()] + '</small><b>' + pd(d).getDate() + '</b><i>' + (n || '') + '</i></button>';
+  }
+  h += '<button class="fl" onclick="sem(7)">›</button></div>';
+  h += '<div class="fila2" style="margin-bottom:10px"><b style="font:700 1.2rem var(--serif)">' + fmt(f) + (f === hoy() ? ' · hoy' : '') + '</b><button class="btn sm" onclick="irDia(\'' + hoy() + '\')">Hoy</button></div>';
+  if (pd(f).getDay() === 0) return h + '<div class="vacio">Domingo: cerrado</div>';
+  var bl = S.bloqueos.filter(function(b) { return String(b.fecha).slice(0, 10) === f; }), dia = bl.filter(function(b) { return !b.turno; })[0];
+  if (dia) return h + '<div class="card fila2"><div><b>Día bloqueado</b><div class="sub">' + esc(dia.motivo || '') + '</div></div><button class="btn sm" onclick="quitarBloqueo(\'' + dia.id + '\')">Quitar</button></div>';
+  var occ = {}; rs.filter(function(r) { return r.fecha === f && r.estado !== 'cancelado'; }).forEach(function(r) { r.turnos.forEach(function(t, j) { occ[t] = { r: r, p: j === 0 }; }); });
+  allSlots().forEach(function(s) {
+    var o = occ[s], b = bl.filter(function(x) { return x.turno === s; })[0], c;
+    if (o && o.p) {
+      var r = o.r, cl = r.estado === 'no_show' ? 'ns' : (r.estado === 'completado' ? 'cp' : ''), dd = deudaDe(r.telefono);
+      c = '<div class="c cita ' + cl + '" data-k="' + esc(r.k) + '" onclick="abrir(this.dataset.k)"><div class="fila2"><span class="nom">' + esc(r.nombre) + (dd && r.estado === 'ocupado' ? '<span class="debe">DEBE ' + money(dd) + '</span>' : '') + '</span><span class="pill p-' + r.estado + '">' + ESTADO[r.estado] + '</span></div><div class="sub">' + esc(r.servicios) + ' · ' + money(r.total) + '</div></div>';
+    } else if (o) c = '<div class="c cont">↳ continúa la cita de ' + esc(o.r.nombre) + '</div>';
+    else if (b) c = '<div class="c blq"><span>Bloqueado' + (b.motivo ? ' · ' + esc(b.motivo) : '') + '</span><button class="btn sm" onclick="quitarBloqueo(\'' + b.id + '\')">Quitar</button></div>';
+    else c = '<div class="c libre"><span>Libre</span><span><button class="btn sm oro" onclick="nuevaCita(\'' + f + '\',\'' + s + '\')">+ Cita</button> <button class="btn sm" onclick="bloquearHora(\'' + f + '\',\'' + s + '\')">Bloquear</button></span></div>';
+    h += '<div class="slot"><div class="h">' + s + '</div>' + c + '</div>';
+  });
+  return h + '<button class="btn" style="width:100%;margin-top:6px" onclick="bloquearDia(\'' + f + '\')">Bloquear todo el día</button>';
+}
+function sem(n) { S.fecha = addD(S.fecha, n); pintar(); }
+function irDia(d) { S.fecha = d; pintar(); }
 
-    <script>
-        const WHATSAPP_NUMBER = '5358592776';
+/* ---------- Ventana ---------- */
+function abreHoja(html) { $('#hoja').innerHTML = '<button class="cierra" onclick="cierra()">×</button>' + html; $('#ov').classList.add('open'); }
+function cierra() { $('#ov').classList.remove('open'); }
+$('#ov').onclick = function(e) { if (e.target === this) cierra(); };
 
-        const homeScreen = document.getElementById('home');
-        const servicesScreen = document.getElementById('services');
-        const datetimeScreen = document.getElementById('datetime');
-        const nameInput = document.getElementById('clientName');
-        const phoneInput = document.getElementById('clientPhone');
-        const wrapName = document.getElementById('wrapName');
-        const wrapPhone = document.getElementById('wrapPhone');
-        const btnStart = document.getElementById('btnStart');
-        const btnToDate = document.getElementById('btnToDate');
-        const dateInput = document.getElementById('date');
-        const timeSelect = document.getElementById('time');
-        const acceptTerms = document.getElementById('acceptTerms');
-        const submitBtn = document.getElementById('submitBtn');
-        const liveTotal = document.getElementById('live-total');
-        const liveDuration = document.getElementById('live-duration');
-        const tooltip = document.getElementById('globalTooltip');
-        const bookingForm = document.getElementById('bookingForm');
-        const howBox = document.getElementById('howBox');
+function abrir(k) {
+  var r = S.map[k]; if (!r) return;
+  var dd = deudaDe(r.telefono), pend = S.ns.filter(function(n) { return n.telefono === r.telefono && n.estado === 'pendiente'; });
+  var h = '<h3>' + esc(r.nombre) + '</h3><div style="margin-bottom:8px"><span class="pill p-' + r.estado + '">' + ESTADO[r.estado] + '</span></div>' +
+    '<div class="sub" style="white-space:normal">📆 ' + fmt(r.fecha) + ' · 🕙 ' + hora(r) + '<br>📱 ' + esc(r.telefono) + '<br>✂️ ' + esc(r.servicios) + '<br>💰 ' + money(r.total) + '</div>';
+  if (dd && r.estado !== 'cancelado') {
+    h += '<div class="alerta" style="margin-top:12px"><b>Debe ' + money(dd) + '</b> por no presentarse' + pend.map(function(n) { return '<div class="fila"><span class="sub">' + fmt(String(n.fecha).slice(0, 10)) + ' · ' + money(n.monto) + '</span><span><button class="btn sm ok" onclick="resolverNS(\'' + n.id + '\',\'pagado\')">Pagó</button> <button class="btn sm" onclick="resolverNS(\'' + n.id + '\',\'perdonado\')">Perdonar</button></span></div>'; }).join('') + '</div>';
+  }
+  if (r.estado !== 'cancelado') {
+    h += '<div class="acc">' +
+      (r.estado !== 'completado' ? '<button class="btn ok" onclick="estado(\'' + esc(r.k) + '\',\'completado\')">✓ Completado</button>' : '') +
+      (r.estado !== 'no_show' ? '<button class="btn mal" onclick="estado(\'' + esc(r.k) + '\',\'no_show\')">No se presentó</button>' : '') +
+      (r.estado !== 'ocupado' ? '<button class="btn" onclick="estado(\'' + esc(r.k) + '\',\'ocupado\')">Reabrir</button>' : '') +
+      '<button class="btn mal" onclick="estado(\'' + esc(r.k) + '\',\'cancelado\')">Cancelar cita</button>' +
+      '<button class="btn" onclick="recordar(\'' + esc(r.k) + '\')">WhatsApp: recordar</button></div>';
+  }
+  abreHoja(h);
+}
+async function estado(k, e) {
+  var r = S.map[k]; if (!r || !r.id) { alert('Esta cita no tiene identificador; cámbiala desde Supabase.'); return; }
+  if (e === 'cancelado' && !confirm('¿Cancelar la cita de ' + r.nombre + '? El horario quedará libre.')) return;
+  if (e === 'no_show' && !confirm('¿Marcar que ' + r.nombre + ' no se presentó? Quedará con deuda de ' + money(r.total) + '.')) return;
+  var x = await sb.rpc('marcar_estado', { p_reserva: r.id, p_estado: e });
+  if (x.error) { alert('No se pudo cambiar: ' + x.error.message); return; }
+  cierra(); await recargar();
+  if (e === 'cancelado' && confirm('Cita cancelada. Recuerda quitarla de tu calendario.\n\n¿Avisar a ' + r.nombre + ' por WhatsApp?')) {
+    wa(r.telefono, 'Hola ' + r.nombre + ', lamentablemente tuvimos que cancelar tu cita del ' + fmt(r.fecha) + ' a las ' + r.turnos[0] + ' en Mono\'s Barbería. Escríbenos para reprogramar. Disculpa las molestias.');
+  }
+}
+function recordar(k) { var r = S.map[k]; wa(r.telefono, 'Hola ' + r.nombre + ', te recordamos tu cita en Mono\'s Barbería: ' + fmt(r.fecha) + ' a las ' + r.turnos[0] + '. ¡Te esperamos!'); }
+async function resolverNS(id, acc) {
+  var x = await sb.rpc('resolver_no_show', { p_id: id, p_accion: acc });
+  if (x.error) { alert('No se pudo: ' + x.error.message); return; }
+  cierra(); recargar();
+}
 
-        function nuevoUUID() {
-            if (window.crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                const r = (window.crypto && crypto.getRandomValues) ? (crypto.getRandomValues(new Uint8Array(1))[0] & 15) : Math.floor(Math.random() * 16);
-                return (c === 'x' ? r : ((r & 3) | 8)).toString(16);
-            });
-        }
-        function getTodayStr() {
-            const n = new Date();
-            return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(n.getDate()).padStart(2, '0')}`;
-        }
-        dateInput.setAttribute('min', getTodayStr());
+/* ---------- Nueva cita ---------- */
+function precioDe(n, def) { var p = S.precios.filter(function(x) { return norm(x.servicio) === norm(n); })[0]; return p ? Number(p.precio) : def; }
+function nuevaCita(f, s) {
+  var h = '<h3>Nueva cita</h3><label class="l">Nombre</label><input id="nc_n" maxlength="60"><label class="l">Teléfono (8 dígitos)</label><input id="nc_t" inputmode="numeric" maxlength="8">' +
+    '<label class="l">Servicios</label>' + DEF.map(function(d, i) { return '<label class="svc"><span><input type="checkbox" class="nc_s" data-i="' + i + '" data-p="' + precioDe(d[0], d[1]) + '">' + esc(d[0]) + '</span><span>' + money(precioDe(d[0], d[1])) + '</span></label>'; }).join('') +
+    '<label class="l">Día</label><input type="date" id="nc_f" value="' + f + '"><label class="l">Hora</label><select id="nc_h"></select>' +
+    '<label class="svc" style="margin-top:12px"><span><input type="checkbox" id="nc_a" checked>Avisar por mi atajo (calendario + agradecer)</span></label>' +
+    '<button class="btn oro" style="width:100%;margin-top:10px" id="nc_go">Guardar cita</button>';
+  abreHoja(h);
+  var ref = function() { llenaHoras('nc_f', 'nc_h', s); };
+  $('#nc_f').onchange = function() { llenaHoras('nc_f', 'nc_h'); };
+  document.querySelectorAll('.nc_s').forEach(function(c) { c.onchange = ref; });
+  ref();
+  $('#nc_go').onclick = guardarCita;
+}
+function nBloques() { var n = 0; document.querySelectorAll('.nc_s').forEach(function(c) { if (c.checked && +c.dataset.i < 5) n++; }); return n <= 1 ? 1 : 2; }
+function libres(f) {
+  var oc = {}; S.turnos.forEach(function(t) { if (String(t.fecha).slice(0, 10) === f) oc[t.turno] = 1; });
+  S.bloqueos.forEach(function(b) { if (String(b.fecha).slice(0, 10) === f) { if (!b.turno) allSlots().forEach(function(s) { oc[s] = 1; }); else oc[b.turno] = 1; } });
+  var all = allSlots(), blocks = typeof nBloques === 'function' && document.querySelector('.nc_s') ? nBloques() : 1;
+  return all.filter(function(s, i) { if (oc[s]) return false; if (blocks === 2) { var n = all[i + 1]; return n && !oc[n] && ((mins(s) < 720) === (mins(n) < 720)); } return true; });
+}
+function llenaHoras(fid, sid, pref) {
+  var f = $('#' + fid).value, sel = $('#' + sid), ant = pref || sel.value;
+  if (!f || pd(f).getDay() === 0) { sel.innerHTML = '<option value="">Domingo cerrado</option>'; return; }
+  var l = libres(f);
+  sel.innerHTML = l.length ? l.map(function(s) { return '<option' + (s === ant ? ' selected' : '') + '>' + s + '</option>'; }).join('') : '<option value="">Sin horarios libres</option>';
+}
+async function guardarCita() {
+  var n = $('#nc_n').value.trim(), t = $('#nc_t').value.trim(), f = $('#nc_f').value, h = $('#nc_h').value, sv = [], tot = 0;
+  document.querySelectorAll('.nc_s:checked').forEach(function(c) { sv.push(DEF[+c.dataset.i][0]); tot += +c.dataset.p; });
+  if (!n || !/^\d{8}$/.test(t) || !f || !h || !sv.length) { alert('Completa nombre, teléfono (8 dígitos), servicios, día y hora.'); return; }
+  var all = allSlots(), idx = all.indexOf(h), ts = nBloques() === 2 ? [h, all[idx + 1]] : [h], rid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) { var r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); });
+  var filas = ts.map(function(x) { return { fecha: f, turno: x, nombre: n, telefono: t, reserva_id: rid, notificado: !$('#nc_a').checked, estado: 'ocupado', servicios: sv.join(', '), total: tot }; });
+  $('#nc_go').disabled = true;
+  var x = await sb.from('turnos').insert(filas);
+  if (x.error) { $('#nc_go').disabled = false; alert(x.error.message.indexOf('BLOQUEADO') >= 0 ? 'Ese horario está bloqueado.' : 'No se pudo guardar: ' + x.error.message); return; }
+  cierra(); S.fecha = f; S.tab = 'cal'; recargar();
+}
 
-        function slotToMinutes(slot) {
-            const m = slot.match(/^(\d{1,2}):(\d{2}) (AM|PM)$/);
-            if (!m) return 0;
-            let h = parseInt(m[1]) % 12;
-            if (m[3] === 'PM') h += 12;
-            return h * 60 + parseInt(m[2]);
-        }
-        function slotYaPaso(slot) {
-            const n = new Date();
-            return slotToMinutes(slot) <= n.getHours() * 60 + n.getMinutes();
-        }
-        function formatTime12h(h, m) {
-            const period = h >= 12 ? 'PM' : 'AM';
-            let h12 = h % 12;
-            if (h12 === 0) h12 = 12;
-            return `${h12}:${String(m).padStart(2, '0')} ${period}`;
-        }
-        function buildAllSlots() {
-            const slots = [];
-            [{ startH: 9, startM: 0, endH: 11, endM: 30 }, { startH: 14, startM: 0, endH: 16, endM: 0 }].forEach(r => {
-                let h = r.startH, m = r.startM;
-                while (h < r.endH || (h === r.endH && m <= r.endM)) {
-                    slots.push(formatTime12h(h, m));
-                    m += 30;
-                    if (m >= 60) { m -= 60; h += 1; }
-                }
-            });
-            return slots;
-        }
+/* ---------- Citas ---------- */
+function rangoF() {
+  var h = hoy(), d = pd(h);
+  if (S.rango === 'hoy') return [h, h];
+  if (S.rango === 'sem') return [lunes(h), addD(lunes(h), 6)];
+  if (S.rango === 'mes') return [iso(new Date(d.getFullYear(), d.getMonth(), 1)), iso(new Date(d.getFullYear(), d.getMonth() + 1, 0))];
+  if (S.rango === 'pas') return [iso(new Date(d.getFullYear(), d.getMonth() - 1, 1)), iso(new Date(d.getFullYear(), d.getMonth(), 0))];
+  return ['0000-00-00', '9999-99-99'];
+}
+function chips(lista, act, fn) { return '<div class="chips">' + lista.map(function(c) { return '<button class="chip' + (c[0] === act ? ' on' : '') + '" onclick="' + fn + '(\'' + c[0] + '\')">' + c[1] + '</button>'; }).join('') + '</div>'; }
+function setR(v) { S.rango = v; pintar(); } function setE(v) { S.est = v; pintar(); }
+function vCitas() {
+  var rg = rangoF(), q = norm(S.q), todas = reservas().filter(function(r) { return r.fecha >= rg[0] && r.fecha <= rg[1]; });
+  var cu = function(e) { var l = todas.filter(function(r) { return !e || r.estado === e; }); return [l.length, l.reduce(function(a, r) { return a + r.total; }, 0)]; };
+  var st = [['Total', ''], ['Completado', 'completado'], ['Pendiente', 'ocupado'], ['No-show', 'no_show'], ['Cancelado', 'cancelado']];
+  var h = '<h2 class="t">Citas</h2><div class="stats">' + st.map(function(s) { var c = cu(s[1]); return '<div class="stat"><small>' + s[0] + '</small><b>' + c[0] + '</b><span>' + money(c[1]) + '</span></div>'; }).join('') + '</div>' +
+    chips([['hoy', 'Hoy'], ['sem', 'Semana'], ['mes', 'Este mes'], ['pas', 'Mes pasado'], ['todo', 'Todo']], S.rango, 'setR') +
+    chips([['todas', 'Todas'], ['ocupado', 'Pendientes'], ['completado', 'Completadas'], ['no_show', 'No-show'], ['cancelado', 'Canceladas']], S.est, 'setE') +
+    '<input placeholder="Buscar nombre o teléfono" value="' + esc(S.q) + '" oninput="S.q=this.value;buscar(\'citas\')" style="margin-bottom:12px">';
+  var l = todas.filter(function(r) { return (S.est === 'todas' || r.estado === S.est) && (!q || norm(r.nombre).indexOf(q) >= 0 || String(r.telefono).indexOf(q) >= 0); }).sort(function(a, b) { return a.fecha < b.fecha ? 1 : a.fecha > b.fecha ? -1 : 0; });
+  h += '<div id="lista">' + (l.length ? l.map(itemCita).join('') : '<div class="vacio">No hay citas con estos filtros</div>') + '</div>';
+  return h;
+}
+function itemCita(r) {
+  return '<div class="card item" data-k="' + esc(r.k) + '" onclick="abrir(this.dataset.k)"><div class="fila2"><span class="nom">' + esc(r.nombre) + '</span><span class="pill p-' + r.estado + '">' + ESTADO[r.estado] + '</span></div><div class="sub">' + fmt(r.fecha) + ' · ' + hora(r) + ' · ' + money(r.total) + '</div><div class="sub">' + esc(r.servicios) + '</div></div>';
+}
+function buscar(tab) {
+  var q = norm(tab === 'citas' ? S.q : S.cq);
+  if (tab === 'citas') {
+    var rg = rangoF(), l = reservas().filter(function(r) { return r.fecha >= rg[0] && r.fecha <= rg[1] && (S.est === 'todas' || r.estado === S.est) && (!q || norm(r.nombre).indexOf(q) >= 0 || String(r.telefono).indexOf(q) >= 0); }).sort(function(a, b) { return a.fecha < b.fecha ? 1 : -1; });
+    $('#lista').innerHTML = l.length ? l.map(itemCita).join('') : '<div class="vacio">No hay citas con estos filtros</div>';
+  } else $('#lista').innerHTML = listaCli();
+}
 
-        // Con mala señal: hasta 3 intentos, cada uno con límite de 10 segundos
-        async function conReintento(fn) {
-            let ultimo;
-            for (let i = 0; i < 3; i++) {
-                try {
-                    const res = await Promise.race([fn(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000))]);
-                    if (res && res.error) throw res.error;
-                    return res;
-                } catch (e) {
-                    ultimo = e;
-                    await new Promise(r => setTimeout(r, 800));
-                }
-            }
-            throw ultimo;
-        }
+/* ---------- Clientes ---------- */
+function clientes() {
+  var m = {};
+  reservas().filter(function(r) { return r.estado !== 'cancelado'; }).forEach(function(r) {
+    var c = m[r.telefono] || (m[r.telefono] = { tel: r.telefono, nombre: r.nombre, visitas: 0, ns: 0, prox: '', gasto: 0, ult: '' });
+    if (r.fecha >= c.ult) { c.ult = r.fecha; c.nombre = r.nombre; }
+    if (r.estado === 'completado') { c.visitas++; c.gasto += r.total; }
+    if (r.estado === 'no_show') c.ns++;
+    if (r.estado === 'ocupado' && r.fecha >= hoy() && (!c.prox || r.fecha < c.prox)) c.prox = r.fecha;
+  });
+  S.ns.forEach(function(n) { if (!m[n.telefono]) m[n.telefono] = { tel: n.telefono, nombre: n.nombre, visitas: 0, ns: 0, prox: '', gasto: 0, ult: '' }; });
+  return Object.keys(m).map(function(k) { var c = m[k]; c.deuda = deudaDe(c.tel); return c; }).sort(function(a, b) { return b.deuda - a.deuda || (a.nombre || '').localeCompare(b.nombre || ''); });
+}
+function setCF(v) { S.cf = v; pintar(); }
+function listaCli() {
+  var q = norm(S.cq), l = clientes().filter(function(c) { return (S.cf === 'todos' || c.deuda > 0) && (!q || norm(c.nombre).indexOf(q) >= 0 || String(c.tel).indexOf(q) >= 0); });
+  return l.length ? l.map(function(c) {
+    return '<div class="card item" data-t="' + esc(c.tel) + '" onclick="verCli(this.dataset.t)"><div class="fila2"><span class="nom">' + esc(c.nombre) + (c.deuda ? '<span class="debe">DEBE ' + money(c.deuda) + '</span>' : '') + '</span><span class="sub">' + esc(c.tel) + '</span></div><div class="sub">' + c.visitas + ' visitas · ' + money(c.gasto) + (c.ns ? ' · ' + c.ns + ' no-show' : '') + (c.prox ? ' · próxima ' + fmt(c.prox) : '') + '</div></div>';
+  }).join('') : '<div class="vacio">Sin clientes</div>';
+}
+function vCli() {
+  return '<h2 class="t">Clientes</h2>' + chips([['todos', 'Todos'], ['deuda', 'Con deuda']], S.cf, 'setCF') +
+    '<input placeholder="Buscar nombre o teléfono" value="' + esc(S.cq) + '" oninput="S.cq=this.value;buscar(\'cli\')" style="margin-bottom:12px"><div id="lista">' + listaCli() + '</div>';
+}
+function verCli(t) {
+  var c = clientes().filter(function(x) { return x.tel === t; })[0]; if (!c) return;
+  var hist = reservas().filter(function(r) { return r.telefono === t; }).sort(function(a, b) { return a.fecha < b.fecha ? 1 : -1; });
+  var pend = S.ns.filter(function(n) { return n.telefono === t && n.estado === 'pendiente'; });
+  var h = '<h3>' + esc(c.nombre) + '</h3><div class="sub">📱 ' + esc(t) + ' · ' + c.visitas + ' visitas · ' + money(c.gasto) + '</div>';
+  if (pend.length) h += '<div class="alerta" style="margin-top:12px"><b>Debe ' + money(c.deuda) + '</b>' + pend.map(function(n) { return '<div class="fila"><span class="sub">' + fmt(String(n.fecha).slice(0, 10)) + ' · ' + money(n.monto) + '</span><span><button class="btn sm ok" onclick="resolverNS(\'' + n.id + '\',\'pagado\')">Pagó</button> <button class="btn sm" onclick="resolverNS(\'' + n.id + '\',\'perdonado\')">Perdonar</button></span></div>'; }).join('') + '</div>';
+  h += '<div class="acc"><button class="btn" onclick="wa(\'' + esc(t) + '\',\'Hola ' + esc(c.nombre).replace(/'/g, '') + ', ¡gracias por visitar Mono\\\'s Barbería!\')">WhatsApp</button>' + (c.deuda ? '<button class="btn oro" onclick="avisarCli(\'' + esc(t) + '\')">Cobrar deuda</button>' : '') + '</div><label class="l">Historial</label>';
+  h += hist.slice(0, 15).map(function(r) { return '<div class="fila2 sub" style="padding:6px 0"><span>' + fmt(r.fecha) + ' · ' + esc(r.servicios) + '</span><span class="pill p-' + r.estado + '">' + ESTADO[r.estado] + '</span></div>'; }).join('');
+  abreHoja(h);
+}
+function avisarCli(t) {
+  var c = clientes().filter(function(x) { return x.tel === t; })[0], n = S.ns.filter(function(x) { return x.telefono === t && x.estado === 'pendiente'; })[0];
+  wa(t, 'Hola ' + c.nombre + ', te recordamos que tienes pendiente ' + money(c.deuda) + ' por el turno' + (n ? ' del ' + fmt(String(n.fecha).slice(0, 10)) : '') + ' al que no asististe en Mono\'s Barbería. Gracias por tu comprensión.');
+}
 
-        function showScreen(name) {
-            homeScreen.classList.toggle('active', name === 'home');
-            servicesScreen.classList.toggle('active', name === 'services');
-            datetimeScreen.classList.toggle('active', name === 'datetime');
-            window.scrollTo(0, 0);
-        }
+/* ---------- Bloqueos ---------- */
+function vBlq() {
+  var f = hoy(), prox = S.bloqueos.filter(function(b) { return String(b.fecha).slice(0, 10) >= f; }).sort(function(a, b) { return a.fecha < b.fecha ? -1 : 1; });
+  var h = '<h2 class="t">Bloqueos</h2><div class="card"><label class="l" style="margin-top:0">Desde</label><input type="date" id="bq_a" value="' + f + '"><label class="l">Hasta (opcional, para vacaciones)</label><input type="date" id="bq_b">' +
+    '<label class="l">Qué bloquear</label><select id="bq_t"><option value="dia">Todo el día</option>' + allSlots().map(function(s) { return '<option>' + s + '</option>'; }).join('') + '</select>' +
+    '<label class="l">Motivo (opcional)</label><input id="bq_m" maxlength="60" placeholder="Ej: trámite, vacaciones"><button class="btn oro" style="width:100%;margin-top:12px" onclick="crearBloqueo()">Bloquear</button></div>';
+  h += '<label class="l">Próximos bloqueos</label>' + (prox.length ? prox.map(function(b) { return '<div class="card fila2"><div><div class="nom">' + fmt(String(b.fecha).slice(0, 10)) + ' · ' + (b.turno || 'Todo el día') + '</div><div class="sub">' + esc(b.motivo || '') + '</div></div><button class="btn sm" onclick="quitarBloqueo(\'' + b.id + '\')">Quitar</button></div>'; }).join('') : '<div class="vacio">No tienes bloqueos</div>');
+  return h;
+}
+async function crearBloqueo() {
+  var a = $('#bq_a').value, b = $('#bq_b').value || a, t = $('#bq_t').value, m = $('#bq_m').value.trim();
+  if (!a || b < a) { alert('Revisa las fechas.'); return; }
+  var filas = [];
+  for (var d = a, n = 0; d <= b && n < 120; d = addD(d, 1), n++) { if (pd(d).getDay() !== 0) filas.push({ fecha: d, turno: t === 'dia' ? null : t, motivo: m || null }); }
+  if (!filas.length) { alert('Esas fechas son domingos (ya cerrados).'); return; }
+  var x = await sb.from('bloqueos').insert(filas);
+  if (x.error) { alert('No se pudo bloquear: ' + x.error.message); return; }
+  var ya = S.turnos.filter(function(r) { return r.estado === 'ocupado' && String(r.fecha).slice(0, 10) >= a && String(r.fecha).slice(0, 10) <= b && (t === 'dia' || r.turno === t); }).length;
+  if (ya) alert('Ojo: ya hay ' + ya + ' cita(s) en ese horario. Siguen reservadas; cancélalas tú si hace falta.');
+  recargar();
+}
+async function bloquearHora(f, s) { var x = await sb.from('bloqueos').insert([{ fecha: f, turno: s }]); if (x.error) { alert(x.error.message); return; } recargar(); }
+async function bloquearDia(f) {
+  if (!confirm('¿Bloquear todo el ' + fmt(f) + '?')) return;
+  var x = await sb.from('bloqueos').insert([{ fecha: f, turno: null }]); if (x.error) { alert(x.error.message); return; } recargar();
+}
+async function quitarBloqueo(id) { var x = await sb.from('bloqueos').delete().eq('id', id); if (x.error) { alert(x.error.message); return; } recargar(); }
 
-        // Recordar nombre y teléfono en este teléfono
-        function guardarDatos(n, t) { try { localStorage.setItem('mono_nombre', n); localStorage.setItem('mono_tel', t); } catch (e) {} }
-        function cargarDatos() {
-            try {
-                const n = localStorage.getItem('mono_nombre'), t = localStorage.getItem('mono_tel');
-                if (n) nameInput.value = n;
-                if (t) phoneInput.value = t;
-            } catch (e) {}
-        }
-
-        function validarLogin() {
-            const nameOk = nameInput.value.trim().length >= 2;
-            const phoneOk = /^[0-9]{8}$/.test(phoneInput.value.trim());
-            btnStart.disabled = !(nameOk && phoneOk);
-            wrapName.classList.toggle('filled', nameInput.value.trim().length > 0);
-            wrapPhone.classList.toggle('filled', phoneInput.value.trim().length > 0);
-        }
-        nameInput.addEventListener('input', validarLogin);
-        phoneInput.addEventListener('input', function() {
-            this.value = this.value.replace(/\D/g, '').slice(0, 8);
-            validarLogin();
-        });
-
-        btnStart.addEventListener('click', function() {
-            if (btnStart.disabled) return;
-            const hola = 'Hola, ' + nameInput.value.trim().split(' ')[0];
-            document.getElementById('helloChip').textContent = hola;
-            document.getElementById('helloChip2').textContent = hola;
-            showScreen('services');
-            updateSummary();
-        });
-        document.getElementById('btnBackHome').addEventListener('click', function() { showScreen('home'); });
-        document.getElementById('btnBackServices').addEventListener('click', function() { showScreen('services'); });
-        btnToDate.addEventListener('click', function() {
-            if (btnToDate.disabled) return;
-            showScreen('datetime');
-            updateSummary();
-            updateTimeSlots();
-        });
-
-        document.getElementById('btnHow').addEventListener('click', function() { howBox.classList.add('open'); });
-        document.getElementById('howClose').addEventListener('click', function() { howBox.classList.remove('open'); });
-        howBox.addEventListener('click', function(e) { if (e.target === howBox) howBox.classList.remove('open'); });
-
-        function toggleService(label, group) {
-            const cb = label.querySelector('input[type="checkbox"]');
-            if (group === 'main-cut') {
-                if (cb.checked) {
-                    cb.checked = false;
-                    label.classList.remove('selected');
-                } else {
-                    document.querySelectorAll('input[data-group="main-cut"]').forEach(inp => {
-                        inp.checked = false;
-                        inp.closest('.service-item').classList.remove('selected');
-                    });
-                    cb.checked = true;
-                    label.classList.add('selected');
-                }
-            } else {
-                cb.checked = !cb.checked;
-                label.classList.toggle('selected', cb.checked);
-            }
-            updateSummary();
-        }
-        function toggleExtra(label, id) {
-            const cb = document.getElementById(id);
-            cb.checked = !cb.checked;
-            label.classList.toggle('selected', cb.checked);
-            updateSummary();
-        }
-        function getSelectedBlocksCount() {
-            return document.querySelectorAll('input[name="service"]:checked').length <= 1 ? 1 : 2;
-        }
-
-        function updateSummary() {
-            let total = 0, selectedCount = 0, isDegradado = false, addonsCount = 0;
-            document.querySelectorAll('input[name="service"]').forEach(cb => {
-                if (cb.checked) {
-                    selectedCount++;
-                    total += parseInt(cb.getAttribute('data-price'));
-                    if (cb.value === 'Degradado') isDegradado = true;
-                    if (cb.getAttribute('data-group') === 'addon') addonsCount++;
-                }
-            });
-            ['cafeCheck', 'ponqueCheck'].forEach(id => {
-                const cb = document.getElementById(id);
-                if (cb && cb.checked) total += parseInt(cb.getAttribute('data-price'));
-            });
-            let durationText = '--';
-            if (selectedCount === 1) durationText = '30 minutos';
-            else if (isDegradado && addonsCount === 3) durationText = '1 hora y 30 min';
-            else if (selectedCount > 1) durationText = '1 hora aprox.';
-
-            liveTotal.textContent = '$' + total;
-            liveDuration.textContent = durationText;
-            document.querySelectorAll('.js-total').forEach(e => { e.textContent = '$' + total; });
-            document.querySelectorAll('.js-dur').forEach(e => { e.textContent = durationText === '--' ? 'Elige un servicio' : durationText; });
-            btnToDate.disabled = selectedCount === 0;
-            validateSubmit();
-            if (dateInput.value && datetimeScreen.classList.contains('active')) updateTimeSlots();
-        }
-
-        async function updateTimeSlots() {
-            if (!dateInput.value) {
-                timeSelect.innerHTML = '<option value="">Selecciona fecha primero...</option>';
-                timeSelect.disabled = true;
-                validateSubmit();
-                return;
-            }
-            const p = dateInput.value.split('-');
-            const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
-            if (dateInput.value < getTodayStr()) {
-                timeSelect.innerHTML = '<option value="">No puedes elegir fechas pasadas</option>';
-                timeSelect.disabled = true;
-                validateSubmit();
-                return;
-            }
-            if (d.getDay() === 0) {
-                timeSelect.innerHTML = '<option value="">Cerrado los domingos</option>';
-                timeSelect.disabled = true;
-                validateSubmit();
-                return;
-            }
-
-            timeSelect.innerHTML = '<option value="">Cargando turnos...</option>';
-            timeSelect.disabled = true;
-
-            const allSlots = buildAllSlots();
-            const morningSlots = allSlots.filter(s => s.includes('AM'));
-            const afternoonSlots = allSlots.filter(s => s.includes('PM'));
-            const occupiedSlots = [];
-
-            // Espera hasta 15 s a que cargue la conexión (mala señal)
-            let waited = 0;
-            while (!window.firebaseReady && waited < 15000) {
-                await new Promise(r => setTimeout(r, 250));
-                waited += 250;
-            }
-            if (!window.firebaseReady) {
-                timeSelect.innerHTML = '<option value="">Sin conexión. Cambia de fecha para reintentar</option>';
-                validateSubmit();
-                return;
-            }
-
-            try {
-                const { data } = await conReintento(function() {
-                    return window.supabaseClient.from('turnos_ocupados').select('turno').eq('fecha', dateInput.value);
-                });
-                if (data) data.forEach(row => { occupiedSlots.push(row.turno); });
-            } catch (err) {
-                timeSelect.innerHTML = '<option value="">Mala señal. Cambia de fecha para reintentar</option>';
-                validateSubmit();
-                return;
-            }
-
-            const blocksNeeded = getSelectedBlocksCount();
-            const esHoy = dateInput.value === getTodayStr();
-            const freeSlots = allSlots.filter(slot => !occupiedSlots.includes(slot) && !(esHoy && slotYaPaso(slot)));
-            let availableSlots = freeSlots;
-            if (blocksNeeded === 2) {
-                availableSlots = freeSlots.filter(slot => {
-                    const sameGroup = morningSlots.includes(slot) ? morningSlots : afternoonSlots;
-                    const nextSlot = sameGroup[sameGroup.indexOf(slot) + 1];
-                    return nextSlot ? freeSlots.includes(nextSlot) : false;
-                });
-            }
-            if (availableSlots.length === 0) {
-                timeSelect.innerHTML = '<option value="">No hay turnos disponibles este día</option>';
-                timeSelect.disabled = true;
-                validateSubmit();
-                return;
-            }
-            timeSelect.innerHTML = '<option value="">Elegir horario...</option>';
-            timeSelect.disabled = false;
-            availableSlots.forEach(slot => {
-                const opt = document.createElement('option');
-                opt.value = slot;
-                opt.textContent = slot;
-                timeSelect.appendChild(opt);
-            });
-            validateSubmit();
-        }
-
-        function getSlotsForBooking(selectedTurno) {
-            if (getSelectedBlocksCount() === 1) return [selectedTurno];
-            const allSlots = buildAllSlots();
-            const sameGroup = allSlots.filter(s => selectedTurno.includes('AM') ? s.includes('AM') : s.includes('PM'));
-            const nextSlot = sameGroup[sameGroup.indexOf(selectedTurno) + 1];
-            return nextSlot ? [selectedTurno, nextSlot] : [selectedTurno];
-        }
-
-        dateInput.addEventListener('change', updateTimeSlots);
-        timeSelect.addEventListener('change', validateSubmit);
-        acceptTerms.addEventListener('change', validateSubmit);
-        function actualizarCuando() {
-            let t = 'Elige día y hora';
-            if (dateInput.value) {
-                const p = dateInput.value.split('-');
-                const d = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
-                const dia = new Intl.DateTimeFormat('es-ES', { weekday: 'short' }).format(d).replace('.', '');
-                t = dia.charAt(0).toUpperCase() + dia.slice(1) + ' ' + p[2] + '/' + p[1] + (timeSelect.value ? ' · ' + timeSelect.value : ' · elige hora');
-            }
-            document.querySelectorAll('.js-cuando').forEach(e => { e.textContent = t; });
-        }
-        function validateSubmit() {
-            actualizarCuando();
-            const hasService = document.querySelectorAll('input[name="service"]:checked').length > 0;
-            submitBtn.disabled = !(hasService && dateInput.value && timeSelect.value && acceptTerms.checked);
-        }
-
-        let tooltipVisible = false;
-        document.querySelectorAll('.info-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const info = this.getAttribute('data-info');
-                if (tooltipVisible && tooltip.textContent === info) {
-                    tooltip.classList.remove('visible');
-                    tooltipVisible = false;
-                    return;
-                }
-                tooltip.textContent = info;
-                const rect = this.getBoundingClientRect();
-                let left = rect.right - 260;
-                if (left < 10) left = 10;
-                let top = rect.bottom + 8;
-                if (top + 130 > window.innerHeight) top = rect.top - 130;
-                tooltip.style.left = left + 'px';
-                tooltip.style.top = top + 'px';
-                tooltip.classList.add('visible');
-                tooltipVisible = true;
-            });
-        });
-        document.addEventListener('click', function() {
-            tooltip.classList.remove('visible');
-            tooltipVisible = false;
-        });
-
-        // Precios desde Supabase (si falla, se quedan los que ya están escritos)
-        function normKey(s) { return String(s || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
-        async function cargarPrecios() {
-            try {
-                const { data, error } = await window.supabaseClient.from('precios').select('servicio,precio');
-                if (error || !data || !data.length) return;
-                const mapa = {};
-                data.forEach(r => { mapa[normKey(r.servicio)] = parseInt(r.precio); });
-                document.querySelectorAll('input[data-price]').forEach(inp => {
-                    const precio = mapa[normKey(inp.getAttribute('data-name') || inp.value)];
-                    if (!Number.isFinite(precio)) return;
-                    inp.setAttribute('data-price', precio);
-                    const etiqueta = inp.closest('.service-item').querySelector(':scope > span:last-child');
-                    if (etiqueta) etiqueta.textContent = (inp.id ? '+$' : '$') + precio;
-                });
-                updateSummary();
-            } catch (e) {}
-        }
-        if (window.supabaseClient) cargarPrecios();
-
-        bookingForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            if (submitBtn.disabled) return;
-            const nombre = nameInput.value.trim();
-            const telefono = phoneInput.value.trim();
-            const turnoSeleccionado = timeSelect.value;
-            const fecha = dateInput.value;
-            if (!nombre || !telefono || !fecha || !turnoSeleccionado) { validateSubmit(); return; }
-            if (fecha < getTodayStr() || (fecha === getTodayStr() && slotYaPaso(turnoSeleccionado))) {
-                alert('Ese horario ya pasó. Elige otro turno disponible.');
-                updateTimeSlots();
-                return;
-            }
-
-            const serviciosElegidos = [];
-            let totalReserva = 0;
-            document.querySelectorAll('input[name="service"]:checked').forEach(cb => {
-                serviciosElegidos.push(cb.value);
-                totalReserva += parseInt(cb.getAttribute('data-price'));
-            });
-            [{ id: 'cafeCheck', label: 'Cafe expresso' }, { id: 'ponqueCheck', label: 'Ponquecito casero' }].forEach(ex => {
-                const cb = document.getElementById(ex.id);
-                if (cb && cb.checked) {
-                    serviciosElegidos.push(ex.label);
-                    totalReserva += parseInt(cb.getAttribute('data-price'));
-                }
-            });
-
-            const reservaId = nuevoUUID();
-            const filas = getSlotsForBooking(turnoSeleccionado).map(turno => ({
-                fecha, turno, nombre, telefono,
-                reserva_id: reservaId,
-                notificado: false,
-                estado: 'ocupado',
-                servicios: serviciosElegidos.join(', '),
-                total: totalReserva
-            }));
-
-            const textoOriginal = submitBtn.textContent;
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Guardando...';
-
-            let error = null;
-            try {
-                const res = await window.supabaseClient.from('turnos').insert(filas);
-                error = res.error;
-            } catch (err) {
-                error = { message: 'network', code: 'NETWORK' };
-            }
-
-            if (error) {
-                submitBtn.textContent = textoOriginal;
-                validateSubmit();
-                if (error.message && error.message.includes('LIMITE_SEMANAL')) {
-                    alert('Este numero de telefono ya tiene 3 citas reservadas esta semana. Si necesitas otro turno, escribenos directo por WhatsApp.');
-                } else if (error.code === '23505') {
-                    alert('Ese horario se acaba de ocupar. Elige otro turno disponible.');
-                    updateTimeSlots();
-                } else if (error.code === 'NETWORK') {
-                    alert('No hay conexión en este momento. Revisa tu señal e intenta de nuevo.');
-                } else {
-                    alert('No se pudo completar la reserva. Intenta de nuevo en unos segundos.');
-                }
-                return;
-            }
-
-            submitBtn.textContent = 'Reserva guardada';
-            guardarDatos(nombre, telefono);
-            sendToWhatsApp(nombre, telefono);
-        });
-
-        function sendToWhatsApp(nombre, telefono) {
-            const p = dateInput.value.split('-');
-            const dateObj = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
-            const dayName = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(dateObj);
-            const formattedDate = `${dayName} ${p[2]}-${p[1]}-${p[0]}`;
-
-            const selected = [];
-            let total = 0;
-            document.querySelectorAll('input[name="service"]:checked').forEach(cb => {
-                selected.push(cb.value);
-                total += parseInt(cb.getAttribute('data-price'));
-            });
-            [{ id: 'cafeCheck', label: 'Cafe expresso' }, { id: 'ponqueCheck', label: 'Ponquecito casero' }].forEach(ex => {
-                const cb = document.getElementById(ex.id);
-                if (cb && cb.checked) {
-                    selected.push(ex.label);
-                    total += parseInt(cb.getAttribute('data-price'));
-                }
-            });
-
-            const texto =
-`¡Hola Felix!
-Quiero pedir una cita en
-*Mono's Barberia Holguin*
-
-👤Nombre: ${nombre}
-📱Telefono: ${telefono}
-📍Direccion: Maceo 254 e/ Cables y Angel Guerra
-📆Fecha: ${formattedDate}
-🕙Horario: ${timeSelect.value}
-☕️Servicio: ${selected.join(', ')}
-⌛️Duracion aprox: ${liveDuration.textContent}
-💰Total a pagar: $${total}`;
-
-            const enlace = `whatsapp://send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(texto)}`;
-            document.getElementById('waApp').href = enlace;
-            document.getElementById('waApp2').href = enlace;
-            volverConfirmacion();
-            document.getElementById('confirmBox').classList.add('open');
-        }
-
-        function pedirCierre() {
-            document.getElementById('confirmMain').classList.add('hidden');
-            document.getElementById('confirmAsk').classList.remove('hidden');
-        }
-        function volverConfirmacion() {
-            document.getElementById('confirmAsk').classList.add('hidden');
-            document.getElementById('confirmMain').classList.remove('hidden');
-        }
-        function cerrarConfirmacion() {
-            document.getElementById('confirmBox').classList.remove('open');
-            document.querySelectorAll('.service-item.selected').forEach(el => el.classList.remove('selected'));
-            document.querySelectorAll('input[name="service"], #cafeCheck, #ponqueCheck').forEach(cb => { cb.checked = false; });
-            dateInput.value = '';
-            acceptTerms.checked = false;
-            submitBtn.textContent = 'Confirmar';
-            updateSummary();
-            updateTimeSlots();
-            showScreen('home');
-        }
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && document.getElementById('confirmBox').classList.contains('open')) pedirCierre();
-        });
-
-        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-        cargarDatos();
-        validarLogin();
-        updateSummary();
-        window.scrollTo(0, 0);
-    </script>
+/* ---------- Ajustes ---------- */
+function vAju() {
+  var h = '<h2 class="t">Ajustes</h2><label class="l">Precios (se ven en la web de reservas)</label><div class="card">';
+  h += S.precios.length ? S.precios.map(function(p, i) { return '<div class="pr"><span>' + esc(p.servicio) + '</span><input type="number" inputmode="numeric" id="pp' + i + '" value="' + esc(p.precio) + '"></div>'; }).join('') + '<button class="btn oro" style="width:100%;margin-top:6px" onclick="guardarPrecios()">Guardar precios</button>' : '<div class="vacio">Aún no hay precios en la tabla «precios».</div>';
+  return h + '</div><a class="btn" style="width:100%;margin-bottom:10px" href="index.html" target="_blank">Ver la web de reservas</a><button class="btn mal" style="width:100%" onclick="sb.auth.signOut()">Cerrar sesión</button>';
+}
+async function guardarPrecios() {
+  for (var i = 0; i < S.precios.length; i++) {
+    var v = parseInt($('#pp' + i).value); if (!isFinite(v)) continue;
+    if (v !== Number(S.precios[i].precio)) { var x = await sb.from('precios').update({ precio: v }).eq('servicio', S.precios[i].servicio); if (x.error) { alert('No se pudo guardar: ' + x.error.message); return; } }
+  }
+  alert('Precios guardados.'); recargar();
+}
+</script>
 </body>
 </html>
