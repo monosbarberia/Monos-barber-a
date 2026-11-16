@@ -212,19 +212,47 @@ async function entrar() {
 
 /* ---------- Datos ---------- */
 async function recargar(silencio) {
-  var desde = addD(hoy(), -180);
-  var q = await Promise.all([
-    sb.from('turnos').select('*').gte('fecha', desde).order('fecha'),
-    sb.from('turnos_cancelados').select('*').gte('fecha', desde),
-    sb.from('bloqueos').select('*').gte('fecha', desde),
-    sb.from('no_shows').select('*'),
-    sb.rpc('alertas_deuda'),
-    sb.from('precios').select('servicio,precio')
-  ]);
-  if (q[0].error) { if (!silencio) alert('No se pudieron cargar las citas. Revisa tu conexión.'); return; }
-  S.turnos = q[0].data || []; S.canc = q[1].data || []; S.bloqueos = q[2].data || [];
-  S.ns = q[3].data || []; S.deudas = q[4].data || []; S.precios = q[5].data || [];
-  pintar();
+  try {
+    var q = await Promise.all([
+      sb.from('turnos').select('*').order('fecha', { ascending: false }),
+      sb.from('turnos_cancelados').select('*').order('fecha', { ascending: false }),
+      sb.from('bloqueos').select('*').order('fecha', { ascending: false }),
+      sb.from('no_shows').select('*'),
+      sb.rpc('alertas_deuda'),
+      sb.from('precios').select('servicio,precio')
+    ]);
+
+    if (q[0].error) {
+      if (!silencio) {
+        alert('Error al cargar citas:\n' + q[0].error.message + '\n\nCódigo: ' + (q[0].error.code || 'sin código'));
+      }
+      return;
+    }
+
+    S.turnos = q[0].data || [];
+    S.canc = q[1].data || [];
+    S.bloqueos = q[2].data || [];
+    S.ns = q[3].data || [];
+    S.deudas = q[4].data || [];
+    S.precios = q[5].data || [];
+
+    if (!silencio && S.turnos.length === 0) {
+      setTimeout(function() {
+        var main = document.getElementById('main');
+        if (main && !document.getElementById('aviso-vacio')) {
+          var aviso = document.createElement('div');
+          aviso.id = 'aviso-vacio';
+          aviso.className = 'alerta';
+          aviso.innerHTML = '<b>⚠ No se encontraron citas</b><br>La tabla «turnos» devolvió 0 filas. Revisa en Supabase → Table Editor si realmente hay datos guardados.';
+          main.insertBefore(aviso, main.firstChild);
+        }
+      }, 300);
+    }
+
+    pintar();
+  } catch (err) {
+    if (!silencio) alert('Error inesperado: ' + (err.message || err));
+  }
 }
 function agrupar(rows, estadoFijo) {
   var m = {};
