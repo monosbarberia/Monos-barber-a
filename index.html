@@ -605,6 +605,19 @@
                 return;
             }
 
+            // Días u horas bloqueados desde el panel (si falla, no se bloquea la reserva)
+            let diaCerrado = false;
+            try {
+                const rb = await window.supabaseClient.from('bloqueos').select('turno').eq('fecha', dateInput.value);
+                if (rb.data) rb.data.forEach(b => { if (!b.turno) diaCerrado = true; else occupiedSlots.push(b.turno); });
+            } catch (e) {}
+            if (diaCerrado) {
+                timeSelect.innerHTML = '<option value="">Este día no hay turnos</option>';
+                timeSelect.disabled = true;
+                validateSubmit();
+                return;
+            }
+
             const blocksNeeded = getSelectedBlocksCount();
             const esHoy = dateInput.value === getTodayStr();
             const freeSlots = allSlots.filter(slot => !occupiedSlots.includes(slot) && !(esHoy && slotYaPaso(slot)));
@@ -764,6 +777,9 @@
                     alert('Este numero de telefono ya tiene 3 citas reservadas esta semana. Si necesitas otro turno, escribenos directo por WhatsApp.');
                 } else if (error.code === '23505') {
                     alert('Ese horario se acaba de ocupar. Elige otro turno disponible.');
+                    updateTimeSlots();
+                } else if (error.message && error.message.includes('BLOQUEADO')) {
+                    alert('Ese horario no está disponible. Elige otro turno.');
                     updateTimeSlots();
                 } else if (error.code === 'NETWORK') {
                     alert('No hay conexión en este momento. Revisa tu señal e intenta de nuevo.');
