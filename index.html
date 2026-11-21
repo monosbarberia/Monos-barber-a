@@ -162,6 +162,11 @@
         .num { flex-shrink: 0; width: 26px; height: 26px; margin-right: 12px; border-radius: 50%; background: var(--oro-grad); color: var(--verde); font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
         .aviso { padding: 12px 14px; margin-bottom: 6px; background: rgba(0,0,0,0.25); border-left: 3px solid var(--oro); border-radius: 8px; text-align: left; font-size: 0.88rem; line-height: 1.45; }
 
+        .datos { margin: 0 0 14px; }
+        .dato { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(243,234,210,0.12); font-size: 0.92rem; text-align: left; }
+        .dato span:first-child { color: var(--suave); padding-right: 12px; flex-shrink: 0; }
+        .dato b { text-align: right; }
+        .dato.total b { font: 700 1.3rem var(--serif); color: var(--oro); }
         @media (max-height: 640px) { .logo { width: 48%; } .bienvenida { margin-bottom: 12px; } }
         @media (max-width: 340px) { .quick .btn-line { font-size: 0.7rem; letter-spacing: 0.3px; } .titulo h2 { font-size: 1.7rem; } }
         @media (prefers-reduced-motion: reduce) { .btn-oro::after { animation: none; } }
@@ -313,29 +318,28 @@
                 <div class="paso"><span class="num">1</span><span><b>Nombre y teléfono</b>, y toca <b>«Reservar»</b>.</span></div>
                 <div class="paso"><span class="num">2</span><span><b>Elige tus servicios</b> y toca <b>«Siguiente»</b>.</span></div>
                 <div class="paso"><span class="num">3</span><span><b>Elige día y hora</b>, acepta las condiciones y toca <b>«Confirmar»</b>.</span></div>
-                <div class="paso"><span class="num">4</span><span><b>Envía el mensaje por WhatsApp.</b> Ya viene escrito, solo envíalo.</span></div>
+                <div class="paso"><span class="num">4</span><span><b>¡Listo!</b> Tu cita queda reservada y te llegará un mensaje con los datos.</span></div>
             </div>
-            <div class="aviso"><b>Importante:</b> cuando sale «Tu cita está agendada», tu turno ya está guardado. <b>No reserves otra vez.</b></div>
+            <div class="aviso"><b>Importante:</b> cuando sale «Tu cita está reservada», tu turno ya está guardado. <b>No reserves otra vez.</b></div>
             <button type="button" class="btn btn-oro" id="howClose">Entendido</button>
         </div>
     </div>
 
-    <!-- CITA AGENDADA -->
+    <!-- CITA RESERVADA -->
     <div class="overlay" id="confirmBox">
         <div class="modal stitch">
-            <div id="confirmMain">
-                <h3>Tu cita está agendada</h3>
-                <p>Tu turno ya quedó guardado. Falta enviarnos el mensaje por WhatsApp para confirmar.</p>
-                <a id="waApp" class="btn btn-oro" href="#">Abrir WhatsApp</a>
-                <button type="button" class="btn btn-line" onclick="pedirCierre()">Cerrar</button>
+            <h3>¡Tu cita está reservada!</h3>
+            <p id="confNombre">Gracias por elegirnos.</p>
+            <div class="datos">
+                <div class="dato"><span>Día</span><b id="confDia"></b></div>
+                <div class="dato"><span>Hora</span><b id="confHora"></b></div>
+                <div class="dato"><span>Servicios</span><b id="confServ"></b></div>
+                <div class="dato"><span>Duración</span><b id="confDur"></b></div>
+                <div class="dato total"><span>Total</span><b id="confTotal"></b></div>
+                <div class="dato"><span>Dirección</span><b>Maceo 254 e/ Cables y Ángel Guerra</b></div>
             </div>
-            <div id="confirmAsk" class="hidden">
-                <h3>¿Ya lo enviaste?</h3>
-                <p>Si aún no, toca el botón y envía el mensaje. Así confirmamos tu cita.</p>
-                <a id="waApp2" class="btn btn-oro" href="#">Abrir WhatsApp</a>
-                <button type="button" class="btn btn-line" onclick="cerrarConfirmacion()">Ya lo envié</button>
-                <button type="button" class="btn-link" onclick="volverConfirmacion()">Volver</button>
-            </div>
+            <div class="aviso">En unos minutos te enviaremos un mensaje con los datos de tu cita. Puedes tomar una captura de esta pantalla. <b>No necesitas hacer nada más.</b> ¡Nos vemos pronto!</div>
+            <button type="button" class="btn btn-oro" onclick="cerrarConfirmacion()">Listo</button>
         </div>
     </div>
 
@@ -363,8 +367,6 @@
     </script>
 
     <script>
-        const WHATSAPP_NUMBER = '5358592776';
-
         const homeScreen = document.getElementById('home');
         const servicesScreen = document.getElementById('services');
         const datetimeScreen = document.getElementById('datetime');
@@ -791,58 +793,35 @@
 
             submitBtn.textContent = 'Reserva guardada';
             guardarDatos(nombre, telefono);
-            sendToWhatsApp(nombre, telefono);
+            mostrarConfirmacion(nombre);
         });
 
-        function sendToWhatsApp(nombre, telefono) {
+        function mostrarConfirmacion(nombre) {
             const p = dateInput.value.split('-');
             const dateObj = new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]));
-            const dayName = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(dateObj);
-            const formattedDate = `${dayName} ${p[2]}-${p[1]}-${p[0]}`;
-
+            const dia = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(dateObj);
             const selected = [];
             let total = 0;
             document.querySelectorAll('input[name="service"]:checked').forEach(cb => {
                 selected.push(cb.value);
                 total += parseInt(cb.getAttribute('data-price'));
             });
-            [{ id: 'cafeCheck', label: 'Cafe expresso' }, { id: 'ponqueCheck', label: 'Ponquecito casero' }].forEach(ex => {
+            [{ id: 'cafeCheck', label: 'Café expresso' }, { id: 'ponqueCheck', label: 'Ponquecito casero' }].forEach(ex => {
                 const cb = document.getElementById(ex.id);
                 if (cb && cb.checked) {
                     selected.push(ex.label);
                     total += parseInt(cb.getAttribute('data-price'));
                 }
             });
-
-            const texto =
-`¡Hola Felix!
-Quiero pedir una cita en
-*Mono's Barberia Holguin*
-
-👤Nombre: ${nombre}
-📱Telefono: ${telefono}
-📍Direccion: Maceo 254 e/ Cables y Angel Guerra
-📆Fecha: ${formattedDate}
-🕙Horario: ${timeSelect.value}
-☕️Servicio: ${selected.join(', ')}
-⌛️Duracion aprox: ${liveDuration.textContent}
-💰Total a pagar: $${total}`;
-
-            const enlace = `whatsapp://send?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(texto)}`;
-            document.getElementById('waApp').href = enlace;
-            document.getElementById('waApp2').href = enlace;
-            volverConfirmacion();
+            document.getElementById('confNombre').textContent = 'Gracias por elegirnos, ' + nombre.split(' ')[0] + '.';
+            document.getElementById('confDia').textContent = dia.charAt(0).toUpperCase() + dia.slice(1) + ' ' + p[2] + '/' + p[1] + '/' + p[0];
+            document.getElementById('confHora').textContent = timeSelect.value;
+            document.getElementById('confServ').textContent = selected.join(', ');
+            document.getElementById('confDur').textContent = liveDuration.textContent;
+            document.getElementById('confTotal').textContent = '$' + total;
             document.getElementById('confirmBox').classList.add('open');
         }
 
-        function pedirCierre() {
-            document.getElementById('confirmMain').classList.add('hidden');
-            document.getElementById('confirmAsk').classList.remove('hidden');
-        }
-        function volverConfirmacion() {
-            document.getElementById('confirmAsk').classList.add('hidden');
-            document.getElementById('confirmMain').classList.remove('hidden');
-        }
         function cerrarConfirmacion() {
             document.getElementById('confirmBox').classList.remove('open');
             document.querySelectorAll('.service-item.selected').forEach(el => el.classList.remove('selected'));
@@ -854,9 +833,6 @@ Quiero pedir una cita en
             updateTimeSlots();
             showScreen('home');
         }
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && document.getElementById('confirmBox').classList.contains('open')) pedirCierre();
-        });
 
         if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
         cargarDatos();
