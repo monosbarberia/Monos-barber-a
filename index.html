@@ -77,8 +77,8 @@
         #home { background-image: radial-gradient(ellipse 85% 34% at 50% 26%, rgba(96,150,104,0.28), rgba(96,150,104,0)); background-size: 100% 100%; background-repeat: no-repeat; }
         #home .col { flex: 1; display: flex; flex-direction: column; justify-content: space-between; text-align: center; }
         .home-top { padding-top: 8px; }
-        .logo { display: block; width: 62%; max-width: 230px; height: auto; margin: 0 auto 8px; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.45)); }
-        .marca { margin: 0; font: 700 0.95rem var(--serif); letter-spacing: 5px; text-transform: uppercase; color: var(--oro); }
+        .logo { display: block; width: 70%; max-width: 262px; height: auto; margin: 0 auto 8px; position: relative; left: -2.5%; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.45)); }
+        .marca { margin: 0; padding-left: 5px; font: 700 0.95rem var(--serif); letter-spacing: 5px; text-transform: uppercase; color: var(--oro); }
         .home-mid { padding: 14px 0; }
         .slogan { margin: 0 0 6px; font: italic 600 1.4rem/1.2 var(--serif); }
         .bienvenida { margin: 0 auto 18px; max-width: 320px; font-size: 0.88rem; line-height: 1.5; color: var(--suave); }
@@ -109,8 +109,7 @@
         .service-item span:last-child { font: 700 1.4rem var(--serif); color: var(--oro); white-space: nowrap; padding-left: 10px; }
         .service-item.selected { background-color: var(--oro); background-image: var(--oro-grad); border-color: var(--oro); color: var(--verde); }
         .service-item.selected span:last-child { color: var(--verde); }
-        .service-row + .service-row, .extras .service-item { margin-top: 0; }
-        .extras .service-item { margin-bottom: 10px; }
+        .info-sp { flex-shrink: 0; width: 48px; }
         .info-btn { flex-shrink: 0; width: 40px; height: 40px; margin-left: 8px; border-radius: 50%; border: 1px solid rgba(243,234,210,0.3); background: transparent; color: var(--suave); font: italic 700 1.1rem var(--serif); cursor: pointer; padding: 0; }
 
         /* ---------- Barra inferior ---------- */
@@ -167,7 +166,7 @@
         .dato span:first-child { color: var(--suave); padding-right: 12px; flex-shrink: 0; }
         .dato b { text-align: right; }
         .dato.total b { font: 700 1.3rem var(--serif); color: var(--oro); }
-        @media (max-height: 640px) { .logo { width: 48%; } .bienvenida { margin-bottom: 12px; } }
+        @media (max-height: 640px) { .logo { width: 56%; } .bienvenida { margin-bottom: 12px; } }
         @media (max-width: 340px) { .quick .btn-line { font-size: 0.7rem; letter-spacing: 0.3px; } .titulo h2 { font-size: 1.7rem; } }
         @media (prefers-reduced-motion: reduce) { .btn-oro::after { animation: none; } }
     </style>
@@ -250,14 +249,20 @@
 
             <div class="grp">Para acompañar</div>
             <div class="extras">
+                <div class="service-row">
                 <label class="service-item" onclick="toggleExtra(this, 'cafeCheck')">
                     <span><input type="checkbox" id="cafeCheck" data-price="40" data-name="Café expresso"> Café expresso</span>
                     <span>+$40</span>
                 </label>
+                <span class="info-sp"></span>
+                </div>
+                <div class="service-row">
                 <label class="service-item" onclick="toggleExtra(this, 'ponqueCheck')">
                     <span><input type="checkbox" id="ponqueCheck" data-price="100" data-name="Ponquecito casero"> Ponquecito casero</span>
                     <span>+$100</span>
                 </label>
+                <span class="info-sp"></span>
+                </div>
 
             </div>
         </div>
@@ -286,7 +291,7 @@
                     <label class="lab" for="time">Hora</label>
                     <select id="time" required disabled><option value="">Selecciona fecha primero...</option></select>
                 </div>
-                <div class="card stitch resumen">
+                <div class="card stitch resumen hidden">
                     <div><small>Duración</small><b id="live-duration">--</b></div>
                     <div class="t"><small>Total</small><b id="live-total">$0</b></div>
                 </div>
@@ -839,6 +844,23 @@
         validarLogin();
         updateSummary();
         window.scrollTo(0, 0);
+
+        // Al volver a la web, se recarga con la versión más nueva.
+        // En el inicio: tras 15 s fuera. A mitad de una reserva: tras 10 min (para no perder lo que eligió).
+        let ocultoDesde = 0;
+        function recargarFresco() { location.replace(location.pathname + '?r=' + Date.now()); }
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) { ocultoDesde = Date.now(); return; }
+            if (!ocultoDesde) return;
+            const fuera = Date.now() - ocultoDesde;
+            ocultoDesde = 0;
+            const enFlujo = !homeScreen.classList.contains('active');
+            const ventana = document.getElementById('confirmBox').classList.contains('open');
+            if (!ventana && fuera > (enFlujo ? 600000 : 15000)) recargarFresco();
+        });
+        window.addEventListener('pageshow', function(e) {
+            if (e.persisted && homeScreen.classList.contains('active') && !document.getElementById('confirmBox').classList.contains('open')) recargarFresco();
+        });
     </script>
 </body>
 </html>
