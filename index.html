@@ -31,7 +31,7 @@
             --verde-2: #234530;
             --crema: #f3ead2;
             --oro: #cbb26a;
-            --oro-grad: linear-gradient(135deg, #f1e1a6 0%, #cbb26a 45%, #a98b40 100%);
+            --oro-grad: linear-gradient(135deg, #f8eab6 0%, #dcc477 26%, #b8973f 62%, #ecd890 100%);
             --linea: rgba(243, 234, 210, 0.2);
             --suave: rgba(243, 234, 210, 0.72);
             --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -57,7 +57,7 @@
 
         /* ---------- Botones ---------- */
         .btn { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 52px; padding: 0 18px; border-radius: 12px; font: 700 0.95rem var(--sans); letter-spacing: 0.8px; text-transform: uppercase; text-decoration: none; text-align: center; cursor: pointer; border: 1px solid transparent; }
-        .btn-oro { position: relative; overflow: hidden; background-color: var(--oro); background-image: var(--oro-grad); color: var(--verde); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .btn-oro { position: relative; overflow: hidden; background-color: var(--oro); background-image: var(--oro-grad); color: var(--verde); box-shadow: 0 4px 12px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.65), inset 0 -2px 4px rgba(120,90,20,0.38); }
         .btn-oro:active { filter: brightness(0.95); }
         .btn-oro:disabled { background-image: none; background-color: rgba(243,234,210,0.1); color: rgba(243,234,210,0.4); box-shadow: none; cursor: not-allowed; }
         .btn-oro:not(:disabled)::after { content: ''; position: absolute; top: 0; left: 0; width: 40%; height: 100%; background: linear-gradient(120deg, transparent, rgba(255,255,255,0.5), transparent); transform: translateX(-150%) skewX(-20deg); animation: sheen 3s ease-in-out infinite; will-change: transform; pointer-events: none; }
@@ -166,6 +166,59 @@
         .dato span:first-child { color: var(--suave); padding-right: 12px; flex-shrink: 0; }
         .dato b { text-align: right; }
         .dato.total b { font: 700 1.3rem var(--serif); color: var(--oro); }
+        /* ---------- Prueba: estilo "reloj" solo en el inicio (verde profundo con brillo + dorado cálido) ---------- */
+        #home {
+            background-color: #16301d;
+            background-image:
+                radial-gradient(ellipse 80% 38% at 50% 24%, rgba(46, 160, 96, 0.30), rgba(46, 160, 96, 0) 70%),
+                linear-gradient(160deg, #21502f 0%, #1a3d25 45%, #122a19 100%);
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+        }
+        #home .marca {
+            background: linear-gradient(180deg, #f6e7ad 0%, #cbb26a 55%, #a98b40 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+        }
+        #home .card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.02) 45%, rgba(0,0,0,0.18) 100%);
+            border-color: rgba(240, 220, 150, 0.28);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.10);
+        }
+        #home .btn-oro { background-image: linear-gradient(135deg, #f6e7ad 0%, #d9bf72 38%, #b8963f 72%, #8f7430 100%); }
+        #home .field-wrap:focus-within { border-color: #46c283; box-shadow: 0 0 0 3px rgba(70, 194, 131, 0.18); }
+        #home .btn-line { border-color: rgba(240, 220, 150, 0.28); }
+
+        /* ===== ESTILO RELOJ (todo estático: degradados y sombras suaves, sin filtros ni blur) ===== */
+        body { background-color: #173620; }
+        .screen {
+            --g1: 0.20; --g2: 0.10;
+            --fondo:
+                radial-gradient(ellipse 80% 36% at 50% 16%, rgba(52,170,102,var(--g1)) 0%, rgba(30,110,66,var(--g2)) 42%, rgba(28,56,35,0) 78%),
+                radial-gradient(ellipse 120% 55% at 12% 0%, rgba(255,255,255,0.06), rgba(255,255,255,0) 60%),
+                linear-gradient(180deg, #1f4a2c 0%, #163220 100%);
+        }
+        #home { --g1: 0.40; --g2: 0.20; }
+        .screen, #home { background-color: #173620; background-image: var(--fondo); background-size: 100% 100%; background-repeat: no-repeat; }
+        .logo { filter: drop-shadow(0 6px 8px rgba(0,0,0,0.45)) drop-shadow(0 0 14px rgba(63,194,122,0.22)); }
+        .marca { background: linear-gradient(180deg, #f6e7b0 0%, #cdb06a 55%, #a98b40 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+        .stitch::after { border-color: rgba(214,190,112,0.55); }
+        .card { background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 40%, rgba(0,0,0,0.20) 100%); border-color: rgba(214,190,112,0.38); box-shadow: inset 1px 1px 0 rgba(255,255,255,0.14), inset -1px -1px 0 rgba(0,0,0,0.28), 0 10px 24px rgba(0,0,0,0.42); }
+        .field-wrap { background: rgba(0,0,0,0.32); border-color: rgba(214,190,112,0.30); box-shadow: inset 0 2px 5px rgba(0,0,0,0.38); }
+        .field-wrap:focus-within { border-color: #4fd18b; box-shadow: inset 0 2px 5px rgba(0,0,0,0.38), 0 0 0 2px rgba(63,194,122,0.30); }
+        .service-item { background-image: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(0,0,0,0.16)); border-color: rgba(214,190,112,0.28); box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08), inset -1px -1px 0 rgba(0,0,0,0.22); }
+        .service-item.selected { border-color: #dcc477; box-shadow: 0 3px 10px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.65), inset 0 -2px 4px rgba(120,90,20,0.38); }
+        .info-btn { border-color: rgba(214,190,112,0.38); }
+        input[type="date"], select { background-color: rgba(0,0,0,0.32); border-color: rgba(214,190,112,0.30); box-shadow: inset 0 2px 5px rgba(0,0,0,0.38); }
+        input[type="date"]:focus, select:focus { border-color: #4fd18b; box-shadow: inset 0 2px 5px rgba(0,0,0,0.38), 0 0 0 2px rgba(63,194,122,0.30); }
+        .btn-line { border-color: rgba(214,190,112,0.38); box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08), inset -1px -1px 0 rgba(0,0,0,0.25); }
+        .bar { background-color: #132c1a; background-image: linear-gradient(180deg, #183623, #112718); border-top-color: rgba(214,190,112,0.38); }
+        .modal { background-color: #1d4029; background-image: linear-gradient(135deg, rgba(255,255,255,0.09), rgba(0,0,0,0.20)); border-color: rgba(214,190,112,0.40); box-shadow: inset 1px 1px 0 rgba(255,255,255,0.12), 0 16px 40px rgba(0,0,0,0.5); }
+        .info-tooltip { border-color: rgba(214,190,112,0.4); }
+        /* ===== fin ESTILO RELOJ ===== */
+
         @media (max-height: 640px) { .logo { width: 56%; } .bienvenida { margin-bottom: 12px; } }
         @media (max-width: 340px) { .quick .btn-line { font-size: 0.7rem; letter-spacing: 0.3px; } .titulo h2 { font-size: 1.7rem; } }
         @media (prefers-reduced-motion: reduce) { .btn-oro::after { animation: none; } }
