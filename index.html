@@ -409,7 +409,27 @@
             if (window.supabaseClient || !window.supabase) return;
             window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             window.firebaseReady = true;
-            if (typeof cargarPrecios === 'function') cargarPrecios();
+            // ---- Clientes bloqueados ----
+const bloqCache = {};
+async function telBloqueado() {
+    const t = phoneInput.value.trim();
+    if (!/^[0-9]{8}$/.test(t)) return false;
+    if (bloqCache[t] !== undefined) return bloqCache[t];
+    try {
+        const { data, error } = await window.supabaseClient.rpc('telefono_bloqueado', { p_tel: t });
+        if (error) throw error;
+        bloqCache[t] = (data === true);
+    } catch (e) { return false; }
+    return bloqCache[t];
+}
+let _estabaBloqueado = false;
+phoneInput.addEventListener('input', async () => {
+    const b = await telBloqueado();
+    if (dateInput.value && b !== _estabaBloqueado) updateTimeSlots();
+    _estabaBloqueado = b;
+});
+
+    if (typeof cargarPrecios === 'function') cargarPrecios();
         }
         function cargarSB(i) {
             var urls = ['https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js', 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js'];
@@ -689,6 +709,7 @@
                     return nextSlot ? freeSlots.includes(nextSlot) : false;
                 });
             }
+            if (await telBloqueado()) availableSlots = [];
             if (availableSlots.length === 0) {
                 timeSelect.innerHTML = '<option value="">No hay turnos disponibles este día</option>';
                 timeSelect.disabled = true;
@@ -835,7 +856,10 @@
                 validateSubmit();
                 if (error.message && error.message.includes('LIMITE_SEMANAL')) {
                     alert('Este numero de telefono ya tiene 3 citas reservadas esta semana. Si necesitas otro turno, escribenos directo por WhatsApp.');
-                } else if (error.code === '23505') {
+                } else if (error.message && error.message.includes('CLIENTE_BLOQUEADO')) {
+    alert('Ese horario se acaba de ocupar. Elige otro turno disponible.');
+    updateTimeSlots();
+} else if (error.code === '23505') {
                     alert('Ese horario se acaba de ocupar. Elige otro turno disponible.');
                     updateTimeSlots();
                 } else if (error.message && error.message.includes('BLOQUEADO')) {
